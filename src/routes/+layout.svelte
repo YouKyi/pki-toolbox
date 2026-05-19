@@ -49,7 +49,7 @@
 				href="/"
 				class="flex items-center gap-2 font-semibold text-slate-800 lg:hidden dark:text-slate-100"
 			>
-				<Icon name="shield" size={18} class="text-teal-600 dark:text-teal-400" /> pki-toolbox
+				<Icon name="shield" size={18} class="text-teal-600 dark:text-teal-400" /> PKI-Toolbox
 			</a>
 
 			<div class="ml-auto flex items-center gap-1">
@@ -72,7 +72,7 @@
 		<footer
 			class="border-t border-slate-200 px-4 py-5 text-center text-xs text-slate-400 sm:px-6 dark:border-slate-800 dark:text-slate-600"
 		>
-			pki-toolbox, a self-hosted PKI decoder, 100% client-side. No data ever leaves your browser.
+			PKI-Toolbox, a self-hosted PKI decoder, 100% client-side. No data ever leaves your browser.
 		</footer>
 	</div>
 </div>

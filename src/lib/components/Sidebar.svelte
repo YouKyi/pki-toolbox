@@ -21,7 +21,7 @@
 			<Icon name="shield" size={20} />
 		</span>
 		<span class="leading-tight">
-			<span class="block font-semibold text-slate-900 dark:text-slate-100">pki-toolbox</span>
+			<span class="block font-semibold text-slate-900 dark:text-slate-100">PKI-Toolbox</span>
 			<span class="block text-xs text-slate-400 dark:text-slate-500">Local PKI decoder</span>
 		</span>
 	</a>

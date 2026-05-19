@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>pki-toolbox, self-hosted PKI decoder</title>
+	<title>PKI-Toolbox, self-hosted PKI decoder</title>
 </svelte:head>
 
 <section class="mb-10">

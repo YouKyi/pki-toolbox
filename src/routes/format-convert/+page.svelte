@@ -54,7 +54,7 @@
 	}
 </script>
 
-<svelte:head><title>{tool.name}, pki-toolbox</title></svelte:head>
+<svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
 
 <ToolHeader {tool} />
 
