@@ -1,6 +1,6 @@
 # pki-toolbox
 
-[![pipeline status](https://img.shields.io/badge/pipeline-passing-brightgreen)](#) <!-- replace with: <GITLAB_URL>/<GROUP>/pki-toolbox/badges/main/pipeline.svg -->
+[![pipeline status](https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/badges/main/pipeline.svg)](https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/pipelines)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
 A **self-hosted, 100 % client-side decoder for PKI artefacts** — X.509 certificates,
@@ -84,6 +84,27 @@ docker run -p 8080:8080 pki-toolbox
   sidebar, the home page and the "coming soon" pages.
 - Test fixtures are real public roots (ISRG Root X1/X2) plus a generated EC
   chain and CSR — see `scripts/generate-fixtures.mjs`.
+
+## Versioning & releases
+
+This project follows [Semantic Versioning](https://semver.org/) and
+[Conventional Commits](https://www.conventionalcommits.org/). Notable changes
+are recorded in [`CHANGELOG.md`](./CHANGELOG.md).
+
+To cut a release, move the `Unreleased` entries in the changelog under a new
+version heading, then tag the commit:
+
+```sh
+git tag -a v1.2.3 -m "v1.2.3"
+git push origin v1.2.3
+```
+
+A `vX.Y.Z` tag triggers the CI `release` stage, which builds and pushes the
+matching container image (`<registry>/pki-toolbox:vX.Y.Z`) and publishes a
+GitLab Release.
+
+Dependencies are kept up to date by [Renovate](https://docs.renovatebot.com/);
+its behaviour is configured in [`renovate.json`](./renovate.json).
 
 ## Screenshots
 

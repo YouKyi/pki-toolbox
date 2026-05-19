@@ -3,11 +3,11 @@ stages:
   - test
   - build
   - docker
+  - release
 
 variables:
   IMAGE: $CI_REGISTRY_IMAGE
   TAG_SHA: $CI_COMMIT_SHORT_SHA
-  TAG_LATEST: latest
 
 # Node jobs share the same image and dependency install step.
 default:
@@ -44,11 +44,27 @@ docker:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
-    - docker build -t "$IMAGE:$TAG_SHA" -t "$IMAGE:$TAG_LATEST" .
+    - docker build -t "$IMAGE:$TAG_SHA" .
     - docker push "$IMAGE:$TAG_SHA"
-    - if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then docker push "$IMAGE:$TAG_LATEST"; fi
+    - if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:latest" && docker push "$IMAGE:latest"; fi
+    - if [ -n "$CI_COMMIT_TAG" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:$CI_COMMIT_TAG" && docker push "$IMAGE:$CI_COMMIT_TAG"; fi
   rules:
     - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+# Publishes a GitLab Release whenever a semver tag (vX.Y.Z) is pushed.
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  before_script: []
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+  script:
+    - echo "Publishing GitLab release for $CI_COMMIT_TAG"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: pki-toolbox $CI_COMMIT_TAG
+    description: 'Container image: `$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG`. See CHANGELOG.md for the release notes.'
 
 # Optional deployment job — disabled by default.
 # Define these CI/CD variables in GitLab before enabling it:
@@ -56,7 +72,7 @@ docker:
 #   SSH_PRIVATE_KEY   — private key with access to DEPLOY_HOST (masked/file)
 #   DEPLOY_PATH       — directory on the host containing docker-compose.yml
 # deploy:
-#   stage: docker
+#   stage: release
 #   needs: [docker]
 #   image: alpine:3
 #   before_script:

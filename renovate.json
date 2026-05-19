@@ -1,0 +1,30 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": ["config:recommended", ":semanticCommits", ":dependencyDashboard", "group:monorepos"],
+	"labels": ["dependencies"],
+	"prConcurrentLimit": 5,
+	"lockFileMaintenance": {
+		"enabled": true,
+		"schedule": ["before 6am on monday"]
+	},
+	"packageRules": [
+		{
+			"description": "Group non-major npm dev-dependency updates into one PR",
+			"matchManagers": ["npm"],
+			"matchDepTypes": ["devDependencies"],
+			"matchUpdateTypes": ["minor", "patch"],
+			"groupName": "npm dev dependencies"
+		},
+		{
+			"description": "Group Docker base-image and CI image updates",
+			"matchManagers": ["dockerfile", "gitlabci"],
+			"groupName": "container images"
+		},
+		{
+			"description": "Pin the pnpm version (packageManager field) explicitly",
+			"matchDepNames": ["pnpm"],
+			"matchManagers": ["npm"],
+			"rangeStrategy": "pin"
+		}
+	]
+}
