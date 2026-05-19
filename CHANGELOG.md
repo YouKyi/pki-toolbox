@@ -11,9 +11,11 @@ are not listed individually here.
 
 ### Security
 
-- CI now runs a Trivy filesystem scan (`supply-chain` job in the `test` stage)
-  on every pipeline, covering dependencies and secrets, and emits a CycloneDX
-  SBOM; the `docker` job is gated on `lint` and `test` passing.
+- CI now runs a Trivy filesystem scan (`supply-chain` job in a dedicated `scan`
+  stage) on every pipeline, covering dependencies, secrets and licenses, and
+  emits a CycloneDX SBOM. Both Trivy scans publish JUnit reports to the pipeline
+  Tests tab. The `docker` job is gated on `lint`, `test` and `supply-chain`
+  passing, so a fixable HIGH/CRITICAL CVE blocks the image build.
 
 ### Changed
 

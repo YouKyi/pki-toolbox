@@ -68,17 +68,19 @@ GitLab Release.
 
 ## Continuous integration
 
-The pipeline (`.gitlab-ci.yml`) has four stages: `lint`, `test`, `docker`,
-and `release`.
+The pipeline (`.gitlab-ci.yml`) has five stages: `lint`, `test`, `scan`,
+`docker`, and `release`.
 
 | Stage     | Jobs                                                                                                          | When                                                                            |
 | --------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `lint`    | `pnpm lint`, `pnpm check`                                                                                     | Every pipeline                                                                  |
-| `test`    | `pnpm test`; `supply-chain` (Trivy filesystem scan: dependencies, secrets, CycloneDX SBOM)                    | Every pipeline                                                                  |
+| `test`    | `pnpm test`                                                                                                   | Every pipeline                                                                  |
+| `scan`    | `supply-chain` (Trivy filesystem scan: dependencies, secrets, licenses, CycloneDX SBOM)                       | Every pipeline                                                                  |
 | `docker`  | Build via the multi-stage Dockerfile (which runs `pnpm build` internally), Trivy image scan, push to registry | Tags unconditionally; branches and MRs only when a build-affecting file changed |
 | `release` | Publish a GitLab Release from the matching `CHANGELOG.md` section                                             | `vX.Y.Z` tags only                                                              |
 
-There is no separate `build` stage and no separate `scan` stage. The
-`supply-chain` job (filesystem scan) runs in the `test` stage on every
-pipeline. The Trivy image scan and the push run together in the `docker` job,
-which is gated on `lint` and `test` passing.
+There is no separate `build` stage: the build runs inside the `docker` job's
+multi-stage Dockerfile. The `supply-chain` job runs in the `scan` stage on
+every pipeline and gates the `docker` job, a fixable HIGH/CRITICAL CVE, a
+committed secret or a restricted license blocks the image build. The `docker`
+job is gated on `lint`, `test` and `supply-chain` passing.
