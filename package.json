@@ -1,7 +1,7 @@
 {
 	"name": "pki-toolbox",
 	"private": true,
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Self-hosted, 100% client-side PKI artefact decoder (X.509, CSR, chains, fingerprints)",
 	"license": "MIT",
 	"type": "module",

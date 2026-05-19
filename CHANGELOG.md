@@ -9,6 +9,21 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-05-19
+
+### Changed
+
+- The interface now displays the product name as "PKI-Toolbox".
+- CI: the `build`, `docker` and `scan` jobs run only when a build-affecting
+  file changes, so a docs- or config-only push no longer rebuilds the image.
+- CI: GitLab Release notes are now generated from this changelog.
+- Renovate extends the shared `Renovate-Bot/renovate-config` preset instead of
+  duplicating its settings.
+
+### Added
+
+- `CONTRIBUTING.md` and a step-by-step release guide in the README.
+
 ## [1.0.1] - 2026-05-19
 
 ### Security
@@ -39,6 +54,7 @@ are not listed individually here.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.1...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.2...main
+[1.0.2]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.1...v1.0.2
 [1.0.1]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.0...v1.0.1
 [1.0.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/tags/v1.0.0
