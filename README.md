@@ -48,11 +48,20 @@ services:
     ports:
       - '8080:8080'
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
 ```
 
 ```sh
 docker compose up -d
 ```
+
+The repository ships a fully hardened `docker-compose.yml` (read-only root
+filesystem, dropped capabilities, resource limits); use that file directly
+rather than this minimal example.
 
 The image is built from `nginx:alpine-slim`, weighs under 25 MB, listens on the
 non-privileged port **8080** and runs as a **non-root** user.
@@ -111,14 +120,16 @@ are recorded in [`CHANGELOG.md`](./CHANGELOG.md). Contribution rules live in
    git push origin v1.2.3
    ```
 
-The `vX.Y.Z` tag triggers the CI pipeline, which lints, tests, builds and
-scans the image (Trivy, the pipeline fails on a fixable HIGH/CRITICAL CVE),
-pushes `<registry>/pki-toolbox:vX.Y.Z`, and publishes a **GitLab Release whose
-notes are the matching `## [X.Y.Z]` section extracted from `CHANGELOG.md`**.
+The `vX.Y.Z` tag triggers the CI pipeline, which runs lint, test and the
+supply-chain filesystem scan, then builds the image via the Dockerfile (Trivy
+image scan included, fails on a fixable HIGH/CRITICAL CVE), pushes
+`<registry>/pki-toolbox:vX.Y.Z`, and publishes a **GitLab Release whose notes
+are the matching `## [X.Y.Z]` section extracted from `CHANGELOG.md`**.
 
-A push to `main` runs the same pipeline minus the release step, but the
-build/docker/scan jobs only run when a file affecting the build changed, so a
-docs- or config-only push does not rebuild the image.
+A push to `main` runs the same pipeline minus the release step. The lint, test
+and supply-chain jobs run on every push; the `docker` job (build, image scan,
+push) runs only when a file affecting the build changed, so a docs- or
+config-only push does not rebuild the image.
 
 Dependencies are kept up to date by [Renovate](https://docs.renovatebot.com/),
 which extends the shared `Renovate-Bot/renovate-config` preset

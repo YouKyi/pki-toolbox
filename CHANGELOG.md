@@ -9,6 +9,25 @@ are not listed individually here.
 
 ## [Unreleased]
 
+### Security
+
+- CI now runs a Trivy filesystem scan (`supply-chain` job in the `test` stage)
+  on every pipeline, covering dependencies and secrets, and emits a CycloneDX
+  SBOM; the `docker` job is gated on `lint` and `test` passing.
+
+### Changed
+
+- PEM file-upload size limit aligned with the 4 MB parser limit enforced by all
+  decoders.
+- `docker-compose.yml` hardened with a read-only root filesystem, dropped
+  capabilities (`cap_drop: ALL`), `no-new-privileges`, and resource limits.
+
+### Fixed
+
+- `CONTRIBUTING.md` and `README.md` now accurately describe the 4-stage CI
+  pipeline (`lint`, `test`, `docker`, `release`); references to the non-existent
+  `build` and `scan` stages have been removed.
+
 ## [1.0.3] - 2026-05-19
 
 ### Fixed
