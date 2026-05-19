@@ -106,7 +106,7 @@ docker:
 scan:
   stage: scan
   image:
-    name: aquasec/trivy:latest
+    name: aquasec/trivy:0.70.0
     entrypoint: ['']
   needs:
     - docker
