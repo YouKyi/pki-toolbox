@@ -21,7 +21,7 @@ describe('decodeCrl', () => {
 		expect(crl.signatureAlgorithm).toMatch(/ECDSA/);
 		expect(crl.thisUpdate).toBeInstanceOf(Date);
 		expect(crl.entryCount).toBe(1);
-		expect(crl.entries[0].reason).toBe('Clé compromise');
+		expect(crl.entries[0].reason).toBe('Key compromise');
 	});
 
 	it('rejects input that is not a CRL', () => {

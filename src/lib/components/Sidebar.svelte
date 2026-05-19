@@ -22,7 +22,7 @@
 		</span>
 		<span class="leading-tight">
 			<span class="block font-semibold text-slate-900 dark:text-slate-100">pki-toolbox</span>
-			<span class="block text-xs text-slate-400 dark:text-slate-500">Décodeur PKI local</span>
+			<span class="block text-xs text-slate-400 dark:text-slate-500">Local PKI decoder</span>
 		</span>
 	</a>
 
@@ -75,7 +75,7 @@
 
 	<div class="border-t border-slate-200 px-4 py-3 dark:border-slate-800">
 		<p class="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
-			<Icon name="lock" size={13} /> 100 % côté client, rien n'est envoyé.
+			<Icon name="lock" size={13} /> 100% client-side, nothing is sent.
 		</p>
 	</div>
 </div>

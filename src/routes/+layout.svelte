@@ -23,7 +23,7 @@
 	{#if drawerOpen}
 		<button
 			type="button"
-			aria-label="Fermer le menu"
+			aria-label="Close menu"
 			class="fixed inset-0 z-40 bg-slate-900/50 lg:hidden"
 			onclick={() => (drawerOpen = false)}
 		></button>
@@ -40,7 +40,7 @@
 				type="button"
 				onclick={() => (drawerOpen = true)}
 				class="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
-				aria-label="Ouvrir le menu"
+				aria-label="Open menu"
 			>
 				<Icon name="menu" size={22} />
 			</button>
@@ -57,8 +57,8 @@
 					type="button"
 					onclick={toggleTheme}
 					class="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-					aria-label="Basculer le thème clair/sombre"
-					title="Thème clair / sombre"
+					aria-label="Toggle light/dark theme"
+					title="Light / dark theme"
 				>
 					<Icon name={theme.value === 'dark' ? 'sun' : 'moon'} size={19} />
 				</button>
@@ -72,8 +72,7 @@
 		<footer
 			class="border-t border-slate-200 px-4 py-5 text-center text-xs text-slate-400 sm:px-6 dark:border-slate-800 dark:text-slate-600"
 		>
-			pki-toolbox, décodeur PKI self-hosted, 100 % côté client. Aucune donnée ne quitte votre
-			navigateur.
+			pki-toolbox, a self-hosted PKI decoder, 100% client-side. No data ever leaves your browser.
 		</footer>
 	</div>
 </div>

@@ -11,7 +11,7 @@ export function ensurePkijsEngine(): void {
 	if (initialised) return;
 	const crypto = (globalThis as { crypto?: Crypto }).crypto;
 	if (!crypto?.subtle) {
-		throw new Error("L'API Web Crypto n'est pas disponible dans cet environnement.");
+		throw new Error('The Web Crypto API is not available in this environment.');
 	}
 	const engine = new pkijs.CryptoEngine({ name: 'pki-toolbox', crypto });
 	// pkijs' bundled `ICryptoEngine` type lags behind lib.dom's `Crypto`
@@ -32,9 +32,7 @@ export function passwordBytes(password: string): ArrayBuffer {
 	for (let i = 0; i < password.length; i++) {
 		const code = password.charCodeAt(i);
 		if (code > 0xff) {
-			throw new Error(
-				'Les mots de passe PKCS#12 contenant des caractères non latins ne sont pas pris en charge.'
-			);
+			throw new Error('PKCS#12 passwords containing non-Latin characters are not supported.');
 		}
 		bytes[i] = code;
 	}

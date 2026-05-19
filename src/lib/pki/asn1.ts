@@ -72,7 +72,7 @@ type AnyBlock = {
 function hexPreview(bytes: Uint8Array, max = 64): string {
 	const hex = bytesToHex(bytes.subarray(0, max));
 	const grouped = (hex.match(/.{2}/g) ?? []).join(' ').toUpperCase();
-	return bytes.length > max ? `${grouped} … (${bytes.length} octets)` : grouped;
+	return bytes.length > max ? `${grouped} … (${bytes.length} bytes)` : grouped;
 }
 
 function contentBytes(block: AnyBlock): Uint8Array {
@@ -129,7 +129,7 @@ const MAX_NODES = 100_000;
 function walk(block: AnyBlock, offset: number, depth: number, budget: { count: number }): Asn1Node {
 	budget.count += 1;
 	if (budget.count > MAX_NODES) {
-		throw new Error("L'arbre ASN.1 dépasse la taille maximale affichable.");
+		throw new Error('The ASN.1 tree exceeds the maximum displayable size.');
 	}
 
 	const { tagClass, tagNumber, isConstructed } = block.idBlock;
@@ -172,13 +172,13 @@ export function parseAsn1(input: string): Asn1Node {
 	try {
 		der = pemToDer(input);
 	} catch (e) {
-		throw new Error("L'entrée n'est ni du PEM valide ni du DER encodé en base64.", { cause: e });
+		throw new Error('The input is neither valid PEM nor base64-encoded DER.', { cause: e });
 	}
-	if (der.length === 0) throw new Error("L'entrée est vide.");
+	if (der.length === 0) throw new Error('The input is empty.');
 
 	const parsed = asn1js.fromBER(toArrayBuffer(der));
 	if (parsed.offset === -1 || !parsed.result) {
-		throw new Error("L'entrée n'a pas pu être analysée comme de l'ASN.1 / DER.");
+		throw new Error('The input could not be parsed as ASN.1 / DER.');
 	}
 	return walk(parsed.result as unknown as AnyBlock, 0, 0, { count: 0 });
 }

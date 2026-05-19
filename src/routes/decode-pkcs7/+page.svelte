@@ -37,15 +37,15 @@
 	bind:value={input}
 	{loading}
 	ondecode={decode}
-	decodeLabel="Décoder le bundle"
+	decodeLabel="Decode the bundle"
 	derLabel="PKCS7"
 	example={TEST_PKCS7}
-	placeholder="Collez ici un bundle PKCS#7 (-----BEGIN PKCS7-----)…"
+	placeholder="Paste a PKCS#7 bundle here (-----BEGIN PKCS7-----)…"
 />
 
 <div class="mt-6 space-y-4">
 	{#if error}
-		<Alert variant="error" title="Échec du décodage">{error}</Alert>
+		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 
 	{#if result}
@@ -56,12 +56,12 @@
 				rows={[
 					{ label: 'Type', value: 'PKCS#7 SignedData' },
 					{
-						label: 'Certificats inclus',
+						label: 'Certificates included',
 						value: String(result.certificateCount)
 					},
-					{ label: 'Signataires', value: String(result.signerCount) },
+					{ label: 'Signers', value: String(result.signerCount) },
 					{
-						label: 'Algorithmes de hachage',
+						label: 'Hash algorithms',
 						value: result.digestAlgorithms.length ? result.digestAlgorithms.join(', ') : ', '
 					}
 				]}
@@ -73,7 +73,7 @@
 				<CertCard {cert} index={i} />
 			{/each}
 		{:else}
-			<Alert variant="info">Ce bundle PKCS#7 ne contient aucun certificat.</Alert>
+			<Alert variant="info">This PKCS#7 bundle contains no certificate.</Alert>
 		{/if}
 	{/if}
 </div>

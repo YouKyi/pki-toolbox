@@ -40,13 +40,13 @@ export function looksLikePem(input: string): boolean {
 export function base64ToBytes(b64: string): Uint8Array {
 	const clean = b64.replace(/\s+/g, '');
 	if (clean.length === 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(clean) || clean.length % 4 !== 0) {
-		throw new Error("Le contenu n'est pas du base64 valide.");
+		throw new Error('The content is not valid base64.');
 	}
 	let bin: string;
 	try {
 		bin = atob(clean);
 	} catch {
-		throw new Error("Le contenu n'est pas du base64 valide.");
+		throw new Error('The content is not valid base64.');
 	}
 	const bytes = new Uint8Array(bin.length);
 	for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);

@@ -84,15 +84,15 @@
 			<input bind:value={commonName} class={inputClass} placeholder="example.local" />
 		</label>
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="font-medium text-slate-600 dark:text-slate-300">Organisation (O)</span>
-			<input bind:value={organization} class={inputClass} placeholder="(facultatif)" />
+			<span class="font-medium text-slate-600 dark:text-slate-300">Organization (O)</span>
+			<input bind:value={organization} class={inputClass} placeholder="(optional)" />
 		</label>
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="font-medium text-slate-600 dark:text-slate-300">Pays (C)</span>
+			<span class="font-medium text-slate-600 dark:text-slate-300">Country (C)</span>
 			<input bind:value={country} class={inputClass} placeholder="FR" maxlength="2" />
 		</label>
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="font-medium text-slate-600 dark:text-slate-300">Algorithme de clé</span>
+			<span class="font-medium text-slate-600 dark:text-slate-300">Key algorithm</span>
 			<select bind:value={keyAlgorithm} class={inputClass}>
 				{#each algorithms as [value, label] (value)}
 					<option {value}>{label}</option>
@@ -100,14 +100,14 @@
 			</select>
 		</label>
 		<label class="flex flex-col gap-1 text-sm">
-			<span class="font-medium text-slate-600 dark:text-slate-300">Validité (jours)</span>
+			<span class="font-medium text-slate-600 dark:text-slate-300">Validity (days)</span>
 			<input type="number" bind:value={validityDays} min="1" max="7300" class={inputClass} />
 		</label>
 		<label class="flex flex-col gap-1 text-sm">
 			<span class="font-medium text-slate-600 dark:text-slate-300">
 				Subject Alternative Names (DNS)
 			</span>
-			<input bind:value={sansText} class={inputClass} placeholder="exemple.com, www.exemple.com" />
+			<input bind:value={sansText} class={inputClass} placeholder="example.com, www.example.com" />
 		</label>
 	</div>
 
@@ -117,7 +117,7 @@
 			bind:checked={isCa}
 			class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500/40 dark:border-slate-600"
 		/>
-		Certificat d'autorité (CA), Basic Constraints cA = true
+		Certificate authority (CA), Basic Constraints cA = true
 	</label>
 
 	<button
@@ -127,17 +127,16 @@
 		class="mt-5 inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-500 focus:ring-2 focus:ring-teal-500/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 	>
 		<Icon name={loading ? 'clock' : 'sparkles'} size={16} />
-		{loading ? 'Génération…' : 'Générer le certificat'}
+		{loading ? 'Generating…' : 'Generate the certificate'}
 	</button>
 	<p class="mt-2 text-xs text-slate-400 dark:text-slate-500">
-		La paire de clés est générée localement via WebCrypto, la clé privée ne quitte jamais cette
-		page.
+		The key pair is generated locally via WebCrypto, the private key never leaves this page.
 	</p>
 </div>
 
 <div class="mt-6 space-y-4">
 	{#if error}
-		<Alert variant="error" title="Échec de la génération">{error}</Alert>
+		<Alert variant="error" title="Generation failed">{error}</Alert>
 	{/if}
 
 	{#if result}
@@ -156,14 +155,14 @@
 							class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
 						>
 							<Icon name={copied === id ? 'check' : 'copy'} size={13} />
-							{copied === id ? 'Copié' : 'Copier'}
+							{copied === id ? 'Copied' : 'Copy'}
 						</button>
 						<button
 							type="button"
 							onclick={() => downloadText(filename, value, 'application/x-pem-file')}
 							class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
 						>
-							<Icon name="upload" size={13} class="rotate-180" /> Télécharger
+							<Icon name="upload" size={13} class="rotate-180" /> Download
 						</button>
 					</div>
 				</header>
@@ -172,13 +171,13 @@
 			</article>
 		{/snippet}
 
-		{@render pemBlock('Certificat (PEM)', result.certificatePem, 'cert', 'certificate.crt')}
+		{@render pemBlock('Certificate (PEM)', result.certificatePem, 'cert', 'certificate.crt')}
 
-		<Alert variant="warn" title="Clé privée">
-			Conservez cette clé privée en lieu sûr et ne la partagez jamais. Elle n'est affichée qu'ici et
-			n'est stockée nulle part.
+		<Alert variant="warn" title="Private key">
+			Keep this private key in a safe place and never share it. It is shown only here and is stored
+			nowhere.
 		</Alert>
 
-		{@render pemBlock('Clé privée (PEM, PKCS#8)', result.privateKeyPem, 'key', 'private-key.key')}
+		{@render pemBlock('Private key (PEM, PKCS#8)', result.privateKeyPem, 'key', 'private-key.key')}
 	{/if}
 </div>

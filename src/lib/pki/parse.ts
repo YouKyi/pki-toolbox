@@ -76,7 +76,7 @@ export type DecodedCsr = {
 /** Resolve the Web Crypto implementation, with a clear error if missing. */
 function subtle(): SubtleCrypto {
 	const c = (globalThis as { crypto?: Crypto }).crypto;
-	if (!c?.subtle) throw new Error("L'API Web Crypto n'est pas disponible dans cet environnement.");
+	if (!c?.subtle) throw new Error('The Web Crypto API is not available in this environment.');
 	return c.subtle;
 }
 
@@ -166,7 +166,7 @@ export async function decodeCertificate(input: string): Promise<DecodedCertifica
 	try {
 		cert = new X509Certificate(input);
 	} catch (e) {
-		throw new Error(`Cela ne ressemble pas à un certificat X.509 (${errMessage(e)}).`, {
+		throw new Error(`This does not look like an X.509 certificate (${errMessage(e)}).`, {
 			cause: e
 		});
 	}
@@ -222,7 +222,7 @@ export async function decodeCsr(input: string): Promise<DecodedCsr> {
 	try {
 		csr = new Pkcs10CertificateRequest(input);
 	} catch (e) {
-		throw new Error(`Cela ne ressemble pas à une demande PKCS#10 (${errMessage(e)}).`, {
+		throw new Error(`This does not look like a PKCS#10 request (${errMessage(e)}).`, {
 			cause: e
 		});
 	}

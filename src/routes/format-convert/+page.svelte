@@ -61,14 +61,14 @@
 <PemInput
 	bind:value={input}
 	ondecode={decode}
-	decodeLabel="Convertir"
+	decodeLabel="Convert"
 	example={ISRG_ROOT_X2}
-	placeholder="Collez un certificat PEM/DER ou un bundle PKCS#7, ou importez un fichier…"
+	placeholder="Paste a PEM/DER certificate or a PKCS#7 bundle, or import a file…"
 />
 
 <div class="mt-6 space-y-4">
 	{#if error}
-		<Alert variant="error" title="Échec de la conversion">{error}</Alert>
+		<Alert variant="error" title="Conversion failed">{error}</Alert>
 	{/if}
 
 	{#if items.length}
@@ -77,14 +77,14 @@
 				class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 dark:border-slate-800 dark:bg-slate-900"
 			>
 				<span class="text-sm text-slate-600 dark:text-slate-300">
-					{certItems.length} certificat(s), regrouper en un seul fichier :
+					{certItems.length} certificate(s), bundle into a single file:
 				</span>
 				<button
 					type="button"
 					onclick={downloadPkcs7}
 					class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
 				>
-					<Icon name="package" size={15} /> Télécharger en PKCS#7 (.p7b)
+					<Icon name="package" size={15} /> Download as PKCS#7 (.p7b)
 				</button>
 			</div>
 		{/if}
@@ -96,7 +96,7 @@
 			>
 				<header class="flex flex-wrap items-center gap-2 px-5 py-3">
 					<Badge tone="accent">{item.label}</Badge>
-					<span class="text-xs text-slate-400 dark:text-slate-500">{item.der.length} octets</span>
+					<span class="text-xs text-slate-400 dark:text-slate-500">{item.der.length} bytes</span>
 					<div class="ml-auto flex gap-2">
 						<button
 							type="button"
@@ -143,7 +143,7 @@
 
 				{@render block('PEM', item.pem, `${id}-pem`)}
 				{@render block('DER (base64)', item.derBase64, `${id}-b64`)}
-				{@render block('DER (hexadécimal)', hexWithColons(item.derHex), `${id}-hex`)}
+				{@render block('DER (hexadecimal)', hexWithColons(item.derHex), `${id}-hex`)}
 			</article>
 		{/each}
 	{/if}

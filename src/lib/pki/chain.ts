@@ -64,12 +64,11 @@ export async function decodeChain(pem: string): Promise<DecodedChain> {
 		(b) => b.type === 'CERTIFICATE' || b.type === 'X509 CERTIFICATE'
 	);
 	if (blocks.length === 0) {
-		throw new Error("Aucun bloc PEM CERTIFICATE n'a été trouvé dans l'entrée.");
+		throw new Error('No PEM CERTIFICATE block was found in the input.');
 	}
 
 	const crypto = (globalThis as { crypto?: Crypto }).crypto;
-	if (!crypto?.subtle)
-		throw new Error("L'API Web Crypto n'est pas disponible dans cet environnement.");
+	if (!crypto?.subtle) throw new Error('The Web Crypto API is not available in this environment.');
 	cryptoProvider.set(crypto);
 
 	const x509 = blocks.map((b) => new X509Certificate(b.pem));

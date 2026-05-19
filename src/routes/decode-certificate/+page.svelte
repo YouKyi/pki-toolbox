@@ -36,7 +36,7 @@
 
 <div class="mt-6 space-y-4">
 	{#if error}
-		<Alert variant="error" title="Échec du décodage">{error}</Alert>
+		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 	{#if result}
 		<CertCard cert={result} />

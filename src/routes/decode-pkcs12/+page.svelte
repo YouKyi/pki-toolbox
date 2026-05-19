@@ -42,12 +42,12 @@
 
 <div class="mb-3 flex flex-wrap items-end gap-3">
 	<label class="flex flex-col gap-1 text-sm">
-		<span class="font-medium text-slate-600 dark:text-slate-300">Mot de passe du fichier</span>
+		<span class="font-medium text-slate-600 dark:text-slate-300">File password</span>
 		<input
 			type="password"
 			bind:value={password}
 			autocomplete="off"
-			placeholder="mot de passe…"
+			placeholder="password…"
 			class="w-64 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-teal-500/40 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
 		/>
 	</label>
@@ -56,7 +56,7 @@
 		onclick={loadExample}
 		class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
 	>
-		<Icon name="file-text" size={16} /> Charger un exemple
+		<Icon name="file-text" size={16} /> Load an example
 	</button>
 </div>
 
@@ -64,23 +64,23 @@
 	bind:value={input}
 	{loading}
 	ondecode={decode}
-	decodeLabel="Déchiffrer"
+	decodeLabel="Decrypt"
 	derLabel="PKCS12"
-	placeholder="Importez un fichier .p12 / .pfx, ou collez son contenu base64…"
+	placeholder="Import a .p12 / .pfx file, or paste its base64 content…"
 />
 
 <div class="mt-6 space-y-4">
 	{#if error}
-		<Alert variant="error" title="Échec du déchiffrement">{error}</Alert>
+		<Alert variant="error" title="Decryption failed">{error}</Alert>
 	{/if}
 
 	{#if result}
 		<Alert variant={result.integrityVerified ? 'success' : 'warn'}>
 			{#if result.integrityVerified}
-				Intégrité MAC vérifiée, mot de passe correct. {result.certificateCount} certificat(s) et {result.keyCount}
-				clé(s) privée(s).
+				MAC integrity verified, password correct. {result.certificateCount} certificate(s) and {result.keyCount}
+				private key(s).
 			{:else}
-				Contenu déchiffré (ce fichier ne comporte pas de MAC d'intégrité).
+				Content decrypted (this file has no integrity MAC).
 			{/if}
 		</Alert>
 
@@ -91,22 +91,22 @@
 				<h3
 					class="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500"
 				>
-					Clés privées
+					Private keys
 				</h3>
 				<ul class="space-y-2">
 					{#each result.keys as key, i (i)}
 						<li class="flex flex-wrap items-center gap-2 text-sm">
 							<Icon name="lock" size={16} class="text-slate-400" />
 							<span class="font-medium text-slate-800 dark:text-slate-200">
-								{key.friendlyName ?? '(sans nom)'}
+								{key.friendlyName ?? '(no name)'}
 							</span>
 							{#if key.algorithm}<Badge tone="info">{key.algorithm}</Badge>{/if}
-							{#if key.encrypted}<Badge tone="neutral">chiffrée</Badge>{/if}
+							{#if key.encrypted}<Badge tone="neutral">encrypted</Badge>{/if}
 						</li>
 					{/each}
 				</ul>
 				<p class="mt-2 text-xs text-slate-400 dark:text-slate-500">
-					Le matériel des clés privées n'est jamais affiché.
+					Private key material is never displayed.
 				</p>
 			</div>
 		{/if}

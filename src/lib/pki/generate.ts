@@ -107,7 +107,7 @@ function buildName(opts: GenerateOptions): JsonName {
  * Throws an `Error` (e.g. when the browser cannot generate the chosen key).
  */
 export async function generateSelfSigned(opts: GenerateOptions): Promise<GeneratedCertificate> {
-	if (!opts.commonName.trim()) throw new Error('Le Common Name (CN) est obligatoire.');
+	if (!opts.commonName.trim()) throw new Error('The Common Name (CN) is required.');
 
 	const crypto = webCrypto();
 	cryptoProvider.set(crypto);
@@ -122,7 +122,7 @@ export async function generateSelfSigned(opts: GenerateOptions): Promise<Generat
 		])) as CryptoKeyPair;
 	} catch (e) {
 		throw new Error(
-			`Ce navigateur ne sait pas générer une clé ${KEY_ALGORITHM_LABELS[opts.keyAlgorithm]}.`,
+			`This browser cannot generate a ${KEY_ALGORITHM_LABELS[opts.keyAlgorithm]} key.`,
 			{ cause: e }
 		);
 	}

@@ -42,7 +42,7 @@
 				/>
 				<span class="font-semibold {tagColor(node)}">{node.tag}</span>
 				<span class="text-xs text-slate-400 dark:text-slate-500">
-					{node.children.length} élément{node.children.length > 1 ? 's' : ''}
+					{node.children.length} element{node.children.length > 1 ? 's' : ''}
 				</span>
 			</button>
 		{:else}
@@ -50,11 +50,11 @@
 			{#if node.value}
 				<span class="break-all text-slate-800 dark:text-slate-200">{node.value}</span>
 			{:else if node.tag !== 'NULL'}
-				<span class="text-slate-400 dark:text-slate-600">(vide)</span>
+				<span class="text-slate-400 dark:text-slate-600">(empty)</span>
 			{/if}
 		{/if}
 		<span class="ml-auto shrink-0 pl-3 text-xs text-slate-400 dark:text-slate-600">
-			@{node.offset} · {node.length} o
+			@{node.offset} · {node.length} B
 		</span>
 	</div>
 

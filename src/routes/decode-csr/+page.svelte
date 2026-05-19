@@ -44,12 +44,12 @@
 	ondecode={decode}
 	derLabel="CERTIFICATE REQUEST"
 	example={TEST_CSR}
-	placeholder="Collez ici une demande PKCS#10 (-----BEGIN CERTIFICATE REQUEST-----)…"
+	placeholder="Paste a PKCS#10 request here (-----BEGIN CERTIFICATE REQUEST-----)…"
 />
 
 <div class="mt-6 space-y-4">
 	{#if error}
-		<Alert variant="error" title="Échec du décodage">{error}</Alert>
+		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 
 	{#if result}
@@ -64,7 +64,7 @@
 				</span>
 				<div class="min-w-0 flex-1">
 					<p class="truncate font-semibold text-slate-900 dark:text-slate-100">{commonName}</p>
-					<p class="text-xs text-slate-400 dark:text-slate-500">Demande de signature PKCS#10</p>
+					<p class="text-xs text-slate-400 dark:text-slate-500">PKCS#10 signing request</p>
 				</div>
 				<Badge tone="accent">CSR</Badge>
 			</header>
@@ -73,21 +73,21 @@
 				<h3
 					class="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500"
 				>
-					Identité
+					Identity
 				</h3>
-				<RowList rows={[{ label: 'Sujet', value: result.subject || ', ', mono: true }]} />
+				<RowList rows={[{ label: 'Subject', value: result.subject || ', ', mono: true }]} />
 			</section>
 
 			<section class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
 				<h3
 					class="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500"
 				>
-					Clé & signature
+					Key & signature
 				</h3>
 				<RowList
 					rows={[
-						{ label: 'Clé publique', value: result.publicKey.label },
-						{ label: 'Algorithme de signature', value: result.signatureAlgorithm }
+						{ label: 'Public key', value: result.publicKey.label },
+						{ label: 'Signature algorithm', value: result.signatureAlgorithm }
 					]}
 				/>
 			</section>
@@ -97,7 +97,7 @@
 					<h3
 						class="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500"
 					>
-						Extensions demandées
+						Requested extensions
 					</h3>
 					<div class="space-y-3">
 						{#if result.subjectAltNames.length}

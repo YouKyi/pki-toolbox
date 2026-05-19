@@ -84,13 +84,13 @@ export async function decodePkcs12(input: string, password: string): Promise<Dec
 	try {
 		await pfx.parseInternalValues({ password: pwd, checkIntegrity: hasMac });
 	} catch (e) {
-		throw new Error('Mot de passe incorrect, ou intégrité du fichier PKCS#12 invalide.', {
+		throw new Error('Incorrect password, or invalid PKCS#12 file integrity.', {
 			cause: e
 		});
 	}
 
 	const authSafe = pfx.parsedValue?.authenticatedSafe;
-	if (!authSafe) throw new Error('Ce fichier PKCS#12 ne contient aucun élément exploitable.');
+	if (!authSafe) throw new Error('This PKCS#12 file contains no usable content.');
 
 	try {
 		await authSafe.parseInternalValues({
@@ -99,7 +99,7 @@ export async function decodePkcs12(input: string, password: string): Promise<Dec
 			}))
 		});
 	} catch (e) {
-		throw new Error('Impossible de déchiffrer le contenu, mot de passe incorrect.', { cause: e });
+		throw new Error('Could not decrypt the content, incorrect password.', { cause: e });
 	}
 
 	const certificates: DecodedCertificate[] = [];

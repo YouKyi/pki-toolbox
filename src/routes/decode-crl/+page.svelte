@@ -35,15 +35,15 @@
 <PemInput
 	bind:value={input}
 	ondecode={decode}
-	decodeLabel="Décoder la CRL"
+	decodeLabel="Decode the CRL"
 	derLabel="X509 CRL"
 	example={TEST_CRL}
-	placeholder="Collez ici une CRL (-----BEGIN X509 CRL-----)…"
+	placeholder="Paste a CRL here (-----BEGIN X509 CRL-----)…"
 />
 
 <div class="mt-6 space-y-4">
 	{#if error}
-		<Alert variant="error" title="Échec du décodage">{error}</Alert>
+		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 
 	{#if result}
@@ -58,8 +58,7 @@
 				</span>
 				<div class="min-w-0 flex-1">
 					<p class="font-semibold text-slate-900 dark:text-slate-100">
-						Liste de révocation, {result.entryCount} certificat{result.entryCount > 1 ? 's' : ''} révoqué{result.entryCount >
-						1
+						Revocation list, {result.entryCount} revoked certificate{result.entryCount > 1
 							? 's'
 							: ''}
 					</p>
@@ -68,11 +67,11 @@
 			<div class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
 				<RowList
 					rows={[
-						{ label: 'Émetteur', value: result.issuer, mono: true },
-						{ label: 'Algorithme de signature', value: result.signatureAlgorithm },
-						{ label: 'Émise le', value: formatDate(result.thisUpdate), mono: true },
+						{ label: 'Issuer', value: result.issuer, mono: true },
+						{ label: 'Signature algorithm', value: result.signatureAlgorithm },
+						{ label: 'Issued on', value: formatDate(result.thisUpdate), mono: true },
 						{
-							label: 'Prochaine mise à jour',
+							label: 'Next update',
 							value: result.nextUpdate ? formatDate(result.nextUpdate) : ', ',
 							mono: true
 						}
@@ -90,9 +89,9 @@
 						class="border-b border-slate-200 text-xs tracking-wide text-slate-400 uppercase dark:border-slate-800 dark:text-slate-500"
 					>
 						<tr>
-							<th class="px-5 py-2.5 font-semibold">Numéro de série</th>
-							<th class="px-5 py-2.5 font-semibold">Date de révocation</th>
-							<th class="px-5 py-2.5 font-semibold">Raison</th>
+							<th class="px-5 py-2.5 font-semibold">Serial number</th>
+							<th class="px-5 py-2.5 font-semibold">Revocation date</th>
+							<th class="px-5 py-2.5 font-semibold">Reason</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -109,7 +108,9 @@
 					<p
 						class="border-t border-slate-200 px-5 py-2 text-xs text-slate-400 dark:border-slate-800"
 					>
-						{result.entries.length - MAX_ROWS} entrée(s) supplémentaire(s) non affichée(s).
+						{result.entries.length - MAX_ROWS} additional entr{result.entries.length - MAX_ROWS > 1
+							? 'ies'
+							: 'y'} not shown.
 					</p>
 				{/if}
 			</div>

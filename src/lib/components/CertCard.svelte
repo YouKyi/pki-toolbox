@@ -12,39 +12,39 @@
 		$props();
 
 	const ROLE_LABEL: Record<ChainRole, string> = {
-		leaf: 'Certificat feuille',
-		intermediate: 'CA intermédiaire',
-		root: 'CA racine'
+		leaf: 'Leaf certificate',
+		intermediate: 'Intermediate CA',
+		root: 'Root CA'
 	};
 
 	const VALIDITY: Record<DecodedCertificate['validity'], { tone: BadgeTone; label: string }> = {
-		valid: { tone: 'valid', label: 'Valide' },
-		expired: { tone: 'expired', label: 'Expiré' },
-		'not-yet-valid': { tone: 'pending', label: 'Pas encore valide' }
+		valid: { tone: 'valid', label: 'Valid' },
+		expired: { tone: 'expired', label: 'Expired' },
+		'not-yet-valid': { tone: 'pending', label: 'Not yet valid' }
 	};
 
 	const commonName = $derived(
-		cert.subjectParts.find((p) => p.key === 'CN')?.value ?? cert.subject ?? '(sans sujet)'
+		cert.subjectParts.find((p) => p.key === 'CN')?.value ?? cert.subject ?? '(no subject)'
 	);
 
 	const validityNote = $derived(
 		cert.validity === 'valid'
-			? `expire dans ${cert.daysUntilExpiry} jour(s)`
+			? `expires in ${cert.daysUntilExpiry} day(s)`
 			: cert.validity === 'expired'
-				? `expiré depuis ${Math.abs(cert.daysUntilExpiry)} jour(s)`
-				: 'la date de début est dans le futur'
+				? `expired ${Math.abs(cert.daysUntilExpiry)} day(s) ago`
+				: 'the start date is in the future'
 	);
 
 	const identity: Row[] = $derived([
-		{ label: 'Sujet', value: cert.subject || ', ', mono: true },
-		{ label: 'Émetteur', value: cert.issuer || ', ', mono: true },
-		{ label: 'Numéro de série', value: formatSerial(cert.serialNumber), mono: true, copy: true }
+		{ label: 'Subject', value: cert.subject || ', ', mono: true },
+		{ label: 'Issuer', value: cert.issuer || ', ', mono: true },
+		{ label: 'Serial number', value: formatSerial(cert.serialNumber), mono: true, copy: true }
 	]);
 
 	const keyRows: Row[] = $derived([
-		{ label: 'Clé publique', value: cert.publicKey.label },
-		{ label: 'Algorithme de signature', value: cert.signatureAlgorithm },
-		{ label: 'Autorité de certification', value: cert.isCA ? 'Oui' : 'Non' },
+		{ label: 'Public key', value: cert.publicKey.label },
+		{ label: 'Signature algorithm', value: cert.signatureAlgorithm },
+		{ label: 'Certificate authority', value: cert.isCA ? 'Yes' : 'No' },
 		...(cert.basicConstraints?.pathLength !== undefined
 			? [{ label: 'Path length', value: String(cert.basicConstraints.pathLength) }]
 			: [])
@@ -95,26 +95,26 @@
 		<div class="flex flex-wrap items-center gap-1.5">
 			{#if role}<Badge tone={role}>{ROLE_LABEL[role]}</Badge>{/if}
 			{#if cert.isCA && !role}<Badge tone="info">CA</Badge>{/if}
-			{#if cert.isSelfSigned}<Badge tone="neutral">Auto-signé</Badge>{/if}
+			{#if cert.isSelfSigned}<Badge tone="neutral">Self-signed</Badge>{/if}
 			<Badge tone={VALIDITY[cert.validity].tone}>{VALIDITY[cert.validity].label}</Badge>
 		</div>
 	</header>
 
 	{#snippet identityBody()}<RowList rows={identity} />{/snippet}
-	{@render section('Identité', identityBody)}
+	{@render section('Identity', identityBody)}
 
 	{#snippet validityBody()}
 		<RowList
 			rows={[
-				{ label: 'Valide à partir du', value: formatDate(cert.notBefore), mono: true },
-				{ label: "Valide jusqu'au", value: formatDate(cert.notAfter), mono: true }
+				{ label: 'Valid from', value: formatDate(cert.notBefore), mono: true },
+				{ label: 'Valid until', value: formatDate(cert.notAfter), mono: true }
 			]}
 		/>
 	{/snippet}
-	{@render section('Validité', validityBody)}
+	{@render section('Validity', validityBody)}
 
 	{#snippet keyBody()}<RowList rows={keyRows} />{/snippet}
-	{@render section('Clé & signature', keyBody)}
+	{@render section('Key & signature', keyBody)}
 
 	{#if cert.subjectAltNames.length || cert.keyUsage.length || cert.extendedKeyUsage.length || cert.extensions.length}
 		{#snippet extBody()}
@@ -147,10 +147,10 @@
 				{#if cert.extensions.length}
 					<div>
 						<p class="mb-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
-							Extensions présentes
+							Extensions present
 						</p>
 						{@render chips(
-							cert.extensions.map((e) => (e.critical ? `${e.name} (critique)` : e.name)),
+							cert.extensions.map((e) => (e.critical ? `${e.name} (critical)` : e.name)),
 							'neutral'
 						)}
 					</div>
@@ -161,5 +161,5 @@
 	{/if}
 
 	{#snippet fpBody()}<RowList rows={fingerprints} />{/snippet}
-	{@render section('Empreintes (DER)', fpBody)}
+	{@render section('Fingerprints (DER)', fpBody)}
 </article>

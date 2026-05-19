@@ -63,13 +63,13 @@
 	bind:value={input}
 	{loading}
 	ondecode={decode}
-	decodeLabel="Calculer les empreintes"
+	decodeLabel="Compute fingerprints"
 	example={ISRG_ROOT_X1}
 />
 
 <div class="mt-6 space-y-4">
 	{#if error}
-		<Alert variant="error" title="Échec du décodage">{error}</Alert>
+		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 
 	{#if result}
@@ -85,7 +85,7 @@
 				<div class="min-w-0 flex-1">
 					<p class="truncate font-semibold text-slate-900 dark:text-slate-100">{result.subject}</p>
 					<p class="text-xs text-slate-400 dark:text-slate-500">
-						Empreintes calculées sur {result.der.length} octets de DER
+						Fingerprints computed over {result.der.length} bytes of DER
 					</p>
 				</div>
 			</header>
@@ -94,10 +94,8 @@
 			</div>
 		</article>
 		<Alert variant="info">
-			Les empreintes sont des condensats du DER complet du certificat, c'est la même valeur que
-			celle affichée par un navigateur ou par <code class="font-mono text-xs"
-				>openssl x509 -fingerprint</code
-			>.
+			Fingerprints are digests of the certificate's complete DER, the same value shown by a browser
+			or by <code class="font-mono text-xs">openssl x509 -fingerprint</code>.
 		</Alert>
 	{/if}
 </div>

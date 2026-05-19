@@ -31,14 +31,14 @@
 <PemInput
 	bind:value={input}
 	ondecode={decode}
-	decodeLabel="Analyser"
+	decodeLabel="Parse"
 	example={ISRG_ROOT_X2}
-	placeholder="Collez un artefact PEM ou DER (certificat, CSR, clé, CRL…)…"
+	placeholder="Paste a PEM or DER artefact (certificate, CSR, key, CRL…)…"
 />
 
 <div class="mt-6 space-y-4">
 	{#if error}
-		<Alert variant="error" title="Échec de l'analyse">{error}</Alert>
+		<Alert variant="error" title="Parsing failed">{error}</Alert>
 	{/if}
 	{#if result}
 		<div

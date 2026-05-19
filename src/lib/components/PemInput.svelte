@@ -15,18 +15,18 @@
 		accept?: string;
 		loading?: boolean;
 		decodeLabel?: string;
-		/** Optional sample to load via the "Exemple" button. */
+		/** Optional sample to load via the "Example" button. */
 		example?: string;
 		ondecode?: () => void;
 	};
 
 	let {
 		value = $bindable(''),
-		placeholder = 'Collez ici un bloc PEM (-----BEGIN …-----)…',
+		placeholder = 'Paste a PEM block here (-----BEGIN …-----)…',
 		derLabel = 'CERTIFICATE',
 		accept = '.pem,.crt,.cer,.der,.txt,.csr,.req,.p7b',
 		loading = false,
-		decodeLabel = 'Décoder',
+		decodeLabel = 'Decode',
 		example,
 		ondecode
 	}: Props = $props();
@@ -41,19 +41,19 @@
 	async function readFile(file: File) {
 		fileError = '';
 		if (file.size > MAX_FILE_BYTES) {
-			fileError = 'Fichier trop volumineux (limite : 8 Mo).';
+			fileError = 'File too large (limit: 8 MB).';
 			return;
 		}
 		try {
 			const bytes = new Uint8Array(await file.arrayBuffer());
 			if (bytes.length === 0) {
-				fileError = 'Le fichier est vide.';
+				fileError = 'The file is empty.';
 				return;
 			}
 			// 0x2D = '-' → already PEM text; otherwise treat as raw DER.
 			value = bytes[0] === 0x2d ? new TextDecoder().decode(bytes) : derToPem(bytes, derLabel);
 		} catch {
-			fileError = 'Impossible de lire ce fichier.';
+			fileError = 'Could not read this file.';
 		}
 	}
 
@@ -80,7 +80,7 @@
 <div class="space-y-3">
 	<div
 		role="group"
-		aria-label="Zone de saisie PEM"
+		aria-label="PEM input area"
 		class="relative rounded-xl border-2 border-dashed transition-colors {dragOver
 			? 'border-teal-500 bg-teal-50/60 dark:bg-teal-500/5'
 			: 'border-slate-300 dark:border-slate-700'}"
@@ -103,7 +103,7 @@
 			<div
 				class="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-teal-50/80 text-sm font-medium text-teal-700 dark:bg-slate-900/80 dark:text-teal-300"
 			>
-				<Icon name="upload" size={18} class="mr-2" /> Déposez le fichier
+				<Icon name="upload" size={18} class="mr-2" /> Drop the file
 			</div>
 		{/if}
 	</div>
@@ -120,7 +120,7 @@
 			class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-500 focus:ring-2 focus:ring-teal-500/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 		>
 			{#if loading}
-				<Icon name="clock" size={16} /> Analyse…
+				<Icon name="clock" size={16} /> Analyzing…
 			{:else}
 				<Icon name="shield" size={16} /> {decodeLabel}
 			{/if}
@@ -131,7 +131,7 @@
 			onclick={() => fileInput?.click()}
 			class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
 		>
-			<Icon name="upload" size={16} /> Importer un fichier
+			<Icon name="upload" size={16} /> Import a file
 		</button>
 
 		{#if example}
@@ -140,7 +140,7 @@
 				onclick={() => (value = example)}
 				class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
 			>
-				<Icon name="file-text" size={16} /> Charger un exemple
+				<Icon name="file-text" size={16} /> Load an example
 			</button>
 		{/if}
 
@@ -153,7 +153,7 @@
 				}}
 				class="ml-auto inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
 			>
-				<Icon name="close" size={16} /> Effacer
+				<Icon name="close" size={16} /> Clear
 			</button>
 		{/if}
 
@@ -168,7 +168,7 @@
 		/>
 	</div>
 	<p class="text-xs text-slate-400 dark:text-slate-500">
-		Tout est décodé localement dans votre navigateur, aucune donnée n'est envoyée.
-		<span class="hidden sm:inline">Astuce : Ctrl/⌘ + Entrée pour décoder.</span>
+		Everything is decoded locally in your browser, no data is sent.
+		<span class="hidden sm:inline">Tip: Ctrl/⌘ + Enter to decode.</span>
 	</p>
 </div>

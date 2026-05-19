@@ -19,92 +19,92 @@ export type Tool = {
 
 /** Display metadata for each category, in sidebar order. */
 export const categories: { id: ToolCategory; label: string }[] = [
-	{ id: 'decode', label: 'Décodage' },
+	{ id: 'decode', label: 'Decoding' },
 	{ id: 'inspect', label: 'Inspection' },
 	{ id: 'convert', label: 'Conversion' },
-	{ id: 'generate', label: 'Génération' }
+	{ id: 'generate', label: 'Generation' }
 ];
 
 export const tools: Tool[] = [
 	{
 		slug: 'decode-certificate',
-		name: 'Décodeur de certificat',
+		name: 'Certificate decoder',
 		description:
-			"Inspecte tous les champs d'un certificat X.509 : sujet, émetteur, validité, SAN, key usage et empreintes.",
+			'Inspect every field of an X.509 certificate: subject, issuer, validity, SANs, key usage and fingerprints.',
 		icon: 'certificate',
 		category: 'decode',
 		status: 'ready'
 	},
 	{
 		slug: 'decode-csr',
-		name: 'Décodeur de CSR',
+		name: 'CSR decoder',
 		description:
-			'Décode une demande de signature PKCS#10 : sujet, clé publique, algorithme de signature et extensions demandées.',
+			'Decode a PKCS#10 signing request: subject, public key, signature algorithm and requested extensions.',
 		icon: 'file-text',
 		category: 'decode',
 		status: 'ready'
 	},
 	{
 		slug: 'decode-chain',
-		name: 'Décodeur de chaîne',
+		name: 'Chain decoder',
 		description:
-			'Sépare un bundle PEM concaténé en chaîne ordonnée et vérifie chaque lien émetteur ↔ sujet.',
+			'Split a concatenated PEM bundle into an ordered chain and verify every issuer-to-subject link.',
 		icon: 'link',
 		category: 'decode',
 		status: 'ready'
 	},
 	{
 		slug: 'fingerprint',
-		name: 'Empreintes',
-		description: "Calcule les empreintes SHA-1, SHA-256 et SHA-512 du DER d'un certificat.",
+		name: 'Fingerprints',
+		description: "Compute the SHA-1, SHA-256 and SHA-512 fingerprints of a certificate's DER.",
 		icon: 'fingerprint',
 		category: 'inspect',
 		status: 'ready'
 	},
 	{
 		slug: 'decode-crl',
-		name: 'Décodeur de CRL',
-		description: 'Liste de révocation de certificats : entrées révoquées, dates et raisons.',
+		name: 'CRL decoder',
+		description: 'Certificate Revocation List: revoked entries, dates and reasons.',
 		icon: 'ban',
 		category: 'decode',
 		status: 'ready'
 	},
 	{
 		slug: 'decode-pkcs7',
-		name: 'Décodeur PKCS#7',
-		description: "Inspecte les bundles PKCS#7 / CMS et les certificats qu'ils transportent.",
+		name: 'PKCS#7 decoder',
+		description: 'Inspect PKCS#7 / CMS bundles and the certificates they carry.',
 		icon: 'package',
 		category: 'decode',
 		status: 'ready'
 	},
 	{
 		slug: 'decode-pkcs12',
-		name: 'Décodeur PKCS#12',
-		description: 'Ouvre les fichiers .p12 / .pfx protégés par mot de passe.',
+		name: 'PKCS#12 decoder',
+		description: 'Open password-protected .p12 / .pfx files.',
 		icon: 'lock',
 		category: 'decode',
 		status: 'ready'
 	},
 	{
 		slug: 'asn1-viewer',
-		name: 'Visualiseur ASN.1',
-		description: "Arbre ASN.1 brut et dépliable de n'importe quel artefact encodé en DER.",
+		name: 'ASN.1 viewer',
+		description: 'Raw, expandable ASN.1 tree of any DER-encoded artefact.',
 		icon: 'tree',
 		category: 'inspect',
 		status: 'ready'
 	},
 	{
 		slug: 'format-convert',
-		name: 'Conversion de format',
-		description: 'Convertit les artefacts PKI entre PEM, DER et PKCS#7.',
+		name: 'Format conversion',
+		description: 'Convert PKI artefacts between PEM, DER and PKCS#7.',
 		icon: 'convert',
 		category: 'convert',
 		status: 'ready'
 	},
 	{
 		slug: 'generate-selfsigned',
-		name: 'Certificat auto-signé',
-		description: 'Génère un certificat auto-signé via WebCrypto, entièrement dans le navigateur.',
+		name: 'Self-signed certificate',
+		description: 'Generate a self-signed certificate via WebCrypto, entirely in the browser.',
 		icon: 'sparkles',
 		category: 'generate',
 		status: 'ready'

@@ -34,7 +34,7 @@ function extractPkcs7(der: Uint8Array): Uint8Array[] {
 	ensurePkijsEngine();
 	const contentInfo = pkijs.ContentInfo.fromBER(toArrayBuffer(der));
 	if (contentInfo.contentType !== OID_SIGNED_DATA) {
-		throw new Error('Type de contenu PKCS#7 non pris en charge (SignedData attendu).');
+		throw new Error('Unsupported PKCS#7 content type (SignedData expected).');
 	}
 	const signed = new pkijs.SignedData({ schema: contentInfo.content });
 	return (signed.certificates ?? [])

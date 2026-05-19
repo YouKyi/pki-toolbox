@@ -37,27 +37,26 @@
 	bind:value={input}
 	{loading}
 	ondecode={decode}
-	decodeLabel="Décoder la chaîne"
+	decodeLabel="Decode the chain"
 	example={TEST_CHAIN}
-	placeholder="Collez ici plusieurs certificats PEM concaténés (feuille → … → racine)…"
+	placeholder="Paste several concatenated PEM certificates here (leaf → … → root)…"
 />
 
 <div class="mt-6 space-y-4">
 	{#if error}
-		<Alert variant="error" title="Échec du décodage">{error}</Alert>
+		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 
 	{#if result}
 		{#if result.complete}
-			<Alert variant="success" title="Chaîne valide">
-				Les {result.links.length} certificats s'enchaînent correctement : chaque signature a été vérifiée
-				cryptographiquement, et la chaîne se termine par une racine auto-signée valide.
+			<Alert variant="success" title="Valid chain">
+				The {result.links.length} certificates link together correctly: every signature has been verified
+				cryptographically, and the chain ends with a valid self-signed root.
 			</Alert>
 		{:else}
-			<Alert variant="warn" title="Chaîne incomplète ou non ordonnée">
-				Une signature n'a pas pu être vérifiée, ou la chaîne ne se termine pas par une racine
-				auto-signée valide. Vérifiez l'ordre des certificats (feuille en premier, racine en
-				dernier).
+			<Alert variant="warn" title="Incomplete or unordered chain">
+				A signature could not be verified, or the chain does not end with a valid self-signed root.
+				Check the order of the certificates (leaf first, root last).
 			</Alert>
 		{/if}
 
@@ -70,12 +69,12 @@
 						{#if link.issuedByNext}
 							<span class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
 								<Icon name="check" size={16} />
-								Signature vérifiée : émis par le certificat #{link.index + 2}
+								Signature verified: issued by certificate #{link.index + 2}
 							</span>
 						{:else}
 							<span class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400">
 								<Icon name="close" size={16} />
-								Signature non vérifiée par le certificat #{link.index + 2}
+								Signature not verified by certificate #{link.index + 2}
 							</span>
 						{/if}
 					</div>

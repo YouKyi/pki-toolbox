@@ -6,15 +6,15 @@ import { humanSignatureAlgorithm, formatSerial } from './format';
 
 /** RFC 5280 §5.3.1 revocation reason codes. */
 const CRL_REASONS: Record<number, string> = {
-	0: 'Non spécifiée',
-	1: 'Clé compromise',
+	0: 'Unspecified',
+	1: 'Key compromise',
 	2: 'CA compromise',
-	3: 'Affiliation modifiée',
-	4: 'Remplacé',
-	5: "Cessation d'activité",
-	6: 'Suspendu',
-	8: 'Retiré de la CRL',
-	9: 'Privilège retiré',
+	3: 'Affiliation changed',
+	4: 'Superseded',
+	5: 'Cessation of operation',
+	6: 'Certificate hold',
+	8: 'Removed from CRL',
+	9: 'Privilege withdrawn',
 	10: 'AA compromise'
 };
 
@@ -41,7 +41,7 @@ export function decodeCrl(input: string): DecodedCrl {
 		crl = new X509Crl(input);
 	} catch (e) {
 		throw new Error(
-			`Cela ne ressemble pas à une CRL X.509 (${e instanceof Error ? e.message : String(e)}).`,
+			`This does not look like an X.509 CRL (${e instanceof Error ? e.message : String(e)}).`,
 			{ cause: e }
 		);
 	}
@@ -54,7 +54,7 @@ export function decodeCrl(input: string): DecodedCrl {
 			revocationDate: entry.revocationDate,
 			reason:
 				code === undefined
-					? 'Aucune (non précisée dans la CRL)'
+					? 'None (not specified in the CRL)'
 					: (CRL_REASONS[code] ?? `Code ${code}`)
 		};
 	});
