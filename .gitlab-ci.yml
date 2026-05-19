@@ -78,7 +78,11 @@ test:
 # dependency tree without re-running the scan themselves.
 supply-chain:
   stage: test
-  image: aquasec/trivy:$TRIVY_VERSION
+  image:
+    name: aquasec/trivy:$TRIVY_VERSION
+    # Clear the image ENTRYPOINT (['trivy']) so GitLab runs this job's shell
+    # script; otherwise the script lines are passed as arguments to `trivy`.
+    entrypoint: ['']
   needs: []
   cache: {}
   before_script: []
@@ -147,18 +151,19 @@ docker:
     # vulnerability that has a fix available exits non-zero and fails the job,
     # so the push steps below never run for a vulnerable image. Trivy runs from
     # its own pinned container against the dind daemon's image store.
-    # The job working directory is mounted at /scan so the JUnit XML lands in
-    # the GitLab job workspace and is picked up by the artifacts block below.
+    # The JUnit report is written to stdout and redirected into the job
+    # workspace. A `-v "$(pwd)":/scan` bind mount cannot be used here: with
+    # docker-in-docker the path would resolve on the dind daemon, not in this
+    # job container, so the file would never reach the GitLab workspace.
     - >-
       docker run --rm
       -v /var/run/docker.sock:/var/run/docker.sock
       -v trivy-cache:/root/.cache
-      -v "$(pwd)":/scan
       "aquasec/trivy:$TRIVY_VERSION"
       image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1
       --format template --template "@/contrib/junit.tpl"
-      --output /scan/trivy-image-junit.xml
       "$IMAGE:$TAG_SHA"
+      > trivy-image-junit.xml
     # Push only from the default branch and from tags, never from feature branches/MRs.
     - |
       if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ] || [ -n "$CI_COMMIT_TAG" ]; then
@@ -171,6 +176,8 @@ docker:
     - if [ -n "$CI_COMMIT_TAG" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:$CI_COMMIT_TAG" && docker push "$IMAGE:$CI_COMMIT_TAG"; fi
   artifacts:
     when: always
+    paths:
+      - trivy-image-junit.xml
     reports:
       junit: trivy-image-junit.xml
     expire_in: 30 days
