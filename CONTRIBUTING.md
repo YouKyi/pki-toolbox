@@ -71,12 +71,12 @@ GitLab Release.
 The pipeline (`.gitlab-ci.yml`) has four stages: `lint`, `test`, `docker`,
 and `release`.
 
-| Stage | Jobs | When |
-|-------|------|------|
-| `lint` | `pnpm lint`, `pnpm check` | Every pipeline |
-| `test` | `pnpm test`; `supply-chain` (Trivy filesystem scan: dependencies, secrets, CycloneDX SBOM) | Every pipeline |
-| `docker` | Build via the multi-stage Dockerfile (which runs `pnpm build` internally), Trivy image scan, push to registry | Tags unconditionally; branches and MRs only when a build-affecting file changed |
-| `release` | Publish a GitLab Release from the matching `CHANGELOG.md` section | `vX.Y.Z` tags only |
+| Stage     | Jobs                                                                                                          | When                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `lint`    | `pnpm lint`, `pnpm check`                                                                                     | Every pipeline                                                                  |
+| `test`    | `pnpm test`; `supply-chain` (Trivy filesystem scan: dependencies, secrets, CycloneDX SBOM)                    | Every pipeline                                                                  |
+| `docker`  | Build via the multi-stage Dockerfile (which runs `pnpm build` internally), Trivy image scan, push to registry | Tags unconditionally; branches and MRs only when a build-affecting file changed |
+| `release` | Publish a GitLab Release from the matching `CHANGELOG.md` section                                             | `vX.Y.Z` tags only                                                              |
 
 There is no separate `build` stage and no separate `scan` stage. The
 `supply-chain` job (filesystem scan) runs in the `test` stage on every
