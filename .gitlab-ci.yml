@@ -37,7 +37,7 @@ workflow:
 
 # Node jobs share the same image, a pnpm-store cache and the install step.
 default:
-  image: node:20-alpine
+  image: node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
   cache:
     key:
       files:
@@ -76,9 +76,9 @@ test:
 # on this GitLab instance: TLS disabled and the job pinned to the `docker` runner.
 docker:
   stage: docker
-  image: docker:27
+  image: docker:27@sha256:aa3df78ecf320f5fafdce71c659f1629e96e9de0968305fe1de670e0ca9176ce
   services:
-    - docker:27-dind
+    - docker:27-dind@sha256:aa3df78ecf320f5fafdce71c659f1629e96e9de0968305fe1de670e0ca9176ce
   tags:
     - docker
   cache: {}
@@ -131,7 +131,7 @@ docker:
 # release-cli is version-pinned so Renovate keeps it current.
 release:
   stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:v0.16.0
+  image: registry.gitlab.com/gitlab-org/release-cli:v0.16.0@sha256:5a71acbadc47c1971100f5246b09f88ba09e84ebe7769e425475dce85245a2bf
   needs:
     - docker
   cache: {}
