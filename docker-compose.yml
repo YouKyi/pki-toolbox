@@ -1,0 +1,10 @@
+services:
+  pki-toolbox:
+    image: ${CI_REGISTRY_IMAGE:-pki-toolbox}:latest
+    # To build the image locally instead of pulling it, comment out `image`
+    # above and uncomment the line below:
+    # build: .
+    container_name: pki-toolbox
+    ports:
+      - '8080:8080'
+    restart: unless-stopped

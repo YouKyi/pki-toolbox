@@ -1,0 +1,11 @@
+.git
+.gitlab-ci.yml
+node_modules
+build
+.svelte-kit
+.pnpm-store
+.claude
+.vscode
+tests
+*.md
+!README.md

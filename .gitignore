@@ -1,0 +1,29 @@
+node_modules
+
+# Package manager store (created when pnpm runs with an in-project store dir)
+/.pnpm-store
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local Claude Code state (plans, memory, per-developer settings)
+.claude/
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*

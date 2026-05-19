@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+/* Dark mode is driven by a `.dark` class on <html> and is the default. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+	color-scheme: light dark;
+}
+
+body {
+	@apply bg-slate-50 text-slate-900 antialiased;
+}
+
+:where(.dark) body {
+	@apply bg-slate-950 text-slate-100;
+}
+
+/* Thin, theme-aware scrollbars for the sidebar and result panes. */
+* {
+	scrollbar-width: thin;
+}
