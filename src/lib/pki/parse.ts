@@ -17,6 +17,7 @@ import {
 	type Name
 } from '@peculiar/x509';
 import { ekuName, extensionName } from './oids';
+import { assertInputSize } from './pem';
 import {
 	bytesToHex,
 	humanKeyAlgorithm,
@@ -162,6 +163,8 @@ function readExtendedKeyUsage(host: ExtensionHost): string[] {
  * Throws an `Error` with a friendly message when the input is not a cert.
  */
 export async function decodeCertificate(input: string): Promise<DecodedCertificate> {
+	assertInputSize(input);
+
 	let cert: X509Certificate;
 	try {
 		cert = new X509Certificate(input);
@@ -218,6 +221,8 @@ export async function decodeCertificate(input: string): Promise<DecodedCertifica
  * Requested extensions (SAN, EKU, Basic Constraints) are best-effort.
  */
 export async function decodeCsr(input: string): Promise<DecodedCsr> {
+	assertInputSize(input);
+
 	let csr: Pkcs10CertificateRequest;
 	try {
 		csr = new Pkcs10CertificateRequest(input);

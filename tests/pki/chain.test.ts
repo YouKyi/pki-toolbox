@@ -41,9 +41,9 @@ describe('decodeChain', () => {
 		expect(chain.links[0].issuedByNext).toBe(false);
 	});
 
-	it('throws when the input contains no certificate block', async () => {
+	it('throws a meaningful error when the input contains no certificate block', async () => {
 		await expect(
 			decodeChain('-----BEGIN NONSENSE-----\nAAAA\n-----END NONSENSE-----')
-		).rejects.toThrow();
+		).rejects.toThrowError(/no PEM CERTIFICATE block/i);
 	});
 });

@@ -33,7 +33,7 @@ export function formatSerial(serial: string): string {
 
 /** Structured description of a public-key algorithm. */
 export type KeyAlgorithmInfo = {
-	/** Family name: `RSA`, `EC`, `Ed25519`, … */
+	/** Family name: `RSA`, `EC`, `EdDSA`, … */
 	family: string;
 	/** Modulus length in bits for RSA. */
 	bits?: number;
@@ -59,12 +59,15 @@ export function humanKeyAlgorithm(algorithm: unknown): KeyAlgorithmInfo {
 		const bits = algo.modulusLength;
 		return { family: 'RSA', bits, label: bits ? `RSA ${bits}-bit` : 'RSA' };
 	}
+	// Edwards-curve keys must be classified before the generic EC branch: their
+	// `name` ("Ed25519"/"Ed448"/"EdDSA") is a distinct family, not RSA or EC.
+	if (/ed(25519|448)/i.test(name)) {
+		const curve = /448/.test(name) ? 'Ed448' : 'Ed25519';
+		return { family: 'EdDSA', curve, label: curve };
+	}
 	if (/ec(dsa|dh)?$/i.test(name) || algo.namedCurve) {
 		const curve = algo.namedCurve;
 		return { family: 'EC', curve, label: curve ? `EC (${curve})` : 'EC' };
-	}
-	if (/ed(25519|448)/i.test(name)) {
-		return { family: name, label: name };
 	}
 	return { family: name, label: name };
 }

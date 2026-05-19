@@ -34,7 +34,7 @@
 
 <PemInput bind:value={input} {loading} ondecode={decode} example={ISRG_ROOT_X1} />
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
 	{#if error}
 		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}

@@ -13,6 +13,29 @@ export type PemBlock = {
 	pem: string;
 };
 
+/**
+ * Upper bound on the size of any artefact the decoders will accept, applied
+ * centrally so every tool benefits. A pathological multi-megabyte paste can
+ * make ASN.1 parsing hang the browser tab; 4 MB comfortably fits any real
+ * certificate, chain, CRL or PKCS#12 bundle while rejecting hostile input.
+ */
+export const MAX_INPUT_BYTES = 4 * 1024 * 1024;
+
+/**
+ * Reject an artefact whose raw text is larger than `MAX_INPUT_BYTES`. Call this
+ * at every decoder entry point before any parsing work begins.
+ */
+export function assertInputSize(input: string): void {
+	// One UTF-16 code unit is at least one byte once decoded; this is a cheap
+	// upper-bound check that avoids allocating a TextEncoder for huge inputs.
+	if (input.length > MAX_INPUT_BYTES) {
+		throw new Error(
+			`The input is too large (limit ${MAX_INPUT_BYTES / (1024 * 1024)} MB). ` +
+				'Paste a single PKI artefact rather than a whole file dump.'
+		);
+	}
+}
+
 /** Matches one `-----BEGIN X-----…-----END X-----` block. */
 const BLOCK_RE = /-----BEGIN ([A-Z0-9 #]+?)-----[\s\S]+?-----END \1-----/g;
 
@@ -47,6 +70,11 @@ export function base64ToBytes(b64: string): Uint8Array {
 		bin = atob(clean);
 	} catch {
 		throw new Error('The content is not valid base64.');
+	}
+	if (bin.length > MAX_INPUT_BYTES) {
+		throw new Error(
+			`The decoded content is too large (limit ${MAX_INPUT_BYTES / (1024 * 1024)} MB).`
+		);
 	}
 	const bytes = new Uint8Array(bin.length);
 	for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);

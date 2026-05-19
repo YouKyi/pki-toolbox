@@ -7,7 +7,7 @@
  * issuer and subject Distinguished Names happen to match.
  */
 import { X509Certificate, cryptoProvider } from '@peculiar/x509';
-import { splitBlocks } from './pem';
+import { splitBlocks, assertInputSize } from './pem';
 import { decodeCertificate, type DecodedCertificate } from './parse';
 
 export type ChainRole = 'leaf' | 'intermediate' | 'root';
@@ -60,6 +60,7 @@ async function isSignedBy(cert: X509Certificate, issuer: X509Certificate): Promi
  * report the chain in pasted order with cryptographically verified linkage.
  */
 export async function decodeChain(pem: string): Promise<DecodedChain> {
+	assertInputSize(pem);
 	const blocks = splitBlocks(pem).filter(
 		(b) => b.type === 'CERTIFICATE' || b.type === 'X509 CERTIFICATE'
 	);

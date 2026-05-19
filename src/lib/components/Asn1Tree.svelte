@@ -33,6 +33,7 @@
 			<button
 				type="button"
 				onclick={() => (open = !open)}
+				aria-expanded={open}
 				class="flex items-baseline gap-1.5 rounded text-left hover:bg-slate-100 dark:hover:bg-slate-800"
 			>
 				<Icon
@@ -41,7 +42,7 @@
 					class="shrink-0 transition-transform {open ? '' : '-rotate-90'}"
 				/>
 				<span class="font-semibold {tagColor(node)}">{node.tag}</span>
-				<span class="text-xs text-slate-400 dark:text-slate-500">
+				<span class="text-xs text-slate-500 dark:text-slate-500">
 					{node.children.length} element{node.children.length > 1 ? 's' : ''}
 				</span>
 			</button>
@@ -50,10 +51,10 @@
 			{#if node.value}
 				<span class="break-all text-slate-800 dark:text-slate-200">{node.value}</span>
 			{:else if node.tag !== 'NULL'}
-				<span class="text-slate-400 dark:text-slate-600">(empty)</span>
+				<span class="text-slate-500 dark:text-slate-600">(empty)</span>
 			{/if}
 		{/if}
-		<span class="ml-auto shrink-0 pl-3 text-xs text-slate-400 dark:text-slate-600">
+		<span class="ml-auto shrink-0 pl-3 text-xs text-slate-500 dark:text-slate-600">
 			@{node.offset} · {node.length} B
 		</span>
 	</div>

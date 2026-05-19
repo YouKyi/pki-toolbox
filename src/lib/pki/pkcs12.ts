@@ -7,7 +7,7 @@
  */
 import * as pkijs from 'pkijs';
 import { ensurePkijsEngine, toArrayBuffer, passwordBytes } from './engine';
-import { pemToDer, derToPem } from './pem';
+import { pemToDer, derToPem, assertInputSize } from './pem';
 import { decodeCertificate, type DecodedCertificate } from './parse';
 
 const OID_CERT_BAG = '1.2.840.113549.1.12.10.1.3';
@@ -67,6 +67,7 @@ async function readKeyAlgorithm(bag: pkijs.SafeBag, password: ArrayBuffer): Prom
 
 /** Decode a PKCS#12 file (PEM- or DER-wrapped) using the given password. */
 export async function decodePkcs12(input: string, password: string): Promise<DecodedPkcs12> {
+	assertInputSize(input);
 	ensurePkijsEngine();
 	const pwd = passwordBytes(password);
 

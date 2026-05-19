@@ -1,18 +1,16 @@
 stages:
   - lint
   - test
-  - build
   - docker
-  - scan
   - release
 
 variables:
   IMAGE: $CI_REGISTRY_IMAGE
   TAG_SHA: $CI_COMMIT_SHORT_SHA
 
-# Paths that, when changed, require rebuilding the app and the image. A push
-# that only touches docs or config (README, CHANGELOG, renovate.json, ...) does
-# not match, so it runs lint/test only and skips the build/docker/scan jobs.
+# Paths that, when changed, require rebuilding the image. A push that only
+# touches docs or config (README, CHANGELOG, renovate.json, ...) does not
+# match, so it runs lint/test only and skips the docker job.
 .build-paths: &build-paths
   - 'src/**/*'
   - 'static/**/*'
@@ -65,25 +63,15 @@ test:
   script:
     - pnpm test
 
-# build/docker/scan run on tags always, and on branches/MRs only when a file
-# that affects the build changed.
-build:
-  stage: build
-  needs: []
-  rules:
-    - if: $CI_COMMIT_TAG
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes: *build-paths
-    - if: $CI_COMMIT_BRANCH
-      changes: *build-paths
-  script:
-    - pnpm build
-  artifacts:
-    paths:
-      - build/
-    expire_in: 1 day
-
-# Builds the Docker image and pushes it to the GitLab Container Registry.
+# Builds the Docker image, scans it for CVEs, then pushes it. Runs on tags
+# always, and on branches/MRs only when a file that affects the build changed.
+#
+# The multi-stage Dockerfile runs `pnpm build` internally, so the app is built
+# exactly once here: there is no separate `build` job. Trivy scans the freshly
+# built image before any push; a fixable HIGH/CRITICAL CVE fails the pipeline,
+# so a vulnerable image can never be pushed or released. Scanning runs on
+# merge requests too, not only on tags/main.
+#
 # Docker-in-Docker config mirrors the working pipeline of youkyi/unifi-flowmatrix
 # on this GitLab instance: TLS disabled and the job pinned to the `docker` runner.
 docker:
@@ -94,12 +82,11 @@ docker:
   tags:
     - docker
   cache: {}
-  needs:
-    - job: build
-      artifacts: false
+  needs: []
   variables:
     DOCKER_TLS_CERTDIR: ''
     DOCKER_BUILDKIT: '1'
+    TRIVY_VERSION: '0.70.0'
   before_script:
     - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
@@ -111,6 +98,17 @@ docker:
       --build-arg BUILDKIT_INLINE_CACHE=1
       --cache-from "$IMAGE:latest"
       -t "$IMAGE:$TAG_SHA" .
+    # Scan the freshly built image BEFORE any push. A HIGH or CRITICAL
+    # vulnerability that has a fix available exits non-zero and fails the job,
+    # so the push steps below never run for a vulnerable image. Trivy runs from
+    # its own pinned container against the dind daemon's image store.
+    - >-
+      docker run --rm
+      -v /var/run/docker.sock:/var/run/docker.sock
+      -v trivy-cache:/root/.cache
+      "aquasec/trivy:$TRIVY_VERSION"
+      image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1
+      "$IMAGE:$TAG_SHA"
     # Push only from the default branch and from tags, never from feature branches/MRs.
     - |
       if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ] || [ -n "$CI_COMMIT_TAG" ]; then
@@ -128,28 +126,6 @@ docker:
     - if: $CI_COMMIT_BRANCH
       changes: *build-paths
 
-# Scans the freshly built image for OS and dependency CVEs. A HIGH or CRITICAL
-# vulnerability that has a fix available fails the pipeline, so a vulnerable
-# image can never be released. Runs only where the docker job pushed the image.
-scan:
-  stage: scan
-  image:
-    name: aquasec/trivy:0.70.0
-    entrypoint: ['']
-  needs:
-    - docker
-  cache: {}
-  variables:
-    TRIVY_USERNAME: $CI_REGISTRY_USER
-    TRIVY_PASSWORD: $CI_REGISTRY_PASSWORD
-  before_script: []
-  script:
-    - trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$IMAGE:$TAG_SHA"
-  rules:
-    - if: $CI_COMMIT_TAG
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes: *build-paths
-
 # Publishes a GitLab Release whenever a semver tag (vX.Y.Z) is pushed. The
 # release notes are the matching section extracted from CHANGELOG.md.
 # release-cli is version-pinned so Renovate keeps it current.
@@ -158,7 +134,6 @@ release:
   image: registry.gitlab.com/gitlab-org/release-cli:v0.16.0
   needs:
     - docker
-    - scan
   cache: {}
   before_script: []
   rules:

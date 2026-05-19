@@ -5,6 +5,7 @@ import {
 	ISRG_ROOT_X1_SHA256,
 	ISRG_ROOT_X2,
 	TEST_LEAF,
+	TEST_EXPIRED,
 	TEST_CSR
 } from '../fixtures/certs';
 
@@ -31,6 +32,13 @@ describe('decodeCertificate, RSA (ISRG Root X1)', () => {
 		expect(cert.notBefore).toBeInstanceOf(Date);
 		expect(cert.notAfter.getTime()).toBeGreaterThan(cert.notBefore.getTime());
 		expect(cert.keyUsage).toContain('keyCertSign');
+	});
+
+	it('reports a certificate whose validity window is in the past as expired', async () => {
+		const cert = await decodeCertificate(TEST_EXPIRED);
+		expect(cert.validity).toBe('expired');
+		expect(cert.notAfter.getTime()).toBeLessThan(Date.now());
+		expect(cert.daysUntilExpiry).toBeLessThan(0);
 	});
 
 	it('computes the expected DER fingerprints', async () => {
@@ -60,8 +68,14 @@ describe('decodeCertificate, EC', () => {
 });
 
 describe('decodeCertificate, errors', () => {
-	it('rejects input that is not a certificate', async () => {
-		await expect(decodeCertificate('not a certificate')).rejects.toThrow();
+	it('rejects input that is not a certificate with a meaningful message', async () => {
+		await expect(decodeCertificate('not a certificate')).rejects.toThrowError(
+			/X\.509 certificate/i
+		);
+	});
+
+	it('rejects a CSR passed to the certificate decoder with a meaningful message', async () => {
+		await expect(decodeCertificate(TEST_CSR)).rejects.toThrowError(/X\.509 certificate/i);
 	});
 });
 
@@ -79,7 +93,7 @@ describe('decodeCsr', () => {
 		expect(csr.subjectAltNames.map((s) => s.value)).toContain('request.pki-toolbox.test');
 	});
 
-	it('rejects input that is not a CSR', async () => {
-		await expect(decodeCsr('not a csr')).rejects.toThrow();
+	it('rejects input that is not a CSR with a meaningful message', async () => {
+		await expect(decodeCsr('not a csr')).rejects.toThrowError(/PKCS#10 request/i);
 	});
 });

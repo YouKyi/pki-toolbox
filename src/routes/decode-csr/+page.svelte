@@ -47,7 +47,7 @@
 	placeholder="Paste a PKCS#10 request here (-----BEGIN CERTIFICATE REQUEST-----)…"
 />
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
 	{#if error}
 		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
@@ -64,23 +64,23 @@
 				</span>
 				<div class="min-w-0 flex-1">
 					<p class="truncate font-semibold text-slate-900 dark:text-slate-100">{commonName}</p>
-					<p class="text-xs text-slate-400 dark:text-slate-500">PKCS#10 signing request</p>
+					<p class="text-xs text-slate-500 dark:text-slate-500">PKCS#10 signing request</p>
 				</div>
 				<Badge tone="accent">CSR</Badge>
 			</header>
 
 			<section class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
 				<h3
-					class="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500"
+					class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
 				>
 					Identity
 				</h3>
-				<RowList rows={[{ label: 'Subject', value: result.subject || ', ', mono: true }]} />
+				<RowList rows={[{ label: 'Subject', value: result.subject || '-', mono: true }]} />
 			</section>
 
 			<section class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
 				<h3
-					class="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500"
+					class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
 				>
 					Key & signature
 				</h3>
@@ -95,7 +95,7 @@
 			{#if result.subjectAltNames.length || result.extendedKeyUsage.length || result.basicConstraints}
 				<section class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
 					<h3
-						class="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500"
+						class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
 					>
 						Requested extensions
 					</h3>

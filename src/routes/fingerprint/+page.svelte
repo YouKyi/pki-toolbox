@@ -67,7 +67,7 @@
 	example={ISRG_ROOT_X1}
 />
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
 	{#if error}
 		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
@@ -84,7 +84,7 @@
 				</span>
 				<div class="min-w-0 flex-1">
 					<p class="truncate font-semibold text-slate-900 dark:text-slate-100">{result.subject}</p>
-					<p class="text-xs text-slate-400 dark:text-slate-500">
+					<p class="text-xs text-slate-500 dark:text-slate-500">
 						Fingerprints computed over {result.der.length} bytes of DER
 					</p>
 				</div>

@@ -9,6 +9,36 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-05-19
+
+### Fixed
+
+- The desktop top bar and the sidebar brand block now share the same height,
+  so their bottom borders line up into one continuous line instead of a
+  visible step across the top of the page.
+- Empty-value placeholders in the certificate, CSR, CRL and PKCS#7 views were
+  showing a stray `, ` instead of a `-`.
+
+### Changed
+
+- Accessibility: the interface now meets WCAG 2.2 AA. Light-theme low-contrast
+  text was darkened, a skip link and a focusable main landmark were added, the
+  mobile navigation drawer is a proper modal dialog (focus trap, Escape to
+  close, focus return, surrounding content inert), the theme toggle announces
+  its action, results and errors are announced through live regions, the
+  ASN.1 tree exposes expansion state, navigation landmarks are labelled, the
+  required form fields are marked as such, and a visible focus style plus a
+  `prefers-reduced-motion` rule were added.
+- Hardening: the Content-Security-Policy `connect-src` directive is now
+  `none`, the app makes no network requests at all.
+- Robustness: ASN.1 parsing reports trailing bytes and an honest maximum
+  nesting depth marker, and every decoder rejects an input larger than 4 MB.
+
+### Security
+
+- Both Docker base images (`node:20-alpine`, `nginx:1.31-alpine-slim`) are now
+  pinned to immutable digests, kept current by Renovate.
+
 ## [1.0.2] - 2026-05-19
 
 ### Changed
@@ -54,7 +84,8 @@ are not listed individually here.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.2...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.3...main
+[1.0.3]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.2...v1.0.3
 [1.0.2]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.1...v1.0.2
 [1.0.1]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.0...v1.0.1
 [1.0.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/tags/v1.0.0

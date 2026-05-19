@@ -81,7 +81,13 @@
 	<div class="grid gap-4 sm:grid-cols-2">
 		<label class="flex flex-col gap-1 text-sm">
 			<span class="font-medium text-slate-600 dark:text-slate-300">Common Name (CN) *</span>
-			<input bind:value={commonName} class={inputClass} placeholder="example.local" />
+			<input
+				bind:value={commonName}
+				required
+				aria-required="true"
+				class={inputClass}
+				placeholder="example.local"
+			/>
 		</label>
 		<label class="flex flex-col gap-1 text-sm">
 			<span class="font-medium text-slate-600 dark:text-slate-300">Organization (O)</span>
@@ -134,7 +140,7 @@
 	</p>
 </div>
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
 	{#if error}
 		<Alert variant="error" title="Generation failed">{error}</Alert>
 	{/if}

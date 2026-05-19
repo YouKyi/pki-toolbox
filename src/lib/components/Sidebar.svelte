@@ -13,7 +13,7 @@
 	<a
 		href="/"
 		onclick={onnavigate}
-		class="flex items-center gap-2.5 border-b border-slate-200 px-4 py-4 dark:border-slate-800"
+		class="flex h-16 items-center gap-2.5 border-b border-slate-200 px-4 dark:border-slate-800"
 	>
 		<span
 			class="grid h-9 w-9 place-items-center rounded-lg bg-teal-600 text-white shadow-sm dark:bg-teal-500"
@@ -22,21 +22,22 @@
 		</span>
 		<span class="leading-tight">
 			<span class="block font-semibold text-slate-900 dark:text-slate-100">PKI-Toolbox</span>
-			<span class="block text-xs text-slate-400 dark:text-slate-500">Local PKI decoder</span>
+			<span class="block text-xs text-slate-500 dark:text-slate-500">Local PKI decoder</span>
 		</span>
 	</a>
 
-	<nav class="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+	<nav aria-label="Tools" class="flex-1 space-y-5 overflow-y-auto px-3 py-4">
 		{#each categories as category (category.id)}
 			{@const list = toolsByCategory(category.id)}
 			{#if list.length}
 				<div>
 					<p
-						class="px-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500"
+						id="cat-{category.id}"
+						class="px-2 text-[11px] font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-500"
 					>
 						{category.label}
 					</p>
-					<ul class="mt-1.5 space-y-0.5">
+					<ul aria-labelledby="cat-{category.id}" class="mt-1.5 space-y-0.5">
 						{#each list as tool (tool.slug)}
 							{@const active = current === `/${tool.slug}`}
 							<li>
@@ -55,7 +56,7 @@
 									<span class="flex-1 truncate">{tool.name}</span>
 									{#if tool.status === 'planned'}
 										<span
-											class="rounded bg-slate-100 px-1 text-[10px] font-semibold text-slate-400 dark:bg-slate-800 dark:text-slate-500"
+											class="rounded bg-slate-100 px-1 text-[10px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-500"
 											>v2</span
 										>
 									{:else if tool.status === 'beta'}
@@ -74,7 +75,7 @@
 	</nav>
 
 	<div class="border-t border-slate-200 px-4 py-3 dark:border-slate-800">
-		<p class="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+		<p class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-500">
 			<Icon name="lock" size={13} /> 100% client-side, nothing is sent.
 		</p>
 	</div>

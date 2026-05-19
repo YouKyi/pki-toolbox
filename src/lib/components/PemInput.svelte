@@ -94,6 +94,9 @@
 		<textarea
 			bind:value
 			{placeholder}
+			aria-label="PKI artefact input"
+			required
+			aria-required="true"
 			spellcheck="false"
 			autocomplete="off"
 			onkeydown={onKeydown}
@@ -162,12 +165,12 @@
 			type="file"
 			{accept}
 			onchange={onFilePick}
+			aria-label="Import a PKI file"
 			class="hidden"
-			aria-hidden="true"
 			tabindex="-1"
 		/>
 	</div>
-	<p class="text-xs text-slate-400 dark:text-slate-500">
+	<p class="text-xs text-slate-500 dark:text-slate-500">
 		Everything is decoded locally in your browser, no data is sent.
 		<span class="hidden sm:inline">Tip: Ctrl/⌘ + Enter to decode.</span>
 	</p>

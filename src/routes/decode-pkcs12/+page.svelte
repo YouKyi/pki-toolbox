@@ -69,7 +69,7 @@
 	placeholder="Import a .p12 / .pfx file, or paste its base64 content…"
 />
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
 	{#if error}
 		<Alert variant="error" title="Decryption failed">{error}</Alert>
 	{/if}
@@ -89,14 +89,14 @@
 				class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
 			>
 				<h3
-					class="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500"
+					class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
 				>
 					Private keys
 				</h3>
 				<ul class="space-y-2">
 					{#each result.keys as key, i (i)}
 						<li class="flex flex-wrap items-center gap-2 text-sm">
-							<Icon name="lock" size={16} class="text-slate-400" />
+							<Icon name="lock" size={16} class="text-slate-500" />
 							<span class="font-medium text-slate-800 dark:text-slate-200">
 								{key.friendlyName ?? '(no name)'}
 							</span>
@@ -105,7 +105,7 @@
 						</li>
 					{/each}
 				</ul>
-				<p class="mt-2 text-xs text-slate-400 dark:text-slate-500">
+				<p class="mt-2 text-xs text-slate-500 dark:text-slate-500">
 					Private key material is never displayed.
 				</p>
 			</div>

@@ -42,7 +42,7 @@
 	placeholder="Paste several concatenated PEM certificates here (leaf → … → root)…"
 />
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
 	{#if error}
 		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}

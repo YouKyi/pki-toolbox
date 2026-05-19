@@ -1,9 +1,13 @@
 # syntax=docker/dockerfile:1
 
 # ---- Stage 1: build the static site ----
-FROM node:20-alpine AS builder
+# Digest-pinned for a reproducible, immutable build base. Renovate keeps the
+# tag and the @sha256 digest in sync when a new node:20-alpine is published.
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS builder
 WORKDIR /app
-RUN corepack enable
+# Pin pnpm to the exact version from package.json so the build never drifts to
+# whatever version Corepack would otherwise default to.
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 # Install dependencies against the committed lockfile first (better layer caching).
 COPY package.json pnpm-lock.yaml ./
@@ -14,8 +18,9 @@ COPY . .
 RUN pnpm build
 
 # ---- Stage 2: serve with nginx as a non-root user ----
-# Version-pinned so Renovate can track and update the base image.
-FROM nginx:1.31-alpine-slim
+# Version- and digest-pinned for an immutable runtime base. Renovate keeps the
+# tag and the @sha256 digest in sync when a new nginx:1.31-alpine-slim ships.
+FROM nginx:1.31-alpine-slim@sha256:9e666aeefa9801445bc2ff4994c48d314736dae4cf1f551ace03e38ea0373552
 
 COPY --from=builder /app/build /usr/share/nginx/html
 COPY nginx-main.conf /etc/nginx/nginx.conf

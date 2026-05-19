@@ -36,8 +36,8 @@
 	);
 
 	const identity: Row[] = $derived([
-		{ label: 'Subject', value: cert.subject || ', ', mono: true },
-		{ label: 'Issuer', value: cert.issuer || ', ', mono: true },
+		{ label: 'Subject', value: cert.subject || '-', mono: true },
+		{ label: 'Issuer', value: cert.issuer || '-', mono: true },
 		{ label: 'Serial number', value: formatSerial(cert.serialNumber), mono: true, copy: true }
 	]);
 
@@ -60,7 +60,7 @@
 {#snippet section(title: string, body: Snippet)}
 	<section class="border-t border-slate-200 px-5 py-4 first:border-t-0 dark:border-slate-800">
 		<h3
-			class="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500"
+			class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
 		>
 			{title}
 		</h3>
@@ -87,10 +87,10 @@
 		</span>
 		<div class="min-w-0 flex-1">
 			<p class="truncate font-semibold text-slate-900 dark:text-slate-100" title={commonName}>
-				{#if index !== undefined}<span class="text-slate-400">#{index + 1}</span>
+				{#if index !== undefined}<span class="text-slate-500">#{index + 1}</span>
 				{/if}{commonName}
 			</p>
-			<p class="text-xs text-slate-400 dark:text-slate-500">{validityNote}</p>
+			<p class="text-xs text-slate-500 dark:text-slate-500">{validityNote}</p>
 		</div>
 		<div class="flex flex-wrap items-center gap-1.5">
 			{#if role}<Badge tone={role}>{ROLE_LABEL[role]}</Badge>{/if}

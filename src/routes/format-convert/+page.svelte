@@ -66,7 +66,7 @@
 	placeholder="Paste a PEM/DER certificate or a PKCS#7 bundle, or import a file…"
 />
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
 	{#if error}
 		<Alert variant="error" title="Conversion failed">{error}</Alert>
 	{/if}
@@ -96,7 +96,7 @@
 			>
 				<header class="flex flex-wrap items-center gap-2 px-5 py-3">
 					<Badge tone="accent">{item.label}</Badge>
-					<span class="text-xs text-slate-400 dark:text-slate-500">{item.der.length} bytes</span>
+					<span class="text-xs text-slate-500 dark:text-slate-500">{item.der.length} bytes</span>
 					<div class="ml-auto flex gap-2">
 						<button
 							type="button"
@@ -124,14 +124,14 @@
 					<div class="border-t border-slate-200 px-5 py-3 dark:border-slate-800">
 						<div class="mb-1.5 flex items-center justify-between">
 							<span
-								class="text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500"
+								class="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
 							>
 								{title}
 							</span>
 							<button
 								type="button"
 								onclick={() => copy(value, blockId)}
-								class="inline-flex items-center gap-1 rounded p-1 text-slate-400 transition hover:text-teal-600 dark:hover:text-teal-400"
+								class="inline-flex items-center gap-1 rounded p-1 text-slate-500 transition hover:text-teal-600 dark:hover:text-teal-400"
 							>
 								<Icon name={copied === blockId ? 'check' : 'copy'} size={14} />
 							</button>

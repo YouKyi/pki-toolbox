@@ -3,6 +3,7 @@
  */
 import { X509Crl } from '@peculiar/x509';
 import { humanSignatureAlgorithm, formatSerial } from './format';
+import { assertInputSize } from './pem';
 
 /** RFC 5280 §5.3.1 revocation reason codes. */
 const CRL_REASONS: Record<number, string> = {
@@ -36,6 +37,8 @@ export type DecodedCrl = {
 
 /** Decode a PEM (or DER-wrapped) X.509 Certificate Revocation List. */
 export function decodeCrl(input: string): DecodedCrl {
+	assertInputSize(input);
+
 	let crl: X509Crl;
 	try {
 		crl = new X509Crl(input);

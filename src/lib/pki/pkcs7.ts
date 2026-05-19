@@ -5,7 +5,7 @@
  */
 import * as pkijs from 'pkijs';
 import { ensurePkijsEngine, toArrayBuffer } from './engine';
-import { pemToDer, derToPem } from './pem';
+import { pemToDer, derToPem, assertInputSize } from './pem';
 import { decodeCertificate, type DecodedCertificate } from './parse';
 
 const OID_SIGNED_DATA = '1.2.840.113549.1.7.2';
@@ -28,6 +28,7 @@ export type DecodedPkcs7 = {
 
 /** Decode a PEM (or DER-wrapped) PKCS#7 / CMS SignedData bundle. */
 export async function decodePkcs7(input: string): Promise<DecodedPkcs7> {
+	assertInputSize(input);
 	ensurePkijsEngine();
 
 	let signed: pkijs.SignedData;

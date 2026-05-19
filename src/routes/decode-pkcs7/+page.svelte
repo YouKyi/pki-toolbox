@@ -43,7 +43,7 @@
 	placeholder="Paste a PKCS#7 bundle here (-----BEGIN PKCS7-----)…"
 />
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
 	{#if error}
 		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
@@ -62,7 +62,7 @@
 					{ label: 'Signers', value: String(result.signerCount) },
 					{
 						label: 'Hash algorithms',
-						value: result.digestAlgorithms.length ? result.digestAlgorithms.join(', ') : ', '
+						value: result.digestAlgorithms.length ? result.digestAlgorithms.join(', ') : '-'
 					}
 				]}
 			/>

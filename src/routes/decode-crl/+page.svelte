@@ -41,7 +41,7 @@
 	placeholder="Paste a CRL here (-----BEGIN X509 CRL-----)…"
 />
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
 	{#if error}
 		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
@@ -72,7 +72,7 @@
 						{ label: 'Issued on', value: formatDate(result.thisUpdate), mono: true },
 						{
 							label: 'Next update',
-							value: result.nextUpdate ? formatDate(result.nextUpdate) : ', ',
+							value: result.nextUpdate ? formatDate(result.nextUpdate) : '-',
 							mono: true
 						}
 					]}
@@ -86,7 +86,7 @@
 			>
 				<table class="w-full text-left text-sm">
 					<thead
-						class="border-b border-slate-200 text-xs tracking-wide text-slate-400 uppercase dark:border-slate-800 dark:text-slate-500"
+						class="border-b border-slate-200 text-xs tracking-wide text-slate-500 uppercase dark:border-slate-800 dark:text-slate-500"
 					>
 						<tr>
 							<th class="px-5 py-2.5 font-semibold">Serial number</th>
@@ -106,7 +106,7 @@
 				</table>
 				{#if result.entries.length > MAX_ROWS}
 					<p
-						class="border-t border-slate-200 px-5 py-2 text-xs text-slate-400 dark:border-slate-800"
+						class="border-t border-slate-200 px-5 py-2 text-xs text-slate-500 dark:border-slate-800"
 					>
 						{result.entries.length - MAX_ROWS} additional entr{result.entries.length - MAX_ROWS > 1
 							? 'ies'

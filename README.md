@@ -34,7 +34,7 @@ tag cannot be audited or rolled back. For the strongest guarantee, pin the
 image digest (`...@sha256:...`).
 
 ```sh
-docker run -p 8080:8080 <registry>/pki-toolbox:v1.0.1
+docker run -p 8080:8080 <registry>/pki-toolbox:v1.0.3
 ```
 
 Then open <http://localhost:8080>.
@@ -44,7 +44,7 @@ Then open <http://localhost:8080>.
 ```yaml
 services:
   pki-toolbox:
-    image: <registry>/pki-toolbox:v1.0.1
+    image: <registry>/pki-toolbox:v1.0.3
     ports:
       - '8080:8080'
     restart: unless-stopped
@@ -85,7 +85,7 @@ docker run -p 8080:8080 pki-toolbox
 - All parsing lives in pure, testable functions under `src/lib/pki/`
   (`parse.ts`, `chain.ts`, `format.ts`, `pem.ts`, `oids.ts`).
 - The tool catalogue is a single registry (`src/lib/tools.ts`) that drives the
-  sidebar, the home page and the "coming soon" pages.
+  sidebar and the home page grid.
 - Test fixtures are real public roots (ISRG Root X1/X2) plus a generated EC
   chain and CSR, see `scripts/generate-fixtures.mjs`.
 

@@ -24,8 +24,8 @@ describe('decodeCrl', () => {
 		expect(crl.entries[0].reason).toBe('Key compromise');
 	});
 
-	it('rejects input that is not a CRL', () => {
-		expect(() => decodeCrl('not a crl')).toThrow();
+	it('rejects input that is not a CRL with a meaningful message', () => {
+		expect(() => decodeCrl('not a crl')).toThrowError(/X\.509 CRL/i);
 	});
 });
 
@@ -38,8 +38,8 @@ describe('decodePkcs7', () => {
 		expect(subjects).toContain('pki-toolbox Test CA');
 	});
 
-	it('rejects input that is not a PKCS#7 bundle', async () => {
-		await expect(decodePkcs7('not a bundle')).rejects.toThrow();
+	it('rejects input that is not a PKCS#7 bundle with a meaningful message', async () => {
+		await expect(decodePkcs7('not a bundle')).rejects.toThrowError(/PKCS#7 bundle/i);
 	});
 });
 
@@ -51,8 +51,10 @@ describe('decodePkcs12', () => {
 		expect(p12.keyCount).toBe(1);
 	});
 
-	it('rejects a wrong password', async () => {
-		await expect(decodePkcs12(TEST_PKCS12, 'wrong-password')).rejects.toThrow();
+	it('rejects a wrong password with a meaningful message', async () => {
+		await expect(decodePkcs12(TEST_PKCS12, 'wrong-password')).rejects.toThrowError(
+			/password|integrity/i
+		);
 	});
 });
 
@@ -64,8 +66,17 @@ describe('parseAsn1', () => {
 		expect(root.children[2].tag).toBe('BIT STRING');
 	});
 
-	it('rejects input that is not DER', () => {
-		expect(() => parseAsn1('definitely not der')).toThrow();
+	it('rejects input that is not DER with a meaningful message', () => {
+		expect(() => parseAsn1('definitely not der')).toThrowError(/could not be parsed as ASN\.1/i);
+	});
+
+	it('rejects unexpected trailing bytes after the top-level structure', () => {
+		// Concatenate two complete certificates: the parser consumes the first
+		// SEQUENCE and must surface the second one as unexpected trailing data
+		// rather than silently parsing only the first.
+		const body = ISRG_ROOT_X2.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
+		const doubled = `-----BEGIN CERTIFICATE-----\n${body}${body}\n-----END CERTIFICATE-----`;
+		expect(() => parseAsn1(doubled)).toThrowError(/trailing byte/i);
 	});
 });
 

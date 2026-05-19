@@ -114,6 +114,23 @@ zr7NiRsbgvACJmxbH6Jhzp4nkhyi/pMCIEUsPdH6DfKhyJjwBrGEBs/S+yX0M+1W
 /** A valid 3-link EC chain (leaf → intermediate → root) as a concatenated PEM. */
 export const TEST_CHAIN = `${TEST_LEAF}\n${TEST_INTERMEDIATE}\n${TEST_ROOT}`;
 
+/**
+ * Generated EC self-signed certificate whose validity window is entirely in the
+ * past (notBefore 2010-01-01, notAfter 2011-01-01). Used to test that the
+ * decoder reports `validity === 'expired'`.
+ */
+export const TEST_EXPIRED = `-----BEGIN CERTIFICATE-----
+MIIBhzCCAS6gAwIBAgIBCjAKBggqhkjOPQQDAjBGMSEwHwYDVQQDExhleHBpcmVk
+LnBraS10b29sYm94LnRlc3QxFDASBgNVBAoTC3BraS10b29sYm94MQswCQYDVQQG
+EwJGUjAeFw0xMDAxMDEwMDAwMDBaFw0xMTAxMDEwMDAwMDBaMEYxITAfBgNVBAMT
+GGV4cGlyZWQucGtpLXRvb2xib3gudGVzdDEUMBIGA1UEChMLcGtpLXRvb2xib3gx
+CzAJBgNVBAYTAkZSMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEyE2Glm0so0rD
+3zeQDqnX9uRnfbNUISEGXKR8fR5wu1/7vNc3jtdRAaxu8wNhSKsAIQNg4VGt4zCR
+27uoKOWfVaMNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNHADBEAiBlBz4D7dZm
+k9HT42PP1pH6jYQrxnKmsnHBXYZrTFJDhwIgeKIe3G8w+K+pz3whduQPDO3IfhKn
+ViihyAHcRI3ES9Y=
+-----END CERTIFICATE-----`;
+
 /** Generated X.509 CRL with one revoked entry, see scripts/generate-v2-fixtures.sh. */
 export const TEST_CRL = `-----BEGIN X509 CRL-----
 MIIBADCBpgIBATAKBggqhkjOPQQDAjBBMQswCQYDVQQGEwJGUjEUMBIGA1UECgwL

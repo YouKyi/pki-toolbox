@@ -29,7 +29,8 @@ const config = {
 				'style-src': ['self', 'unsafe-inline'],
 				'img-src': ['self', 'data:'],
 				'font-src': ['self'],
-				'connect-src': ['self'],
+				// The app is 100% client-side and makes no network requests; deny all.
+				'connect-src': ['none'],
 				'object-src': ['none'],
 				'base-uri': ['self'],
 				'form-action': ['self']

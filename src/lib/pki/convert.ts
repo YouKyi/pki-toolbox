@@ -2,12 +2,19 @@
  * Format conversion between PEM, DER and PKCS#7, pure functions over bytes.
  */
 import * as pkijs from 'pkijs';
-import { splitBlocks, pemToDer, derToPem, bytesToBase64 } from './pem';
+import { splitBlocks, pemToDer, derToPem, bytesToBase64, assertInputSize } from './pem';
 import { bytesToHex } from './format';
 import { ensurePkijsEngine, toArrayBuffer } from './engine';
 
 const OID_SIGNED_DATA = '1.2.840.113549.1.7.2';
 const OID_DATA = '1.2.840.113549.1.7.1';
+
+/**
+ * Exact PEM labels that denote a PKCS#7 / CMS container. Matched exactly (not
+ * as a substring) so an unrelated label such as `PKCS7-EXTRA` or a partial
+ * fragment is never mistaken for a real PKCS#7 block.
+ */
+const PKCS7_LABELS = new Set(['PKCS7', 'PKCS #7', 'CMS']);
 
 /** One artefact rendered in every supported representation. */
 export type ConvertedItem = {
@@ -48,8 +55,9 @@ function extractPkcs7(der: Uint8Array): Uint8Array[] {
  * split; bare base64 is treated as a single DER certificate.
  */
 export function convertArtefact(input: string): ConvertedItem[] {
+	assertInputSize(input);
 	const blocks = splitBlocks(input);
-	const pkcs7 = blocks.find((b) => /PKCS\s?#?7/.test(b.type));
+	const pkcs7 = blocks.find((b) => PKCS7_LABELS.has(b.type));
 	if (pkcs7) {
 		return extractPkcs7(pemToDer(pkcs7.pem)).map((der) => itemFromDer(der, 'CERTIFICATE'));
 	}

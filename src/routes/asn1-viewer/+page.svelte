@@ -36,7 +36,7 @@
 	placeholder="Paste a PEM or DER artefact (certificate, CSR, key, CRL…)…"
 />
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
 	{#if error}
 		<Alert variant="error" title="Parsing failed">{error}</Alert>
 	{/if}

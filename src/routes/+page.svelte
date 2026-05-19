@@ -32,7 +32,7 @@
 	{#if list.length}
 		<section class="mb-8">
 			<h2
-				class="mb-3 text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500"
+				class="mb-3 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-500"
 			>
 				{category.label}
 			</h2>

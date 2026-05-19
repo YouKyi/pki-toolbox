@@ -1,6 +1,6 @@
 /**
- * Single source of truth for the tool catalogue. The sidebar, the home grid
- * and the "coming soon" pages all read from this registry.
+ * Single source of truth for the tool catalogue. The sidebar and the home
+ * grid both read from this registry.
  */
 
 export type ToolCategory = 'decode' | 'inspect' | 'convert' | 'generate';

@@ -4,7 +4,7 @@
  * viewer. It does not know about X.509 semantics; it only decodes structure.
  */
 import * as asn1js from 'asn1js';
-import { pemToDer } from './pem';
+import { pemToDer, assertInputSize } from './pem';
 import { bytesToHex } from './format';
 import { toArrayBuffer } from './engine';
 
@@ -126,6 +126,9 @@ function readValue(block: AnyBlock, tagClass: number, tagNumber: number): string
 /** Hard cap on the number of nodes, to bound memory on hostile input. */
 const MAX_NODES = 100_000;
 
+/** Hard cap on nesting depth, to bound the recursion on hostile input. */
+const MAX_DEPTH = 40;
+
 function walk(block: AnyBlock, offset: number, depth: number, budget: { count: number }): Asn1Node {
 	budget.count += 1;
 	if (budget.count > MAX_NODES) {
@@ -150,11 +153,17 @@ function walk(block: AnyBlock, offset: number, depth: number, budget: { count: n
 	};
 
 	const children = block.valueBlock.value;
-	if (isConstructed && Array.isArray(children) && depth < 40) {
-		let childOffset = offset + headerLength;
-		for (const child of children) {
-			node.children.push(walk(child, childOffset, depth + 1, budget));
-			childOffset += child.blockLength;
+	if (isConstructed && Array.isArray(children)) {
+		if (depth >= MAX_DEPTH) {
+			// Honestly mark where parsing stopped instead of silently dropping the
+			// subtree: an empty `children` array would look like a leaf node.
+			node.value = `(maximum nesting depth ${MAX_DEPTH} reached, ${children.length} child node(s) not expanded)`;
+		} else {
+			let childOffset = offset + headerLength;
+			for (const child of children) {
+				node.children.push(walk(child, childOffset, depth + 1, budget));
+				childOffset += child.blockLength;
+			}
 		}
 	} else if (!isConstructed) {
 		node.value = readValue(block, tagClass, tagNumber);
@@ -168,6 +177,8 @@ function walk(block: AnyBlock, offset: number, depth: number, budget: { count: n
  * Throws an `Error` when the bytes are not valid DER.
  */
 export function parseAsn1(input: string): Asn1Node {
+	assertInputSize(input);
+
 	let der: Uint8Array;
 	try {
 		der = pemToDer(input);
@@ -180,5 +191,16 @@ export function parseAsn1(input: string): Asn1Node {
 	if (parsed.offset === -1 || !parsed.result) {
 		throw new Error('The input could not be parsed as ASN.1 / DER.');
 	}
+
+	// `parsed.offset` is the number of bytes consumed by the top-level value.
+	// Anything left over is unexpected trailing data: surface it rather than
+	// silently parsing only the first structure and discarding the rest.
+	const trailing = der.length - parsed.offset;
+	if (trailing > 0) {
+		throw new Error(
+			`The input has ${trailing} unexpected trailing byte(s) after the top-level ASN.1 structure.`
+		);
+	}
+
 	return walk(parsed.result as unknown as AnyBlock, 0, 0, { count: 0 });
 }

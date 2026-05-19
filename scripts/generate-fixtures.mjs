@@ -74,6 +74,19 @@ async function main() {
 		]
 	});
 
+	// --- Expired leaf (P-256, self-signed, validity window entirely in the past) ---
+	// Drives the decoder test that asserts `validity === 'expired'`.
+	const expiredKeys = await ecKeys('P-256');
+	const expired = await x509.X509CertificateGenerator.createSelfSigned({
+		serialNumber: '0a',
+		name: 'CN=expired.pki-toolbox.test, O=pki-toolbox, C=FR',
+		notBefore: new Date('2010-01-01T00:00:00Z'),
+		notAfter: new Date('2011-01-01T00:00:00Z'),
+		signingAlgorithm: { name: 'ECDSA', hash: 'SHA-256' },
+		keys: expiredKeys,
+		extensions: [new x509.BasicConstraintsExtension(false, undefined, false)]
+	});
+
 	// --- CSR (P-256) ---
 	const csrKeys = await ecKeys('P-256');
 	const csr = await x509.Pkcs10CertificateRequestGenerator.create({
@@ -89,6 +102,8 @@ async function main() {
 	console.log(inter.toString('pem'));
 	console.log('// ===== ROOT =====');
 	console.log(root.toString('pem'));
+	console.log('// ===== EXPIRED =====');
+	console.log(expired.toString('pem'));
 	console.log('// ===== CSR =====');
 	console.log(csr.toString('pem'));
 }
