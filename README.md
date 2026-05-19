@@ -93,22 +93,36 @@ docker run -p 8080:8080 pki-toolbox
 
 This project follows [Semantic Versioning](https://semver.org/) and
 [Conventional Commits](https://www.conventionalcommits.org/). Notable changes
-are recorded in [`CHANGELOG.md`](./CHANGELOG.md).
+are recorded in [`CHANGELOG.md`](./CHANGELOG.md). Contribution rules live in
+[`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
-To cut a release, move the `Unreleased` entries in the changelog under a new
-version heading, then tag the commit:
+### Cutting a release
 
-```sh
-git tag -a v1.2.3 -m "v1.2.3"
-git push origin v1.2.3
-```
+1. In [`CHANGELOG.md`](./CHANGELOG.md), rename the `## [Unreleased]` heading to
+   the new version with today's date, e.g. `## [1.2.3] - 2026-06-01`, add a
+   fresh empty `## [Unreleased]` above it, and update the link references at
+   the bottom of the file.
+2. Bump `"version"` in `package.json` to the same number.
+3. Commit on `main` (a conventional commit, e.g. `chore(release): 1.2.3`) and
+   push.
+4. Tag the commit and push the tag:
+   ```sh
+   git tag -a v1.2.3 -m "pki-toolbox v1.2.3"
+   git push origin v1.2.3
+   ```
 
-A `vX.Y.Z` tag triggers the CI `release` stage, which builds and pushes the
-matching container image (`<registry>/pki-toolbox:vX.Y.Z`) and publishes a
-GitLab Release.
+The `vX.Y.Z` tag triggers the CI pipeline, which lints, tests, builds and
+scans the image (Trivy, the pipeline fails on a fixable HIGH/CRITICAL CVE),
+pushes `<registry>/pki-toolbox:vX.Y.Z`, and publishes a **GitLab Release whose
+notes are the matching `## [X.Y.Z]` section extracted from `CHANGELOG.md`**.
 
-Dependencies are kept up to date by [Renovate](https://docs.renovatebot.com/);
-its behaviour is configured in [`renovate.json`](./renovate.json).
+A push to `main` runs the same pipeline minus the release step, but the
+build/docker/scan jobs only run when a file affecting the build changed, so a
+docs- or config-only push does not rebuild the image.
+
+Dependencies are kept up to date by [Renovate](https://docs.renovatebot.com/),
+which extends the shared `Renovate-Bot/renovate-config` preset
+(see [`renovate.json`](./renovate.json)).
 
 ## License
 

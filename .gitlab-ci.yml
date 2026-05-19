@@ -10,6 +10,23 @@ variables:
   IMAGE: $CI_REGISTRY_IMAGE
   TAG_SHA: $CI_COMMIT_SHORT_SHA
 
+# Paths that, when changed, require rebuilding the app and the image. A push
+# that only touches docs or config (README, CHANGELOG, renovate.json, ...) does
+# not match, so it runs lint/test only and skips the build/docker/scan jobs.
+.build-paths: &build-paths
+  - 'src/**/*'
+  - 'static/**/*'
+  - 'package.json'
+  - 'pnpm-lock.yaml'
+  - 'svelte.config.js'
+  - 'vite.config.ts'
+  - 'tsconfig.json'
+  - 'Dockerfile'
+  - 'nginx.conf'
+  - 'nginx-main.conf'
+  - '.dockerignore'
+  - '.gitlab-ci.yml'
+
 # Run exactly one pipeline per change: a merge-request pipeline when an MR is
 # open, otherwise a branch pipeline, plus tag pipelines.
 workflow:
@@ -34,6 +51,7 @@ default:
     - pnpm config set store-dir .pnpm-store
     - pnpm install --frozen-lockfile
 
+# lint and test run on every pipeline: they are fast and guard every change.
 lint:
   stage: lint
   needs: []
@@ -47,9 +65,17 @@ test:
   script:
     - pnpm test
 
+# build/docker/scan run on tags always, and on branches/MRs only when a file
+# that affects the build changed.
 build:
   stage: build
   needs: []
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes: *build-paths
+    - if: $CI_COMMIT_BRANCH
+      changes: *build-paths
   script:
     - pnpm build
   artifacts:
@@ -96,9 +122,11 @@ docker:
     - if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:latest" && docker push "$IMAGE:latest"; fi
     - if [ -n "$CI_COMMIT_TAG" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:$CI_COMMIT_TAG" && docker push "$IMAGE:$CI_COMMIT_TAG"; fi
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes: *build-paths
     - if: $CI_COMMIT_BRANCH
+      changes: *build-paths
 
 # Scans the freshly built image for OS and dependency CVEs. A HIGH or CRITICAL
 # vulnerability that has a fix available fails the pipeline, so a vulnerable
@@ -118,10 +146,12 @@ scan:
   script:
     - trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$IMAGE:$TAG_SHA"
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: *build-paths
 
-# Publishes a GitLab Release whenever a semver tag (vX.Y.Z) is pushed.
+# Publishes a GitLab Release whenever a semver tag (vX.Y.Z) is pushed. The
+# release notes are the matching section extracted from CHANGELOG.md.
 # release-cli is version-pinned so Renovate keeps it current.
 release:
   stage: release
@@ -134,11 +164,23 @@ release:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
   script:
-    - echo "Publishing GitLab release for $CI_COMMIT_TAG"
+    # Extract the "## [VERSION]" section of CHANGELOG.md as the release notes.
+    - VERSION="${CI_COMMIT_TAG#v}"
+    - |
+      awk -v ver="[$VERSION]" '
+        /^## \[/ { if (found) exit; if (index($0, ver)) { found=1; next } }
+        found { print }
+      ' CHANGELOG.md > release-notes.md
+    - |
+      {
+        echo
+        echo "Container image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+      } >> release-notes.md
+    - echo "--- release notes ---" && cat release-notes.md
   release:
     tag_name: $CI_COMMIT_TAG
     name: pki-toolbox $CI_COMMIT_TAG
-    description: 'Container image: `$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG`. See CHANGELOG.md for the release notes.'
+    description: release-notes.md
 
 # Optional deployment job, disabled by default.
 # Define these CI/CD variables in GitLab before enabling it:
