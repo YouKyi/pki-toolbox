@@ -1,6 +1,7 @@
 stages:
   - lint
   - test
+  - scan
   - docker
   - release
 
@@ -77,7 +78,7 @@ test:
 # It also emits a CycloneDX SBOM so downstream consumers can audit the
 # dependency tree without re-running the scan themselves.
 supply-chain:
-  stage: test
+  stage: scan
   image:
     name: aquasec/trivy:$TRIVY_VERSION
     # Clear the image ENTRYPOINT (['trivy']) so GitLab runs this job's shell
@@ -132,7 +133,9 @@ docker:
   tags:
     - docker
   cache: {}
-  needs: [lint, test]
+  # Waits for supply-chain too: a fixable HIGH/CRITICAL CVE, a committed secret
+  # or a restricted license fails the scan stage and blocks the image build.
+  needs: [lint, test, supply-chain]
   variables:
     DOCKER_TLS_CERTDIR: ''
     DOCKER_BUILDKIT: '1'
