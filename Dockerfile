@@ -15,7 +15,7 @@ RUN pnpm build
 
 # ---- Stage 2: serve with nginx as a non-root user ----
 # Version-pinned so Renovate can track and update the base image.
-FROM nginx:1.27-alpine-slim
+FROM nginx:1.31-alpine-slim
 
 COPY --from=builder /app/build /usr/share/nginx/html
 COPY nginx-main.conf /etc/nginx/nginx.conf

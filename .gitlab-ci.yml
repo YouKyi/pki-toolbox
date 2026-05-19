@@ -3,6 +3,7 @@ stages:
   - test
   - build
   - docker
+  - scan
   - release
 
 variables:
@@ -99,6 +100,27 @@ docker:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH
 
+# Scans the freshly built image for OS and dependency CVEs. A HIGH or CRITICAL
+# vulnerability that has a fix available fails the pipeline, so a vulnerable
+# image can never be released. Runs only where the docker job pushed the image.
+scan:
+  stage: scan
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: ['']
+  needs:
+    - docker
+  cache: {}
+  variables:
+    TRIVY_USERNAME: $CI_REGISTRY_USER
+    TRIVY_PASSWORD: $CI_REGISTRY_PASSWORD
+  before_script: []
+  script:
+    - trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$IMAGE:$TAG_SHA"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
 # Publishes a GitLab Release whenever a semver tag (vX.Y.Z) is pushed.
 # release-cli is version-pinned so Renovate keeps it current.
 release:
@@ -106,6 +128,7 @@ release:
   image: registry.gitlab.com/gitlab-org/release-cli:v0.16.0
   needs:
     - docker
+    - scan
   cache: {}
   before_script: []
   rules:

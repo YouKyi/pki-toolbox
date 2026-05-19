@@ -9,6 +9,17 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-05-19
+
+### Security
+
+- Rebuilt the runtime image on `nginx:1.31-alpine-slim` (nginx 1.31, Alpine
+  3.23), which clears 19 HIGH/CRITICAL OS-package CVEs carried by the stale
+  Alpine 3.21 base of the 1.0.0 image.
+- Added a Trivy container-scan stage to the CI pipeline: a HIGH or CRITICAL
+  vulnerability with an available fix now fails the build, so a vulnerable
+  image can no longer be released.
+
 ## [1.0.0] - 2026-05-19
 
 ### Added
@@ -28,5 +39,6 @@ are not listed individually here.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.0...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.1...main
+[1.0.1]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.0...v1.0.1
 [1.0.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/tags/v1.0.0
