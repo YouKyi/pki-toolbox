@@ -3,5 +3,14 @@
 	"extends": ["local>Renovate-Bot/renovate-config"],
 	"lockFileMaintenance": {
 		"enabled": true
-	}
+	},
+	"customManagers": [
+		{
+			"customType": "regex",
+			"fileMatch": ["^\\.gitlab-ci\\.yml$"],
+			"matchStrings": ["TRIVY_VERSION:\\s*'(?<currentValue>[^']+)'"],
+			"depNameTemplate": "aquasec/trivy",
+			"datasourceTemplate": "docker"
+		}
+	]
 }
