@@ -55,7 +55,7 @@
 	);
 </script>
 
-<svelte:head><title>{tool.name} — pki-toolbox</title></svelte:head>
+<svelte:head><title>{tool.name}, pki-toolbox</title></svelte:head>
 
 <ToolHeader {tool} />
 
@@ -94,7 +94,7 @@
 			</div>
 		</article>
 		<Alert variant="info">
-			Les empreintes sont des condensats du DER complet du certificat — c'est la même valeur que
+			Les empreintes sont des condensats du DER complet du certificat, c'est la même valeur que
 			celle affichée par un navigateur ou par <code class="font-mono text-xs"
 				>openssl x509 -fingerprint</code
 			>.

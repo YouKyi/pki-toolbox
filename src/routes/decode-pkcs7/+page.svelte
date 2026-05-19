@@ -29,7 +29,7 @@
 	}
 </script>
 
-<svelte:head><title>{tool.name} — pki-toolbox</title></svelte:head>
+<svelte:head><title>{tool.name}, pki-toolbox</title></svelte:head>
 
 <ToolHeader {tool} />
 
@@ -62,7 +62,7 @@
 					{ label: 'Signataires', value: String(result.signerCount) },
 					{
 						label: 'Algorithmes de hachage',
-						value: result.digestAlgorithms.length ? result.digestAlgorithms.join(', ') : '—'
+						value: result.digestAlgorithms.length ? result.digestAlgorithms.join(', ') : ', '
 					}
 				]}
 			/>

@@ -34,7 +34,7 @@
 	);
 </script>
 
-<svelte:head><title>{tool.name} — pki-toolbox</title></svelte:head>
+<svelte:head><title>{tool.name}, pki-toolbox</title></svelte:head>
 
 <ToolHeader {tool} />
 
@@ -75,7 +75,7 @@
 				>
 					Identité
 				</h3>
-				<RowList rows={[{ label: 'Sujet', value: result.subject || '—', mono: true }]} />
+				<RowList rows={[{ label: 'Sujet', value: result.subject || ', ', mono: true }]} />
 			</section>
 
 			<section class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">

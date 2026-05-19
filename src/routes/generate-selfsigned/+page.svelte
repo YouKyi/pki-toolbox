@@ -71,7 +71,7 @@
 	}
 </script>
 
-<svelte:head><title>{tool.name} — pki-toolbox</title></svelte:head>
+<svelte:head><title>{tool.name}, pki-toolbox</title></svelte:head>
 
 <ToolHeader {tool} />
 
@@ -117,7 +117,7 @@
 			bind:checked={isCa}
 			class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500/40 dark:border-slate-600"
 		/>
-		Certificat d'autorité (CA) — Basic Constraints cA = true
+		Certificat d'autorité (CA), Basic Constraints cA = true
 	</label>
 
 	<button
@@ -130,7 +130,7 @@
 		{loading ? 'Génération…' : 'Générer le certificat'}
 	</button>
 	<p class="mt-2 text-xs text-slate-400 dark:text-slate-500">
-		La paire de clés est générée localement via WebCrypto — la clé privée ne quitte jamais cette
+		La paire de clés est générée localement via WebCrypto, la clé privée ne quitte jamais cette
 		page.
 	</p>
 </div>

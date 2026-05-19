@@ -7,7 +7,7 @@ export type ToolCategory = 'decode' | 'inspect' | 'convert' | 'generate';
 export type ToolStatus = 'ready' | 'beta' | 'planned';
 
 export type Tool = {
-	/** URL slug — also the route path (`/<slug>`). */
+	/** URL slug, also the route path (`/<slug>`). */
 	slug: string;
 	name: string;
 	description: string;

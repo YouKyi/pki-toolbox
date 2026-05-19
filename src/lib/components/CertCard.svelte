@@ -36,8 +36,8 @@
 	);
 
 	const identity: Row[] = $derived([
-		{ label: 'Sujet', value: cert.subject || '—', mono: true },
-		{ label: 'Émetteur', value: cert.issuer || '—', mono: true },
+		{ label: 'Sujet', value: cert.subject || ', ', mono: true },
+		{ label: 'Émetteur', value: cert.issuer || ', ', mono: true },
 		{ label: 'Numéro de série', value: formatSerial(cert.serialNumber), mono: true, copy: true }
 	]);
 

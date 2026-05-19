@@ -1,6 +1,6 @@
 /**
  * Generic ASN.1 / DER structure walker, built on `asn1js`. Turns any DER blob
- * into an expandable tag/length/value tree — the engine behind the ASN.1
+ * into an expandable tag/length/value tree, the engine behind the ASN.1
  * viewer. It does not know about X.509 semantics; it only decodes structure.
  */
 import * as asn1js from 'asn1js';
@@ -123,7 +123,15 @@ function readValue(block: AnyBlock, tagClass: number, tagNumber: number): string
 	}
 }
 
-function walk(block: AnyBlock, offset: number, depth: number): Asn1Node {
+/** Hard cap on the number of nodes, to bound memory on hostile input. */
+const MAX_NODES = 100_000;
+
+function walk(block: AnyBlock, offset: number, depth: number, budget: { count: number }): Asn1Node {
+	budget.count += 1;
+	if (budget.count > MAX_NODES) {
+		throw new Error("L'arbre ASN.1 dépasse la taille maximale affichable.");
+	}
+
 	const { tagClass, tagNumber, isConstructed } = block.idBlock;
 	const length = block.lenBlock.length;
 	const headerLength = block.blockLength - length;
@@ -145,7 +153,7 @@ function walk(block: AnyBlock, offset: number, depth: number): Asn1Node {
 	if (isConstructed && Array.isArray(children) && depth < 40) {
 		let childOffset = offset + headerLength;
 		for (const child of children) {
-			node.children.push(walk(child, childOffset, depth + 1));
+			node.children.push(walk(child, childOffset, depth + 1, budget));
 			childOffset += child.blockLength;
 		}
 	} else if (!isConstructed) {
@@ -164,13 +172,13 @@ export function parseAsn1(input: string): Asn1Node {
 	try {
 		der = pemToDer(input);
 	} catch (e) {
-		throw new Error('The input is neither valid PEM nor base64-encoded DER.', { cause: e });
+		throw new Error("L'entrée n'est ni du PEM valide ni du DER encodé en base64.", { cause: e });
 	}
-	if (der.length === 0) throw new Error('The input is empty.');
+	if (der.length === 0) throw new Error("L'entrée est vide.");
 
 	const parsed = asn1js.fromBER(toArrayBuffer(der));
 	if (parsed.offset === -1 || !parsed.result) {
-		throw new Error('The input could not be parsed as ASN.1 / DER.');
+		throw new Error("L'entrée n'a pas pu être analysée comme de l'ASN.1 / DER.");
 	}
-	return walk(parsed.result as unknown as AnyBlock, 0, 0);
+	return walk(parsed.result as unknown as AnyBlock, 0, 0, { count: 0 });
 }

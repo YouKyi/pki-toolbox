@@ -54,7 +54,7 @@
 	}
 </script>
 
-<svelte:head><title>{tool.name} — pki-toolbox</title></svelte:head>
+<svelte:head><title>{tool.name}, pki-toolbox</title></svelte:head>
 
 <ToolHeader {tool} />
 
@@ -77,7 +77,7 @@
 				class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 dark:border-slate-800 dark:bg-slate-900"
 			>
 				<span class="text-sm text-slate-600 dark:text-slate-300">
-					{certItems.length} certificat(s) — regrouper en un seul fichier :
+					{certItems.length} certificat(s), regrouper en un seul fichier :
 				</span>
 				<button
 					type="button"

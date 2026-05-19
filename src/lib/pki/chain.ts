@@ -1,10 +1,12 @@
 /**
- * Certificate-chain decoding and linkage validation.
+ * Certificate-chain decoding and validation.
  *
- * A chain is verified by checking, for each certificate, that its `issuer`
- * Distinguished Name matches the `subject` of the next certificate in the
- * list — exactly the rule from the validated POC.
+ * Each link is verified cryptographically: the signature of certificate i is
+ * checked against the public key of certificate i+1 (and the final root is
+ * checked against its own key). This proves real issuance, not just that the
+ * issuer and subject Distinguished Names happen to match.
  */
+import { X509Certificate, cryptoProvider } from '@peculiar/x509';
 import { splitBlocks } from './pem';
 import { decodeCertificate, type DecodedCertificate } from './parse';
 
@@ -15,19 +17,24 @@ export type ChainLink = {
 	index: number;
 	certificate: DecodedCertificate;
 	role: ChainRole;
-	/** Whether this cert is issued by the next one; `null` for the last link. */
+	/**
+	 * True when this certificate's signature is cryptographically verified
+	 * against the next certificate's public key. `null` for the last link.
+	 */
 	issuedByNext: boolean | null;
 };
 
 export type DecodedChain = {
 	links: ChainLink[];
-	/** True when every link is verified and the chain ends in a self-signed root. */
+	/** True when every link is verified and the chain ends in a verified self-signed root. */
 	complete: boolean;
 };
 
 /**
- * POC-compatible adjacency check. `result[i]` is `true` when `certs[i]` is
- * issued by `certs[i + 1]` (i.e. their issuer/subject names match).
+ * Name-based adjacency check (POC-compatible, kept for quick comparisons and
+ * tests). `result[i]` is `true` when `certs[i].issuer` equals
+ * `certs[i + 1].subject`. This only compares Distinguished Name strings; use
+ * `decodeChain` for real cryptographic verification.
  */
 export function validateChain(certs: { issuer: string; subject: string }[]): boolean[] {
 	return certs.slice(0, -1).map((cert, i) => cert.issuer === certs[i + 1].subject);
@@ -39,30 +46,50 @@ function classifyRole(cert: DecodedCertificate): ChainRole {
 	return 'leaf';
 }
 
+/** Verify `cert`'s signature against `issuer`'s public key (signature only). */
+async function isSignedBy(cert: X509Certificate, issuer: X509Certificate): Promise<boolean> {
+	try {
+		return await cert.verify({ publicKey: issuer.publicKey, signatureOnly: true });
+	} catch {
+		return false;
+	}
+}
+
 /**
- * Decode every `CERTIFICATE` block of a (possibly concatenated) PEM string and
- * report the chain in pasted order with per-link linkage status.
+ * Decode every certificate block of a (possibly concatenated) PEM string and
+ * report the chain in pasted order with cryptographically verified linkage.
  */
 export async function decodeChain(pem: string): Promise<DecodedChain> {
-	const blocks = splitBlocks(pem).filter((b) => b.type.endsWith('CERTIFICATE'));
+	const blocks = splitBlocks(pem).filter(
+		(b) => b.type === 'CERTIFICATE' || b.type === 'X509 CERTIFICATE'
+	);
 	if (blocks.length === 0) {
-		throw new Error('No PEM CERTIFICATE blocks were found in the input.');
+		throw new Error("Aucun bloc PEM CERTIFICATE n'a été trouvé dans l'entrée.");
 	}
 
-	const certs = await Promise.all(blocks.map((b) => decodeCertificate(b.pem)));
+	const crypto = (globalThis as { crypto?: Crypto }).crypto;
+	if (!crypto?.subtle)
+		throw new Error("L'API Web Crypto n'est pas disponible dans cet environnement.");
+	cryptoProvider.set(crypto);
 
-	const links: ChainLink[] = certs.map((certificate, index) => {
-		const next = certs[index + 1];
-		return {
-			index,
-			certificate,
-			role: classifyRole(certificate),
-			issuedByNext: next ? certificate.issuer === next.subject : null
-		};
-	});
+	const x509 = blocks.map((b) => new X509Certificate(b.pem));
+	const decoded = await Promise.all(blocks.map((b) => decodeCertificate(b.pem)));
+
+	const links: ChainLink[] = await Promise.all(
+		decoded.map(async (certificate, index) => {
+			const next = x509[index + 1];
+			return {
+				index,
+				certificate,
+				role: classifyRole(certificate),
+				issuedByNext: next ? await isSignedBy(x509[index], next) : null
+			};
+		})
+	);
 
 	const allLinked = links.slice(0, -1).every((l) => l.issuedByNext === true);
-	const endsInRoot = certs[certs.length - 1].isSelfSigned;
+	const last = x509[x509.length - 1];
+	const endsInRoot = decoded[decoded.length - 1].isSelfSigned && (await isSignedBy(last, last));
 
 	return { links, complete: allLinked && endsInRoot };
 }

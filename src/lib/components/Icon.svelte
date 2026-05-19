@@ -1,7 +1,7 @@
 <script module lang="ts">
 	/**
 	 * Lightweight inline-SVG icon set (Tabler-style, 24×24, stroked).
-	 * Zero dependencies — each entry is the trusted inner markup of the icon.
+	 * Zero dependencies, each entry is the trusted inner markup of the icon.
 	 */
 	const ICONS: Record<string, string> = {
 		certificate:

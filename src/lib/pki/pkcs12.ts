@@ -99,7 +99,7 @@ export async function decodePkcs12(input: string, password: string): Promise<Dec
 			}))
 		});
 	} catch (e) {
-		throw new Error('Impossible de déchiffrer le contenu — mot de passe incorrect.', { cause: e });
+		throw new Error('Impossible de déchiffrer le contenu, mot de passe incorrect.', { cause: e });
 	}
 
 	const certificates: DecodedCertificate[] = [];

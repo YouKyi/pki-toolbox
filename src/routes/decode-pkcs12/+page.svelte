@@ -36,7 +36,7 @@
 	}
 </script>
 
-<svelte:head><title>{tool.name} — pki-toolbox</title></svelte:head>
+<svelte:head><title>{tool.name}, pki-toolbox</title></svelte:head>
 
 <ToolHeader {tool} />
 
@@ -77,7 +77,7 @@
 	{#if result}
 		<Alert variant={result.integrityVerified ? 'success' : 'warn'}>
 			{#if result.integrityVerified}
-				Intégrité MAC vérifiée — mot de passe correct. {result.certificateCount} certificat(s) et {result.keyCount}
+				Intégrité MAC vérifiée, mot de passe correct. {result.certificateCount} certificat(s) et {result.keyCount}
 				clé(s) privée(s).
 			{:else}
 				Contenu déchiffré (ce fichier ne comporte pas de MAC d'intégrité).

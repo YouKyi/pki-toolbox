@@ -1,5 +1,5 @@
 /**
- * Presentation helpers — turn raw parser output into human-readable strings.
+ * Presentation helpers, turn raw parser output into human-readable strings.
  * Pure functions: no DOM, no crypto.
  */
 

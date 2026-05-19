@@ -1,5 +1,5 @@
 /**
- * Format conversion between PEM, DER and PKCS#7 — pure functions over bytes.
+ * Format conversion between PEM, DER and PKCS#7, pure functions over bytes.
  */
 import * as pkijs from 'pkijs';
 import { splitBlocks, pemToDer, derToPem, bytesToBase64 } from './pem';
@@ -34,7 +34,7 @@ function extractPkcs7(der: Uint8Array): Uint8Array[] {
 	ensurePkijsEngine();
 	const contentInfo = pkijs.ContentInfo.fromBER(toArrayBuffer(der));
 	if (contentInfo.contentType !== OID_SIGNED_DATA) {
-		throw new Error('Unsupported PKCS#7 content type (expected SignedData).');
+		throw new Error('Type de contenu PKCS#7 non pris en charge (SignedData attendu).');
 	}
 	const signed = new pkijs.SignedData({ schema: contentInfo.content });
 	return (signed.certificates ?? [])

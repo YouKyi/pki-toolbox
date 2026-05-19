@@ -31,12 +31,19 @@
 		ondecode
 	}: Props = $props();
 
+	/** Reject oversized files before reading them into memory. */
+	const MAX_FILE_BYTES = 8 * 1024 * 1024;
+
 	let dragOver = $state(false);
 	let fileError = $state('');
 	let fileInput: HTMLInputElement | undefined = $state();
 
 	async function readFile(file: File) {
 		fileError = '';
+		if (file.size > MAX_FILE_BYTES) {
+			fileError = 'Fichier trop volumineux (limite : 8 Mo).';
+			return;
+		}
 		try {
 			const bytes = new Uint8Array(await file.arrayBuffer());
 			if (bytes.length === 0) {
@@ -161,7 +168,7 @@
 		/>
 	</div>
 	<p class="text-xs text-slate-400 dark:text-slate-500">
-		Tout est décodé localement dans votre navigateur — aucune donnée n'est envoyée.
+		Tout est décodé localement dans votre navigateur, aucune donnée n'est envoyée.
 		<span class="hidden sm:inline">Astuce : Ctrl/⌘ + Entrée pour décoder.</span>
 	</p>
 </div>

@@ -24,7 +24,7 @@
 				if (copied === row.label) copied = null;
 			}, 1200);
 		} catch {
-			/* clipboard unavailable — nothing to do */
+			/* clipboard unavailable, nothing to do */
 		}
 	}
 </script>

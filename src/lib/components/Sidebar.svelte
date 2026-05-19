@@ -75,7 +75,7 @@
 
 	<div class="border-t border-slate-200 px-4 py-3 dark:border-slate-800">
 		<p class="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
-			<Icon name="lock" size={13} /> 100 % côté client — rien n'est envoyé.
+			<Icon name="lock" size={13} /> 100 % côté client, rien n'est envoyé.
 		</p>
 	</div>
 </div>

@@ -76,7 +76,7 @@ export type DecodedCsr = {
 /** Resolve the Web Crypto implementation, with a clear error if missing. */
 function subtle(): SubtleCrypto {
 	const c = (globalThis as { crypto?: Crypto }).crypto;
-	if (!c?.subtle) throw new Error('Web Crypto API is not available in this environment.');
+	if (!c?.subtle) throw new Error("L'API Web Crypto n'est pas disponible dans cet environnement.");
 	return c.subtle;
 }
 
@@ -103,7 +103,7 @@ function nameParts(name: Name): NamePart[] {
 			}
 		}
 	} catch {
-		/* toJSON can throw on exotic names — the string form is still available */
+		/* toJSON can throw on exotic names, the string form is still available */
 	}
 	return parts;
 }
@@ -121,7 +121,7 @@ function decodeKeyUsageFlags(usages: number): string[] {
 
 // Look extensions up by OID string rather than by class: on a
 // `Pkcs10CertificateRequest` the requested extensions are generic objects, so
-// a class-based `getExtension` misses them — an OID lookup works on both.
+// a class-based `getExtension` misses them, an OID lookup works on both.
 const OID_SAN = '2.5.29.17';
 const OID_BASIC_CONSTRAINTS = '2.5.29.19';
 const OID_EXTENDED_KEY_USAGE = '2.5.29.37';
@@ -166,7 +166,7 @@ export async function decodeCertificate(input: string): Promise<DecodedCertifica
 	try {
 		cert = new X509Certificate(input);
 	} catch (e) {
-		throw new Error(`This does not look like an X.509 certificate (${errMessage(e)}).`, {
+		throw new Error(`Cela ne ressemble pas à un certificat X.509 (${errMessage(e)}).`, {
 			cause: e
 		});
 	}
@@ -222,7 +222,7 @@ export async function decodeCsr(input: string): Promise<DecodedCsr> {
 	try {
 		csr = new Pkcs10CertificateRequest(input);
 	} catch (e) {
-		throw new Error(`This does not look like a PKCS#10 request (${errMessage(e)}).`, {
+		throw new Error(`Cela ne ressemble pas à une demande PKCS#10 (${errMessage(e)}).`, {
 			cause: e
 		});
 	}

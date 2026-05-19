@@ -9,20 +9,20 @@
 </script>
 
 <svelte:head>
-	<title>pki-toolbox — décodeur PKI self-hosted</title>
+	<title>pki-toolbox, décodeur PKI self-hosted</title>
 </svelte:head>
 
 <section class="mb-10">
 	<div
 		class="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700 dark:bg-teal-500/10 dark:text-teal-300"
 	>
-		<Icon name="lock" size={13} /> 100 % côté client — aucune donnée envoyée
+		<Icon name="lock" size={13} /> 100 % côté client, aucune donnée envoyée
 	</div>
 	<h1 class="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-slate-50">
 		Boîte à outils PKI
 	</h1>
 	<p class="mt-3 max-w-2xl text-slate-500 dark:text-slate-400">
-		Décodez et inspectez vos artefacts PKI — certificats X.509, CSR, chaînes et empreintes —
+		Décodez et inspectez vos artefacts PKI, certificats X.509, CSR, chaînes et empreintes ,
 		directement dans le navigateur. {readyCount} outils sont disponibles aujourd'hui.
 	</p>
 </section>

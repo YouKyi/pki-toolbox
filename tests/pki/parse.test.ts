@@ -8,7 +8,7 @@ import {
 	TEST_CSR
 } from '../fixtures/certs';
 
-describe('decodeCertificate — RSA (ISRG Root X1)', () => {
+describe('decodeCertificate, RSA (ISRG Root X1)', () => {
 	it('extracts the identity fields', async () => {
 		const cert = await decodeCertificate(ISRG_ROOT_X1);
 		expect(cert.kind).toBe('certificate');
@@ -41,7 +41,7 @@ describe('decodeCertificate — RSA (ISRG Root X1)', () => {
 	});
 });
 
-describe('decodeCertificate — EC', () => {
+describe('decodeCertificate, EC', () => {
 	it('reports the named curve for ISRG Root X2 (P-384)', async () => {
 		const cert = await decodeCertificate(ISRG_ROOT_X2);
 		expect(cert.publicKey.family).toBe('EC');
@@ -59,7 +59,7 @@ describe('decodeCertificate — EC', () => {
 	});
 });
 
-describe('decodeCertificate — errors', () => {
+describe('decodeCertificate, errors', () => {
 	it('rejects input that is not a certificate', async () => {
 		await expect(decodeCertificate('not a certificate')).rejects.toThrow();
 	});

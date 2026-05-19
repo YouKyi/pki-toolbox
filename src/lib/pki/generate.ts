@@ -1,5 +1,5 @@
 /**
- * Self-signed X.509 certificate generation — entirely in the browser via the
+ * Self-signed X.509 certificate generation, entirely in the browser via the
  * Web Crypto API and `@peculiar/x509`'s certificate generator. The private key
  * never leaves the page.
  */

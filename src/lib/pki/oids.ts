@@ -1,5 +1,5 @@
 /**
- * Object identifier dictionaries. Kept deliberately small and extensible —
+ * Object identifier dictionaries. Kept deliberately small and extensible ,
  * add an entry here whenever a tool needs to humanise a new OID.
  */
 

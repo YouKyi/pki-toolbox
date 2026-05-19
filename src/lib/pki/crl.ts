@@ -41,16 +41,23 @@ export function decodeCrl(input: string): DecodedCrl {
 		crl = new X509Crl(input);
 	} catch (e) {
 		throw new Error(
-			`This does not look like an X.509 CRL (${e instanceof Error ? e.message : String(e)}).`,
+			`Cela ne ressemble pas à une CRL X.509 (${e instanceof Error ? e.message : String(e)}).`,
 			{ cause: e }
 		);
 	}
 
-	const entries: CrlEntry[] = crl.entries.map((entry) => ({
-		serialNumber: formatSerial(entry.serialNumber),
-		revocationDate: entry.revocationDate,
-		reason: CRL_REASONS[entry.reason ?? 0] ?? `Code ${entry.reason}`
-	}));
+	const entries: CrlEntry[] = crl.entries.map((entry) => {
+		// A missing reason extension is distinct from reason code 0 (unspecified).
+		const code = entry.reason as number | undefined;
+		return {
+			serialNumber: formatSerial(entry.serialNumber),
+			revocationDate: entry.revocationDate,
+			reason:
+				code === undefined
+					? 'Aucune (non précisée dans la CRL)'
+					: (CRL_REASONS[code] ?? `Code ${code}`)
+		};
+	});
 
 	return {
 		kind: 'crl',

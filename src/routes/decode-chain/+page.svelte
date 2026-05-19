@@ -29,7 +29,7 @@
 	}
 </script>
 
-<svelte:head><title>{tool.name} — pki-toolbox</title></svelte:head>
+<svelte:head><title>{tool.name}, pki-toolbox</title></svelte:head>
 
 <ToolHeader {tool} />
 
@@ -50,13 +50,14 @@
 	{#if result}
 		{#if result.complete}
 			<Alert variant="success" title="Chaîne valide">
-				Les {result.links.length} certificats s'enchaînent correctement et la chaîne se termine par une
-				racine auto-signée.
+				Les {result.links.length} certificats s'enchaînent correctement : chaque signature a été vérifiée
+				cryptographiquement, et la chaîne se termine par une racine auto-signée valide.
 			</Alert>
 		{:else}
 			<Alert variant="warn" title="Chaîne incomplète ou non ordonnée">
-				Un lien émetteur ↔ sujet ne correspond pas, ou la chaîne ne se termine pas par une racine
-				auto-signée. Vérifiez l'ordre des certificats (feuille en premier, racine en dernier).
+				Une signature n'a pas pu être vérifiée, ou la chaîne ne se termine pas par une racine
+				auto-signée valide. Vérifiez l'ordre des certificats (feuille en premier, racine en
+				dernier).
 			</Alert>
 		{/if}
 
@@ -69,12 +70,12 @@
 						{#if link.issuedByNext}
 							<span class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
 								<Icon name="check" size={16} />
-								Émis par le certificat #{link.index + 2}
+								Signature vérifiée : émis par le certificat #{link.index + 2}
 							</span>
 						{:else}
 							<span class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400">
 								<Icon name="close" size={16} />
-								L'émetteur ne correspond pas au sujet du certificat #{link.index + 2}
+								Signature non vérifiée par le certificat #{link.index + 2}
 							</span>
 						{/if}
 					</div>

@@ -11,7 +11,7 @@ export function ensurePkijsEngine(): void {
 	if (initialised) return;
 	const crypto = (globalThis as { crypto?: Crypto }).crypto;
 	if (!crypto?.subtle) {
-		throw new Error('Web Crypto API is not available in this environment.');
+		throw new Error("L'API Web Crypto n'est pas disponible dans cet environnement.");
 	}
 	const engine = new pkijs.CryptoEngine({ name: 'pki-toolbox', crypto });
 	// pkijs' bundled `ICryptoEngine` type lags behind lib.dom's `Crypto`
@@ -20,10 +20,24 @@ export function ensurePkijsEngine(): void {
 	initialised = true;
 }
 
-/** Convert a string to the ArrayBuffer of char codes that pkijs expects. */
+/**
+ * Convert a PKCS#12 password to the byte ArrayBuffer pkijs expects. pkijs reads
+ * each byte as a code point and performs the RFC 7292 BMPString conversion
+ * itself, so only Latin-1 (U+0000..U+00FF) password characters can be
+ * represented. A character outside that range is rejected explicitly rather
+ * than silently corrupted into a misleading "wrong password" failure.
+ */
 export function passwordBytes(password: string): ArrayBuffer {
 	const bytes = new Uint8Array(password.length);
-	for (let i = 0; i < password.length; i++) bytes[i] = password.charCodeAt(i) & 0xff;
+	for (let i = 0; i < password.length; i++) {
+		const code = password.charCodeAt(i);
+		if (code > 0xff) {
+			throw new Error(
+				'Les mots de passe PKCS#12 contenant des caractères non latins ne sont pas pris en charge.'
+			);
+		}
+		bytes[i] = code;
+	}
 	return bytes.buffer;
 }
 

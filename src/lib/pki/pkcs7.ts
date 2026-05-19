@@ -34,12 +34,12 @@ export async function decodePkcs7(input: string): Promise<DecodedPkcs7> {
 	try {
 		const contentInfo = pkijs.ContentInfo.fromBER(toArrayBuffer(pemToDer(input)));
 		if (contentInfo.contentType !== OID_SIGNED_DATA) {
-			throw new Error('the PKCS#7 content type is not SignedData');
+			throw new Error("le type de contenu PKCS#7 n'est pas SignedData");
 		}
 		signed = new pkijs.SignedData({ schema: contentInfo.content });
 	} catch (e) {
 		throw new Error(
-			`This does not look like a PKCS#7 bundle (${e instanceof Error ? e.message : String(e)}).`,
+			`Cela ne ressemble pas à un bundle PKCS#7 (${e instanceof Error ? e.message : String(e)}).`,
 			{ cause: e }
 		);
 	}

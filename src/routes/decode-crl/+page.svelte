@@ -28,7 +28,7 @@
 	}
 </script>
 
-<svelte:head><title>{tool.name} — pki-toolbox</title></svelte:head>
+<svelte:head><title>{tool.name}, pki-toolbox</title></svelte:head>
 
 <ToolHeader {tool} />
 
@@ -58,7 +58,7 @@
 				</span>
 				<div class="min-w-0 flex-1">
 					<p class="font-semibold text-slate-900 dark:text-slate-100">
-						Liste de révocation — {result.entryCount} certificat{result.entryCount > 1 ? 's' : ''} révoqué{result.entryCount >
+						Liste de révocation, {result.entryCount} certificat{result.entryCount > 1 ? 's' : ''} révoqué{result.entryCount >
 						1
 							? 's'
 							: ''}
@@ -73,7 +73,7 @@
 						{ label: 'Émise le', value: formatDate(result.thisUpdate), mono: true },
 						{
 							label: 'Prochaine mise à jour',
-							value: result.nextUpdate ? formatDate(result.nextUpdate) : '—',
+							value: result.nextUpdate ? formatDate(result.nextUpdate) : ', ',
 							mono: true
 						}
 					]}

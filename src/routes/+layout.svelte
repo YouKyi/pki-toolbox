@@ -72,7 +72,7 @@
 		<footer
 			class="border-t border-slate-200 px-4 py-5 text-center text-xs text-slate-400 sm:px-6 dark:border-slate-800 dark:text-slate-600"
 		>
-			pki-toolbox — décodeur PKI self-hosted, 100 % côté client. Aucune donnée ne quitte votre
+			pki-toolbox, décodeur PKI self-hosted, 100 % côté client. Aucune donnée ne quitte votre
 			navigateur.
 		</footer>
 	</div>

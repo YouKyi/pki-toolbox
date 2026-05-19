@@ -1,5 +1,5 @@
 /**
- * PEM helpers — pure functions, no DOM, no crypto.
+ * PEM helpers, pure functions, no DOM, no crypto.
  *
  * A PEM file can contain several armoured blocks (a certificate chain, a key
  * plus its certificate, …). These helpers slice such a file into individual
@@ -38,8 +38,16 @@ export function looksLikePem(input: string): boolean {
 
 /** Decode a base64 string to bytes (works in browsers and Node). */
 export function base64ToBytes(b64: string): Uint8Array {
-	const clean = b64.replace(/[^A-Za-z0-9+/=]/g, '');
-	const bin = atob(clean);
+	const clean = b64.replace(/\s+/g, '');
+	if (clean.length === 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(clean) || clean.length % 4 !== 0) {
+		throw new Error("Le contenu n'est pas du base64 valide.");
+	}
+	let bin: string;
+	try {
+		bin = atob(clean);
+	} catch {
+		throw new Error("Le contenu n'est pas du base64 valide.");
+	}
 	const bytes = new Uint8Array(bin.length);
 	for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
 	return bytes;

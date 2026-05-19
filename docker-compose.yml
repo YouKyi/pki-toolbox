@@ -1,6 +1,7 @@
 services:
   pki-toolbox:
-    image: ${CI_REGISTRY_IMAGE:-pki-toolbox}:latest
+    # Pin a specific release by setting PKI_TOOLBOX_TAG (e.g. v1.0.0); defaults to latest.
+    image: ${CI_REGISTRY_IMAGE:-pki-toolbox}:${PKI_TOOLBOX_TAG:-latest}
     # To build the image locally instead of pulling it, comment out `image`
     # above and uncomment the line below:
     # build: .
@@ -8,3 +9,12 @@ services:
     ports:
       - '8080:8080'
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
