@@ -29,8 +29,12 @@ request.
 
 ## Run it
 
+Always run a pinned, immutable release tag (`vX.Y.Z`), never `latest`: a moving
+tag cannot be audited or rolled back. For the strongest guarantee, pin the
+image digest (`...@sha256:...`).
+
 ```sh
-docker run -p 8080:8080 <registry>/pki-toolbox:latest
+docker run -p 8080:8080 <registry>/pki-toolbox:v1.0.0
 ```
 
 Then open <http://localhost:8080>.
@@ -40,7 +44,7 @@ Then open <http://localhost:8080>.
 ```yaml
 services:
   pki-toolbox:
-    image: <registry>/pki-toolbox:latest
+    image: <registry>/pki-toolbox:v1.0.0
     ports:
       - '8080:8080'
     restart: unless-stopped

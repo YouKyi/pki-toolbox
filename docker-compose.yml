@@ -1,7 +1,9 @@
 services:
   pki-toolbox:
-    # Pin a specific release by setting PKI_TOOLBOX_TAG (e.g. v1.0.0); defaults to latest.
-    image: ${CI_REGISTRY_IMAGE:-pki-toolbox}:${PKI_TOOLBOX_TAG:-latest}
+    # Always run a pinned, immutable release tag, never `latest`. Override the
+    # version with PKI_TOOLBOX_TAG; for the strongest guarantee pin a digest
+    # (PKI_TOOLBOX_TAG=v1.0.0@sha256:...).
+    image: ${CI_REGISTRY_IMAGE:-pki-toolbox}:${PKI_TOOLBOX_TAG:-v1.0.0}
     # To build the image locally instead of pulling it, comment out `image`
     # above and uncomment the line below:
     # build: .

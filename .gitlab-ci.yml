@@ -9,6 +9,16 @@ variables:
   IMAGE: $CI_REGISTRY_IMAGE
   TAG_SHA: $CI_COMMIT_SHORT_SHA
 
+# Run exactly one pipeline per change: a merge-request pipeline when an MR is
+# open, otherwise a branch pipeline, plus tag pipelines.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
 # Node jobs share the same image, a pnpm-store cache and the install step.
 default:
   image: node:20-alpine
@@ -25,17 +35,20 @@ default:
 
 lint:
   stage: lint
+  needs: []
   script:
     - pnpm lint
     - pnpm check
 
 test:
   stage: test
+  needs: []
   script:
     - pnpm test
 
 build:
   stage: build
+  needs: []
   script:
     - pnpm build
   artifacts:
@@ -43,26 +56,48 @@ build:
       - build/
     expire_in: 1 day
 
+# Builds the Docker image and pushes it to the GitLab Container Registry.
+# Docker-in-Docker config mirrors the working pipeline of youkyi/unifi-flowmatrix
+# on this GitLab instance: TLS disabled and the job pinned to the `docker` runner.
 docker:
   stage: docker
-  image: docker:24
+  image: docker:27
   services:
-    - docker:24-dind
+    - docker:27-dind
+  tags:
+    - docker
   cache: {}
+  needs:
+    - job: build
+      artifacts: false
+  variables:
+    DOCKER_TLS_CERTDIR: ''
+    DOCKER_BUILDKIT: '1'
   before_script:
+    - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
-    - docker build -t "$IMAGE:$TAG_SHA" .
-    # Push only from the default branch and from tags, never from feature branches.
+    # Warm the BuildKit layer cache from the previously published image.
+    - docker pull "$IMAGE:latest" || true
+    - >-
+      docker build
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      --cache-from "$IMAGE:latest"
+      -t "$IMAGE:$TAG_SHA" .
+    # Push only from the default branch and from tags, never from feature branches/MRs.
     - |
       if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ] || [ -n "$CI_COMMIT_TAG" ]; then
         docker push "$IMAGE:$TAG_SHA"
       fi
+    # `latest` is a rolling tag for the build cache and quick trials only.
+    # Deployments must pin an immutable tag: the per-commit `:$TAG_SHA` or the
+    # per-release `:$CI_COMMIT_TAG`, ideally by digest.
     - if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:latest" && docker push "$IMAGE:latest"; fi
     - if [ -n "$CI_COMMIT_TAG" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:$CI_COMMIT_TAG" && docker push "$IMAGE:$CI_COMMIT_TAG"; fi
   rules:
-    - if: $CI_COMMIT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
 
 # Publishes a GitLab Release whenever a semver tag (vX.Y.Z) is pushed.
 # release-cli is version-pinned so Renovate keeps it current.
