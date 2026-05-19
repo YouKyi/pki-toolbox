@@ -7,6 +7,7 @@
 	} from '$lib/pki/generate';
 	import { decodeCertificate, type DecodedCertificate } from '$lib/pki/parse';
 	import { downloadText } from '$lib/download';
+	import { writeToClipboard } from '$lib/clipboard';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import CertCard from '$lib/components/CertCard.svelte';
 	import Alert from '$lib/components/Alert.svelte';
@@ -59,14 +60,12 @@
 	}
 
 	async function copy(text: string, id: string) {
-		try {
-			await navigator.clipboard.writeText(text);
+		const ok = await writeToClipboard(text);
+		if (ok) {
 			copied = id;
 			setTimeout(() => {
 				if (copied === id) copied = '';
 			}, 1200);
-		} catch {
-			/* clipboard unavailable */
 		}
 	}
 </script>
