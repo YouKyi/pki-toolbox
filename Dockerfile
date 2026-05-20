@@ -3,7 +3,7 @@
 # ---- Stage 1: build the static site ----
 # Digest-pinned for a reproducible, immutable build base. Renovate keeps the
 # tag and the @sha256 digest in sync when a new node:20-alpine is published.
-FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS builder
+FROM node:24-alpine@sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f AS builder
 WORKDIR /app
 # Pin pnpm to the exact version from package.json so the build never drifts to
 # whatever version Corepack would otherwise default to.
