@@ -9,6 +9,8 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-05-23
+
 ### Added
 
 - Release images are now published to public registries on every `vX.Y.Z` tag,
@@ -104,7 +106,8 @@ are not listed individually here.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.4...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.1.0...main
+[1.1.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.4...v1.1.0
 [1.0.4]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.3...v1.0.4
 [1.0.3]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.2...v1.0.3
 [1.0.2]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.1...v1.0.2
