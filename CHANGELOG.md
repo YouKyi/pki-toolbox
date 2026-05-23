@@ -9,6 +9,16 @@ are not listed individually here.
 
 ## [Unreleased]
 
+### Added
+
+- Release images are now published to public registries on every `vX.Y.Z` tag,
+  under the same immutable tag: GitHub Container Registry
+  (`ghcr.io/youkyi/pki-toolbox`) and Docker Hub (`youkyi/pki-toolbox`).
+- A public demo of the static build is deployed on Vercel at
+  <https://pki-toolbox.youkyi.net>, driven by a `vercel.json` config.
+- OCI image labels (`org.opencontainers.image.*`) so the published image is
+  self-describing (source repository, licence, revision, build date).
+
 ## [1.0.4] - 2026-05-23
 
 ### Changed

@@ -9,6 +9,13 @@ variables:
   IMAGE: $CI_REGISTRY_IMAGE
   TAG_SHA: $CI_COMMIT_SHORT_SHA
   TRIVY_VERSION: '0.70.0'
+  # Public mirrors for the open-source release images. The push steps in the
+  # `docker` job are no-ops until the matching *_TOKEN/_USER CI/CD variables are
+  # set in GitLab, so these defaults stay inert until publishing is turned on.
+  GHCR_IMAGE: ghcr.io/youkyi/pki-toolbox
+  DOCKERHUB_IMAGE: docker.io/youkyi/pki-toolbox
+  # Canonical public source repository, stamped into the image OCI labels.
+  SOURCE_URL: https://github.com/youkyi/pki-toolbox
 
 # Paths that, when changed, require rebuilding the image. A push that only
 # touches docs or config (README, CHANGELOG, renovate.json, ...) does not
@@ -148,6 +155,9 @@ docker:
     - >-
       docker build
       --build-arg BUILDKIT_INLINE_CACHE=1
+      --build-arg SOURCE_URL="$SOURCE_URL"
+      --build-arg VCS_REF="$CI_COMMIT_SHA"
+      --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
       --cache-from "$IMAGE:latest"
       -t "$IMAGE:$TAG_SHA" .
     # Scan the freshly built image BEFORE any push. A HIGH or CRITICAL
@@ -177,6 +187,22 @@ docker:
     # per-release `:$CI_COMMIT_TAG`, ideally by digest.
     - if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:latest" && docker push "$IMAGE:latest"; fi
     - if [ -n "$CI_COMMIT_TAG" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:$CI_COMMIT_TAG" && docker push "$IMAGE:$CI_COMMIT_TAG"; fi
+    # Mirror release images to the public registries on a semver tag only, so
+    # the open-source artefacts are always immutable, pinned `vX.Y.Z` tags
+    # (never a moving `latest`). Each block is skipped unless its token is
+    # configured, so this whole section is inert until publishing is enabled.
+    - |
+      if [ -n "$CI_COMMIT_TAG" ] && [ -n "$GHCR_TOKEN" ]; then
+        echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+        docker tag "$IMAGE:$TAG_SHA" "$GHCR_IMAGE:$CI_COMMIT_TAG"
+        docker push "$GHCR_IMAGE:$CI_COMMIT_TAG"
+      fi
+    - |
+      if [ -n "$CI_COMMIT_TAG" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
+        echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USER" --password-stdin
+        docker tag "$IMAGE:$TAG_SHA" "$DOCKERHUB_IMAGE:$CI_COMMIT_TAG"
+        docker push "$DOCKERHUB_IMAGE:$CI_COMMIT_TAG"
+      fi
   artifacts:
     when: always
     paths:

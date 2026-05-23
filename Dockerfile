@@ -22,6 +22,21 @@ RUN pnpm build
 # tag and the @sha256 digest in sync when a new nginx:1.31-alpine-slim ships.
 FROM nginx:1.31-alpine-slim@sha256:3fe7a344f234ac4b84817896c9294ffae74eae03fc1ad0ff502457fef5cebef8
 
+# OCI image metadata. The defaults make a local `docker build` self-describing;
+# CI overrides SOURCE_URL/VCS_REF/BUILD_DATE with the real repository, commit
+# SHA and build timestamp via --build-arg.
+ARG SOURCE_URL=https://github.com/youkyi/pki-toolbox
+ARG VCS_REF=local
+ARG BUILD_DATE=
+LABEL org.opencontainers.image.title="pki-toolbox" \
+	org.opencontainers.image.description="Self-hosted, 100% client-side PKI artefact decoder (X.509, CSR, chains, CRL, PKCS#7/#12, ASN.1) with self-signed certificate generation." \
+	org.opencontainers.image.source="$SOURCE_URL" \
+	org.opencontainers.image.url="$SOURCE_URL" \
+	org.opencontainers.image.documentation="$SOURCE_URL#readme" \
+	org.opencontainers.image.licenses="MIT" \
+	org.opencontainers.image.revision="$VCS_REF" \
+	org.opencontainers.image.created="$BUILD_DATE"
+
 COPY --from=builder /app/build /usr/share/nginx/html
 COPY nginx-main.conf /etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf

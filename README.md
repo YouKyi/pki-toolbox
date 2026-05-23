@@ -1,11 +1,13 @@
 # pki-toolbox
 
-[![pipeline status](https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/badges/main/pipeline.svg)](https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/pipelines)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
 A **self-hosted, 100 % client-side decoder for PKI artefacts**, X.509 certificates,
 PKCS#10 CSRs, certificate chains and DER fingerprints. A privacy-respecting,
 self-hostable replacement for online certificate decoders.
+
+**Live demo:** <https://pki-toolbox.youkyi.net> (the demo is the same static
+build you can self-host below; nothing you paste leaves your browser).
 
 Every byte is parsed **inside your browser** with [`@peculiar/x509`](https://github.com/PeculiarVentures/x509).
 Nothing is ever uploaded, the backend only ships static files. Open your
@@ -34,17 +36,31 @@ tag cannot be audited or rolled back. For the strongest guarantee, pin the
 image digest (`...@sha256:...`).
 
 ```sh
-docker run -p 8080:8080 <registry>/pki-toolbox:v1.0.4
+docker run -p 8080:8080 ghcr.io/youkyi/pki-toolbox:v1.0.4
 ```
 
 Then open <http://localhost:8080>.
+
+### Public images
+
+Each release is published, under the same immutable `vX.Y.Z` tag, to:
+
+| Registry                  | Image                        |
+| ------------------------- | ---------------------------- |
+| GitHub Container Registry | `ghcr.io/youkyi/pki-toolbox` |
+| Docker Hub                | `youkyi/pki-toolbox`         |
+
+```sh
+docker pull ghcr.io/youkyi/pki-toolbox:v1.0.4   # or
+docker pull youkyi/pki-toolbox:v1.0.4
+```
 
 ### Self-host with Docker Compose
 
 ```yaml
 services:
   pki-toolbox:
-    image: <registry>/pki-toolbox:v1.0.4
+    image: ghcr.io/youkyi/pki-toolbox:v1.0.4
     ports:
       - '8080:8080'
     restart: unless-stopped
