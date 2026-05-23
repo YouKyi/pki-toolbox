@@ -5,6 +5,9 @@
  * parsing is plain ASN.1 work via `@peculiar/x509`, and fingerprints use the
  * Web Crypto API which both environments expose as `globalThis.crypto`.
  */
+// @peculiar/x509 v2 requires a Reflect metadata polyfill on the consumer side
+// (its internal tsyringe DI needs Reflect.metadata / Reflect.getMetadata).
+import '@abraham/reflection';
 import {
 	X509Certificate,
 	Pkcs10CertificateRequest,

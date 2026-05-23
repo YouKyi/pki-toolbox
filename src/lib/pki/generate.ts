@@ -3,6 +3,8 @@
  * Web Crypto API and `@peculiar/x509`'s certificate generator. The private key
  * never leaves the page.
  */
+// @peculiar/x509 v2 requires a Reflect metadata polyfill on the consumer side.
+import '@abraham/reflection';
 import {
 	X509CertificateGenerator,
 	BasicConstraintsExtension,

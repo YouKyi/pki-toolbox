@@ -9,6 +9,16 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-05-23
+
+### Changed
+
+- Upgraded `@peculiar/x509` to v2. Its v2 line routes object construction
+  through tsyringe, which requires a Reflect metadata polyfill on the
+  consumer side, so `@abraham/reflection` (a lightweight `reflect-metadata`
+  equivalent) is now imported ahead of the library in every module that uses
+  it. Behaviour is unchanged for users.
+
 ## [1.0.3] - 2026-05-19
 
 ### Fixed
@@ -84,7 +94,8 @@ are not listed individually here.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.3...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.4...main
+[1.0.4]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.3...v1.0.4
 [1.0.3]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.2...v1.0.3
 [1.0.2]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.1...v1.0.2
 [1.0.1]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.0...v1.0.1

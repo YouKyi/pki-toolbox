@@ -6,6 +6,8 @@
  * The ISRG Root X1 / X2 fixtures are real public certificates and are not
  * generated here.
  */
+// @peculiar/x509 v2 requires a Reflect metadata polyfill on the consumer side.
+import '@abraham/reflection';
 import * as x509 from '@peculiar/x509';
 
 const crypto = globalThis.crypto;

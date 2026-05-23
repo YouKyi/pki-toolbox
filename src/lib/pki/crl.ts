@@ -1,6 +1,8 @@
 /**
  * Certificate Revocation List decoding, via `@peculiar/x509`'s `X509Crl`.
  */
+// @peculiar/x509 v2 requires a Reflect metadata polyfill on the consumer side.
+import '@abraham/reflection';
 import { X509Crl } from '@peculiar/x509';
 import { humanSignatureAlgorithm, formatSerial } from './format';
 import { assertInputSize } from './pem';

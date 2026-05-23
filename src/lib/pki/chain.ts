@@ -6,6 +6,8 @@
  * checked against its own key). This proves real issuance, not just that the
  * issuer and subject Distinguished Names happen to match.
  */
+// @peculiar/x509 v2 requires a Reflect metadata polyfill on the consumer side.
+import '@abraham/reflection';
 import { X509Certificate, cryptoProvider } from '@peculiar/x509';
 import { splitBlocks, assertInputSize } from './pem';
 import { decodeCertificate, type DecodedCertificate } from './parse';

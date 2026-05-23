@@ -34,7 +34,7 @@ tag cannot be audited or rolled back. For the strongest guarantee, pin the
 image digest (`...@sha256:...`).
 
 ```sh
-docker run -p 8080:8080 <registry>/pki-toolbox:v1.0.3
+docker run -p 8080:8080 <registry>/pki-toolbox:v1.0.4
 ```
 
 Then open <http://localhost:8080>.
@@ -44,7 +44,7 @@ Then open <http://localhost:8080>.
 ```yaml
 services:
   pki-toolbox:
-    image: <registry>/pki-toolbox:v1.0.3
+    image: <registry>/pki-toolbox:v1.0.4
     ports:
       - '8080:8080'
     restart: unless-stopped
@@ -59,7 +59,7 @@ non-privileged port **8080** and runs as a **non-root** user.
 
 ## Local development
 
-Requires **Node 20** and **pnpm**.
+Requires **Node 24** and **pnpm**.
 
 ```sh
 pnpm install
