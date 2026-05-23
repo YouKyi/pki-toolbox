@@ -20,7 +20,7 @@ RUN pnpm build
 # ---- Stage 2: serve with nginx as a non-root user ----
 # Version- and digest-pinned for an immutable runtime base. Renovate keeps the
 # tag and the @sha256 digest in sync when a new nginx:1.31-alpine-slim ships.
-FROM nginx:1.31-alpine-slim@sha256:241b0d0fe06250e026e7a35a008d022c9a1d3bec19442d65cc33b84d0b5dd64d
+FROM nginx:1.31-alpine-slim@sha256:3fe7a344f234ac4b84817896c9294ffae74eae03fc1ad0ff502457fef5cebef8
 
 COPY --from=builder /app/build /usr/share/nginx/html
 COPY nginx-main.conf /etc/nginx/nginx.conf
