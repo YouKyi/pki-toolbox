@@ -1,12 +1,14 @@
 stages:
   - lint
   - test
+  - scan
   - docker
   - release
 
 variables:
   IMAGE: $CI_REGISTRY_IMAGE
   TAG_SHA: $CI_COMMIT_SHORT_SHA
+  TRIVY_VERSION: '0.70.0'
 
 # Paths that, when changed, require rebuilding the image. A push that only
 # touches docs or config (README, CHANGELOG, renovate.json, ...) does not
@@ -63,6 +65,55 @@ test:
   script:
     - pnpm test
 
+# Supply-chain scan: source-side complement to the runtime image scan.
+#
+# The `docker` job runs `trivy image` against the built image, but the
+# multi-stage Dockerfile discards node_modules before the final layer, so
+# dependency CVEs and committed secrets that exist in the source tree are
+# never visible in the image scan. This job fills that gap by scanning the
+# repository itself with `trivy fs`:
+#   - vuln: finds CVEs in package-lock / pnpm-lock before they reach the image
+#   - secret: catches credentials accidentally committed to the repo
+#   - license: flags copyleft or restricted licenses introduced by new deps
+# It also emits a CycloneDX SBOM so downstream consumers can audit the
+# dependency tree without re-running the scan themselves.
+supply-chain:
+  stage: scan
+  image:
+    name: aquasec/trivy:$TRIVY_VERSION
+    # Clear the image ENTRYPOINT (['trivy']) so GitLab runs this job's shell
+    # script; otherwise the script lines are passed as arguments to `trivy`.
+    entrypoint: ['']
+  needs: []
+  cache: {}
+  before_script: []
+  script:
+    # Gate scan: fails the job on any fixable HIGH/CRITICAL finding and writes a
+    # JUnit XML report that GitLab surfaces in the Tests tab. The template ships
+    # inside the aquasec/trivy image at /contrib/junit.tpl. `when: always` on the
+    # artifacts block ensures the report is uploaded even when this step exits 1.
+    - >-
+      trivy fs
+      --scanners vuln,secret,license
+      --severity HIGH,CRITICAL
+      --ignore-unfixed
+      --exit-code 1
+      --format template
+      --template "@/contrib/junit.tpl"
+      --output trivy-fs-junit.xml
+      .
+    # Emit a CycloneDX SBOM for downstream consumers (separate invocation so the
+    # format flag does not conflict with the JUnit template above).
+    - trivy fs --format cyclonedx --output sbom.cdx.json .
+  artifacts:
+    when: always
+    paths:
+      - sbom.cdx.json
+      - trivy-fs-junit.xml
+    reports:
+      junit: trivy-fs-junit.xml
+    expire_in: 30 days
+
 # Builds the Docker image, scans it for CVEs, then pushes it. Runs on tags
 # always, and on branches/MRs only when a file that affects the build changed.
 #
@@ -82,11 +133,12 @@ docker:
   tags:
     - docker
   cache: {}
-  needs: []
+  # Waits for supply-chain too: a fixable HIGH/CRITICAL CVE, a committed secret
+  # or a restricted license fails the scan stage and blocks the image build.
+  needs: [lint, test, supply-chain]
   variables:
     DOCKER_TLS_CERTDIR: ''
     DOCKER_BUILDKIT: '1'
-    TRIVY_VERSION: '0.70.0'
   before_script:
     - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
@@ -102,13 +154,19 @@ docker:
     # vulnerability that has a fix available exits non-zero and fails the job,
     # so the push steps below never run for a vulnerable image. Trivy runs from
     # its own pinned container against the dind daemon's image store.
+    # The JUnit report is written to stdout and redirected into the job
+    # workspace. A `-v "$(pwd)":/scan` bind mount cannot be used here: with
+    # docker-in-docker the path would resolve on the dind daemon, not in this
+    # job container, so the file would never reach the GitLab workspace.
     - >-
       docker run --rm
       -v /var/run/docker.sock:/var/run/docker.sock
       -v trivy-cache:/root/.cache
       "aquasec/trivy:$TRIVY_VERSION"
       image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1
+      --format template --template "@/contrib/junit.tpl"
       "$IMAGE:$TAG_SHA"
+      > trivy-image-junit.xml
     # Push only from the default branch and from tags, never from feature branches/MRs.
     - |
       if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ] || [ -n "$CI_COMMIT_TAG" ]; then
@@ -119,6 +177,13 @@ docker:
     # per-release `:$CI_COMMIT_TAG`, ideally by digest.
     - if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:latest" && docker push "$IMAGE:latest"; fi
     - if [ -n "$CI_COMMIT_TAG" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:$CI_COMMIT_TAG" && docker push "$IMAGE:$CI_COMMIT_TAG"; fi
+  artifacts:
+    when: always
+    paths:
+      - trivy-image-junit.xml
+    reports:
+      junit: trivy-image-junit.xml
+    expire_in: 30 days
   rules:
     - if: $CI_COMMIT_TAG
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"

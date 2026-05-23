@@ -25,13 +25,15 @@ pnpm dev          # dev server on http://localhost:5173
 
 ## Quality checks
 
-All of these must pass before a change is pushed; CI runs the same commands.
+All of these must pass before a change is pushed; CI runs the same commands
+in the `lint` and `test` stages. Note that `pnpm build` is not a standalone
+CI step: it runs inside the multi-stage Dockerfile as part of the `docker` job.
 
 ```sh
 pnpm lint         # Prettier + ESLint
 pnpm check        # svelte-check / TypeScript
 pnpm test         # Vitest unit tests
-pnpm build        # static production build
+pnpm build        # static production build (exercised by the docker job in CI)
 ```
 
 Run `pnpm format` to apply Prettier automatically.
@@ -53,8 +55,9 @@ scope, e.g. `fix(chain): verify signatures, not just DN strings`.
 3. Add an entry under `## [Unreleased]` in [`CHANGELOG.md`](./CHANGELOG.md)
    describing the change (skip this for pure dependency bumps, which Renovate
    handles).
-4. Open a merge request against `main`. The MR pipeline runs lint, test and,
-   when build-affecting files changed, the build and image jobs.
+4. Open a merge request against `main`. The MR pipeline always runs lint and
+   test (including the supply-chain scan); the `docker` job runs only when a
+   build-affecting file changed.
 
 ## Releases
 
@@ -65,8 +68,19 @@ GitLab Release.
 
 ## Continuous integration
 
-The pipeline (`.gitlab-ci.yml`) has six stages: `lint`, `test`, `build`,
-`docker`, `scan` (Trivy, fails on a fixable HIGH/CRITICAL CVE) and `release`.
-`build`, `docker` and `scan` run on tags unconditionally and on branches or
-MRs only when a build-affecting file changed; `release` runs only on
-`vX.Y.Z` tags.
+The pipeline (`.gitlab-ci.yml`) has five stages: `lint`, `test`, `scan`,
+`docker`, and `release`.
+
+| Stage     | Jobs                                                                                                          | When                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `lint`    | `pnpm lint`, `pnpm check`                                                                                     | Every pipeline                                                                  |
+| `test`    | `pnpm test`                                                                                                   | Every pipeline                                                                  |
+| `scan`    | `supply-chain` (Trivy filesystem scan: dependencies, secrets, licenses, CycloneDX SBOM)                       | Every pipeline                                                                  |
+| `docker`  | Build via the multi-stage Dockerfile (which runs `pnpm build` internally), Trivy image scan, push to registry | Tags unconditionally; branches and MRs only when a build-affecting file changed |
+| `release` | Publish a GitLab Release from the matching `CHANGELOG.md` section                                             | `vX.Y.Z` tags only                                                              |
+
+There is no separate `build` stage: the build runs inside the `docker` job's
+multi-stage Dockerfile. The `supply-chain` job runs in the `scan` stage on
+every pipeline and gates the `docker` job, a fixable HIGH/CRITICAL CVE, a
+committed secret or a restricted license blocks the image build. The `docker`
+job is gated on `lint`, `test` and `supply-chain` passing.

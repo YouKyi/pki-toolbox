@@ -5,7 +5,7 @@
 	 * into a PEM block (`derLabel`) so the textarea always shows armoured text.
 	 */
 	import Icon from './Icon.svelte';
-	import { derToPem } from '$lib/pki/pem';
+	import { derToPem, MAX_INPUT_BYTES } from '$lib/pki/pem';
 
 	type Props = {
 		value: string;
@@ -31,17 +31,14 @@
 		ondecode
 	}: Props = $props();
 
-	/** Reject oversized files before reading them into memory. */
-	const MAX_FILE_BYTES = 8 * 1024 * 1024;
-
 	let dragOver = $state(false);
 	let fileError = $state('');
 	let fileInput: HTMLInputElement | undefined = $state();
 
 	async function readFile(file: File) {
 		fileError = '';
-		if (file.size > MAX_FILE_BYTES) {
-			fileError = 'File too large (limit: 8 MB).';
+		if (file.size > MAX_INPUT_BYTES) {
+			fileError = `File too large (limit: ${MAX_INPUT_BYTES / (1024 * 1024)} MB).`;
 			return;
 		}
 		try {

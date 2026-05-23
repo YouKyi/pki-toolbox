@@ -3,6 +3,7 @@
 	import { convertArtefact, buildPkcs7, type ConvertedItem } from '$lib/pki/convert';
 	import { hexWithColons } from '$lib/pki/format';
 	import { downloadBytes, downloadText } from '$lib/download';
+	import { writeToClipboard } from '$lib/clipboard';
 	import { ISRG_ROOT_X2 } from '$lib/samples';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
@@ -30,14 +31,12 @@
 	}
 
 	async function copy(text: string, id: string) {
-		try {
-			await navigator.clipboard.writeText(text);
+		const ok = await writeToClipboard(text);
+		if (ok) {
 			copied = id;
 			setTimeout(() => {
 				if (copied === id) copied = '';
 			}, 1200);
-		} catch {
-			/* clipboard unavailable */
 		}
 	}
 

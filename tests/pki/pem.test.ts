@@ -12,8 +12,8 @@ import {
 	derToPem,
 	assertInputSize,
 	MAX_INPUT_BYTES
-} from './pem';
-import { ISRG_ROOT_X1, TEST_CHAIN } from '../samples';
+} from '$lib/pki/pem';
+import { ISRG_ROOT_X1, TEST_CHAIN } from '../fixtures/certs';
 
 describe('base64ToBytes / bytesToBase64', () => {
 	it('round-trips an arbitrary byte sequence', () => {
