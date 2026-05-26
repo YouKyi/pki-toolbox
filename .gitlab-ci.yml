@@ -134,9 +134,9 @@ supply-chain:
 # on this GitLab instance: TLS disabled and the job pinned to the `docker` runner.
 docker:
   stage: docker
-  image: docker:28@sha256:2a232a42256f70d78e3cc5d2b5d6b3276710a0de0596c145f627ecfae90282ac
+  image: docker:29@sha256:6b9cd914eb9c6b342c040a49a27a5eb3804453bae6ecc90f7ff96133595a95e8
   services:
-    - docker:28-dind@sha256:2a232a42256f70d78e3cc5d2b5d6b3276710a0de0596c145f627ecfae90282ac
+    - docker:29-dind@sha256:6b9cd914eb9c6b342c040a49a27a5eb3804453bae6ecc90f7ff96133595a95e8
   tags:
     - docker
   cache: {}
