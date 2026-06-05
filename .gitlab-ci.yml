@@ -8,7 +8,7 @@ stages:
 variables:
   IMAGE: $CI_REGISTRY_IMAGE
   TAG_SHA: $CI_COMMIT_SHORT_SHA
-  TRIVY_VERSION: '0.70.0'
+  TRIVY_VERSION: '0.71.0'
   # Public mirrors for the open-source release images. The push steps in the
   # `docker` job are no-ops until the matching *_TOKEN/_USER CI/CD variables are
   # set in GitLab, so these defaults stay inert until publishing is turned on.
