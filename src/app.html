@@ -1,17 +1,147 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="color-scheme" content="dark light" />
+		<meta name="color-scheme" content="light dark" />
 		<meta
 			name="description"
 			content="Self-hosted, 100% client-side decoder for X.509 certificates, CSRs and certificate chains."
 		/>
+		<!-- No-FOUC + loader control, before first paint. Default theme light.
+		     The loader shows only on the first document load of the session.
+		     Kept in the head on purpose: SvelteKit hash-mode CSP allows head inline
+		     scripts, whereas a script placed after the body placeholder is blocked. -->
+		<script>
+			var __html = document.documentElement;
+			try {
+				if (localStorage.getItem('pki-toolbox-theme') === 'dark') __html.classList.add('dark');
+			} catch (e) {}
+			var __seen;
+			try {
+				__seen = sessionStorage.getItem('pki-toolbox-loaded');
+				if (__seen) __html.classList.add('yk-ready');
+				else sessionStorage.setItem('pki-toolbox-loaded', '1');
+			} catch (e) {}
+			if (!__seen) {
+				(function () {
+					var fired;
+					function done() {
+						if (fired) return;
+						fired = 1;
+						var l = document.getElementById('yk-loader');
+						if (!l) return;
+						l.classList.add('done'); // fade out (opacity .3s)
+						setTimeout(function () {
+							l.remove();
+						}, 300);
+					}
+					if (document.readyState === 'complete') setTimeout(done, 300);
+					else
+						window.addEventListener('load', function () {
+							setTimeout(done, 220);
+						});
+					setTimeout(done, 1600); // safety net if `load` never fires
+				})();
+			}
+		</script>
+		<!-- youkyi loader — critical CSS, painted on the first frame, hidden by
+		     `html.yk-ready`. Mark « Y » taillé + barre orange (pente 1/Φ² ≈ 21°). -->
+		<style>
+			:root {
+				--ykl-bg: #f8f7f4;
+				--ykl-fg: #1a1816;
+				--ykl-acc: #d6470d;
+				--ykl-track: rgba(26, 24, 22, 0.14);
+			}
+			html.dark {
+				--ykl-bg: #131211;
+				--ykl-fg: #f2f0ec;
+				--ykl-acc: #ff6a2e;
+				--ykl-track: rgba(242, 240, 236, 0.14);
+			}
+			#yk-loader {
+				position: fixed;
+				inset: 0;
+				z-index: 2000;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				gap: 20px;
+				background: var(--ykl-bg);
+				transition: opacity 0.3s linear;
+			}
+			#yk-loader.done {
+				opacity: 0;
+				pointer-events: none;
+			}
+			#yk-loader .m {
+				width: 54px;
+				height: 54px;
+				display: block;
+				color: var(--ykl-fg);
+			}
+			#yk-loader .m path {
+				fill: currentColor;
+				opacity: 0;
+				animation: yklin 0.45s linear forwards;
+			}
+			#yk-loader .m path:last-child {
+				animation-delay: 0.15s;
+			}
+			@keyframes yklin {
+				to {
+					opacity: 1;
+				}
+			}
+			#yk-loader .bar {
+				position: relative;
+				width: 120px;
+				height: 2px;
+				background: var(--ykl-track);
+				overflow: hidden;
+			}
+			#yk-loader .bar i {
+				position: absolute;
+				left: -42%;
+				top: 0;
+				bottom: 0;
+				width: 40%;
+				background: var(--ykl-acc);
+				transform: skewX(-21deg);
+				animation: yklsw 0.9s linear infinite;
+			}
+			@keyframes yklsw {
+				to {
+					left: 102%;
+				}
+			}
+			@media (prefers-reduced-motion: reduce) {
+				#yk-loader .m path {
+					animation: none;
+					opacity: 1;
+				}
+				#yk-loader .bar i {
+					animation: none;
+					left: 30%;
+				}
+			}
+			html.yk-ready #yk-loader {
+				display: none;
+			}
+		</style>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
+		<div id="yk-loader" aria-hidden="true">
+			<svg class="m" viewBox="0 0 240 240">
+				<path d="M56.459 30 L98.8197 30 L167.3607 209.4427 L125 209.4427 Z"></path>
+				<path d="M183.541 30 L141.1803 30 L128.6603 62.778 L149.8406 118.2289 Z"></path>
+			</svg>
+			<span class="bar"><i></i></span>
+		</div>
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
 </html>
