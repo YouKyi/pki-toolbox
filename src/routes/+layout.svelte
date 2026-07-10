@@ -84,11 +84,14 @@
 		Skip to main content
 	</a>
 
-	<!-- Desktop sidebar -->
-	<aside
-		class="sticky top-0 hidden h-screen border-r border-slate-200 lg:block dark:border-slate-800"
-	>
-		<Sidebar />
+	<!-- Desktop sidebar: the column carries the border and stretches to the full
+	     grid-row height, so its right border and footer stay level with the main
+	     column on pages taller than the viewport. A sticky, viewport-tall inner
+	     wrapper keeps the navigation pinned while scrolling. (see MR !122 / #6) -->
+	<aside class="hidden border-r border-slate-200 lg:block dark:border-slate-800">
+		<div class="sticky top-0 flex h-screen flex-col">
+			<Sidebar />
+		</div>
 	</aside>
 
 	<!-- Mobile drawer -->
@@ -128,9 +131,11 @@
 
 			<a
 				href="/"
-				class="flex items-center gap-2 font-semibold text-slate-800 lg:hidden dark:text-slate-100"
+				class="yk-wordmark flex items-center gap-2 text-[15px] text-slate-900 lg:hidden dark:text-slate-100"
 			>
-				<Icon name="shield" size={18} class="text-teal-600 dark:text-teal-400" /> PKI-Toolbox
+				<Icon name="shield" size={18} class="text-teal-600 dark:text-teal-400" /> pki-toolbox<u
+					class="-ml-2">_</u
+				>
 			</a>
 
 			<div class="ml-auto flex items-center gap-1">
@@ -150,10 +155,69 @@
 			{@render children()}
 		</main>
 
-		<footer
-			class="border-t border-slate-200 px-4 py-5 text-center text-xs text-slate-500 sm:px-6 dark:border-slate-800 dark:text-slate-400"
-		>
-			PKI-Toolbox, a self-hosted PKI decoder, 100% client-side. No data ever leaves your browser.
+		<!-- Footer DA youkyi (condensé) : filet neutre interrompu par une entaille
+		     oblique orange (le geste signature), baseline, mentions légales en mono. -->
+		<footer class="relative px-4 pt-9 pb-8 text-slate-500 sm:px-6 dark:text-slate-400">
+			<svg
+				class="pointer-events-none absolute top-0 left-0 block text-slate-200 dark:text-slate-800"
+				viewBox="0 0 1200 8"
+				width="100%"
+				height="8"
+				preserveAspectRatio="none"
+				aria-hidden="true"
+			>
+				<line
+					x1="0"
+					y1="4"
+					x2="470"
+					y2="4"
+					stroke="currentColor"
+					stroke-width="1"
+					vector-effect="non-scaling-stroke"
+				/>
+				<line
+					x1="470"
+					y1="4"
+					x2="510"
+					y2="1"
+					stroke="var(--yk-accent)"
+					stroke-width="2"
+					vector-effect="non-scaling-stroke"
+				/>
+				<line
+					x1="510"
+					y1="1"
+					x2="1200"
+					y2="1"
+					stroke="currentColor"
+					stroke-width="1"
+					vector-effect="non-scaling-stroke"
+				/>
+			</svg>
+			<div class="flex flex-wrap items-end justify-between gap-4">
+				<div class="max-w-[46ch]">
+					<a
+						href="https://youkyi.fr"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="yk-wordmark text-slate-900 hover:text-teal-700 dark:text-slate-100 dark:hover:text-teal-300"
+						>youkyi<u>_</u></a
+					>
+					<p class="mt-2 text-xs">
+						PKI-Toolbox, a self-hosted PKI decoder. 100% client-side, no data ever leaves your
+						browser.
+					</p>
+				</div>
+				<div class="yk-kicker flex flex-col items-start gap-1.5 sm:items-end">
+					<a
+						href="https://youkyi.fr"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="text-teal-700 hover:underline dark:text-teal-300">youkyi.fr</a
+					>
+					<span>© 2026 · Agasseau Alexandre EI</span>
+				</div>
+			</div>
 		</footer>
 	</div>
 </div>
