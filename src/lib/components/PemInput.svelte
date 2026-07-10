@@ -117,7 +117,7 @@
 			type="button"
 			onclick={() => ondecode?.()}
 			disabled={loading || value.trim().length === 0}
-			class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-500 focus:ring-2 focus:ring-teal-500/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+			class="yk-cut inline-flex items-center gap-2 bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-500 focus:ring-2 focus:ring-teal-500/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 		>
 			{#if loading}
 				<Icon name="clock" size={16} /> Analyzing…

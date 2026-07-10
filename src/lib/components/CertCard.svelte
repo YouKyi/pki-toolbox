@@ -81,7 +81,7 @@
 >
 	<header class="flex flex-wrap items-center gap-3 px-5 py-4">
 		<span
-			class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400"
+			class="grid h-9 w-9 shrink-0 place-items-center yk-chip bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400"
 		>
 			<Icon name="certificate" size={20} />
 		</span>
