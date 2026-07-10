@@ -209,13 +209,21 @@
 					</p>
 				</div>
 				<div class="yk-kicker flex flex-col items-start gap-1.5 sm:items-end">
-					<a
-						href="https://youkyi.fr"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="text-teal-700 hover:underline dark:text-teal-300">youkyi.fr</a
-					>
-					<span>© 2026 · Agasseau Alexandre EI</span>
+					<span class="flex items-center gap-3">
+						<a
+							href="https://youkyi.fr"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-teal-700 hover:underline dark:text-teal-300">youkyi.fr</a
+						>
+						<a
+							href="https://github.com/youkyi/pki-toolbox"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-teal-700 hover:underline dark:text-teal-300">github</a
+						>
+					</span>
+					<span>© 2026 · Agasseau Alexandre</span>
 				</div>
 			</div>
 		</footer>
