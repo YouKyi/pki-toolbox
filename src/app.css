@@ -245,6 +245,15 @@ h6 {
 	scrollbar-width: thin;
 }
 
+/* Tailwind v4 removed the default pointer cursor on buttons — restore it so
+   interactive controls read as clickable. */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']),
+label[for],
+summary {
+	cursor: pointer;
+}
+
 /* Always-visible keyboard focus indicator (WCAG 2.4.7) — liseré orange net. */
 :focus-visible {
 	outline: 2px solid var(--yk-accent);
