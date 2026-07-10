@@ -1,6 +1,7 @@
 stages:
   - lint
   - test
+  - e2e
   - scan
   - docker
   - release
@@ -71,6 +72,31 @@ test:
   needs: []
   script:
     - pnpm test
+
+# End-to-end tests: build the static app and run Playwright against the exact
+# prerendered output (playwright.config.ts webServer = `pnpm build && pnpm
+# preview`). Uses the official Playwright image (browsers + system deps baked
+# in), pinned to the same version as the @playwright/test devDependency. A noble
+# base (Node >= 22.13) is required so corepack/pnpm@11 in the default
+# before_script works — the Node-20 -jammy image fails the pnpm engine check.
+e2e:
+  stage: e2e
+  image: mcr.microsoft.com/playwright:v1.55.1-noble
+  needs: []
+  script:
+    - pnpm exec playwright test
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+      - test-results/
+      - junit.xml
+    reports:
+      junit: junit.xml
+    expire_in: 30 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
 
 # Supply-chain scan: source-side complement to the runtime image scan.
 #
