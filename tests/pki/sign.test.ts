@@ -9,6 +9,7 @@ import {
 	KeyUsageFlags
 } from '@peculiar/x509';
 import { decodeCertificate } from '$lib/pki/parse';
+import { TEST_CSR } from '../fixtures/certs';
 
 /** Generate a fresh CA (cert + key PEM) with the existing generator. */
 async function makeCa(
@@ -167,5 +168,62 @@ describe('issueCertificate (new key pair)', () => {
 				subject: { kind: 'generate', keyAlgorithm: 'ec-p256' }
 			})
 		).rejects.toThrowError(/Common Name/);
+	});
+});
+
+describe('issueCertificate (CSR)', () => {
+	it('certifies the public key of a valid CSR, without a private key output', async () => {
+		const caPems = await makeCa('ec-p256');
+		const ca = await importCa(caPems.certificatePem, caPems.privateKeyPem);
+		const issued = await issueCertificate(ca, {
+			commonName: 'from-csr.sign.test',
+			validityDays: 365,
+			sans: ['from-csr.sign.test'],
+			isCa: false,
+			subject: { kind: 'csr', csrPem: TEST_CSR }
+		});
+
+		expect(issued.privateKeyPem).toBeUndefined();
+		const leaf = new X509Certificate(issued.certificatePem);
+		expect(await leaf.verify({ publicKey: ca.cert.publicKey })).toBe(true);
+		// The certified key is the CSR's, not a fresh one.
+		const { Pkcs10CertificateRequest } = await import('@peculiar/x509');
+		const csr = new Pkcs10CertificateRequest(TEST_CSR);
+		expect(leaf.publicKey.toString('hex')).toBe(csr.publicKey.toString('hex'));
+		// Subject comes from the form, not the CSR.
+		expect(leaf.subject).toContain('from-csr.sign.test');
+	});
+
+	it('rejects a CSR with a broken signature', async () => {
+		const caPems = await makeCa('ec-p256');
+		const ca = await importCa(caPems.certificatePem, caPems.privateKeyPem);
+		// Flip characters in the base64 body to corrupt the signature.
+		const lines = TEST_CSR.trim().split('\n');
+		const bodyIdx = Math.floor(lines.length / 2);
+		lines[bodyIdx] = lines[bodyIdx].replace(/[A-Za-z]/g, (c) => (c === 'A' ? 'B' : 'A'));
+		const tampered = lines.join('\n');
+		await expect(
+			issueCertificate(ca, {
+				commonName: 'tampered.sign.test',
+				validityDays: 365,
+				sans: [],
+				isCa: false,
+				subject: { kind: 'csr', csrPem: tampered }
+			})
+		).rejects.toThrowError(/CSR|PKCS#10/i);
+	});
+
+	it('rejects input that is not a CSR', async () => {
+		const caPems = await makeCa('ec-p256');
+		const ca = await importCa(caPems.certificatePem, caPems.privateKeyPem);
+		await expect(
+			issueCertificate(ca, {
+				commonName: 'x.sign.test',
+				validityDays: 365,
+				sans: [],
+				isCa: false,
+				subject: { kind: 'csr', csrPem: 'not a csr' }
+			})
+		).rejects.toThrowError(/PKCS#10/i);
 	});
 });

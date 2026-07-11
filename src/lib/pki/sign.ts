@@ -14,6 +14,7 @@ import {
 	SubjectAlternativeNameExtension,
 	SubjectKeyIdentifierExtension,
 	AuthorityKeyIdentifierExtension,
+	Pkcs10CertificateRequest,
 	cryptoProvider,
 	type Extension,
 	type PublicKeyType
@@ -249,8 +250,26 @@ export async function issueCertificate(
 	};
 }
 
+/**
+ * Parse and verify a PKCS#10 request, returning its public key. `decodeCsr`
+ * (parse.ts) does not check the signature, so it is verified here — a CSR
+ * whose proof-of-possession fails must not be certified.
+ */
 async function csrPublicKey(csrPem: string, crypto: Crypto): Promise<PublicKeyType> {
-	void csrPem;
-	void crypto;
-	throw new Error('CSR mode not implemented yet.');
+	let csr: Pkcs10CertificateRequest;
+	try {
+		csr = new Pkcs10CertificateRequest(csrPem);
+	} catch (e) {
+		throw new Error(`This does not look like a PKCS#10 request (${errMessage(e)}).`, {
+			cause: e
+		});
+	}
+	let valid: boolean;
+	try {
+		valid = await csr.verify(crypto);
+	} catch {
+		valid = false;
+	}
+	if (!valid) throw new Error('The CSR signature is invalid; refusing to certify its key.');
+	return csr.publicKey;
 }
