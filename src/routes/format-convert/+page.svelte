@@ -130,7 +130,7 @@
 							<button
 								type="button"
 								onclick={() => copy(value, blockId)}
-								class="inline-flex items-center gap-1 rounded p-1 text-slate-500 transition hover:text-teal-600 dark:hover:text-teal-400"
+								class="inline-flex items-center gap-1 rounded p-1 text-slate-500 transition hover:text-teal-700 dark:hover:text-teal-400"
 							>
 								<Icon name={copied === blockId ? 'check' : 'copy'} size={14} />
 							</button>

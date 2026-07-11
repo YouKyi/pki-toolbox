@@ -106,7 +106,7 @@ docker run -p 8080:8080 pki-toolbox
 
 - **SvelteKit 2** + **TypeScript**, built with `adapter-static` to plain
   HTML/JS, there is no Node runtime in production.
-- **TailwindCSS** for styling, dark mode by default.
+- **TailwindCSS** for styling, on the youkyi design system: light by default, dark as the signature theme (the choice is persisted).
 - All parsing lives in pure, testable functions under `src/lib/pki/`
   (`parse.ts`, `chain.ts`, `format.ts`, `pem.ts`, `oids.ts`).
 - The tool catalogue is a single registry (`src/lib/tools.ts`) that drives the

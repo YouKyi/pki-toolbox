@@ -15,7 +15,9 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui"
 	},
 	"dependencies": {
 		"@abraham/reflection": "^0.13.0",
@@ -25,6 +27,7 @@
 	},
 	"devDependencies": {
 		"@eslint/compat": "2.1.0",
+		"@playwright/test": "1.55.1",
 		"@eslint/js": "10.0.1",
 		"@sveltejs/adapter-static": "3.0.10",
 		"@sveltejs/kit": "2.69.2",

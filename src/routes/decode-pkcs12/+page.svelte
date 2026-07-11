@@ -54,7 +54,7 @@
 	<button
 		type="button"
 		onclick={loadExample}
-		class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+		class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-400"
 	>
 		<Icon name="file-text" size={16} /> Load an example
 	</button>

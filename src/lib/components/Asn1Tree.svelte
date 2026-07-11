@@ -4,7 +4,7 @@
 	/** Tailwind text colour for a given ASN.1 tag. */
 	function tagColor(node: Asn1Node): string {
 		if (node.tagClass !== 'Universal') return 'text-slate-500 dark:text-slate-400';
-		if (node.tag === 'SEQUENCE' || node.tag === 'SET') return 'text-teal-600 dark:text-teal-400';
+		if (node.tag === 'SEQUENCE' || node.tag === 'SET') return 'text-teal-700 dark:text-teal-400';
 		if (node.tag === 'OBJECT IDENTIFIER') return 'text-violet-600 dark:text-violet-400';
 		if (node.tag === 'INTEGER' || node.tag === 'BOOLEAN' || node.tag === 'ENUMERATED')
 			return 'text-amber-600 dark:text-amber-400';

@@ -14,7 +14,7 @@
 
 <section class="mb-10">
 	<div
-		class="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700 dark:bg-teal-500/10 dark:text-teal-300"
+		class="yk-kicker yk-cut-sm inline-flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 text-teal-700 dark:bg-slate-800 dark:text-teal-300"
 	>
 		<Icon name="lock" size={13} /> 100% client-side, no data sent
 	</div>
@@ -31,34 +31,30 @@
 	{@const list = toolsByCategory(category.id)}
 	{#if list.length}
 		<section class="mb-8">
-			<h2
-				class="mb-3 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-500"
-			>
+			<h2 class="yk-kicker mb-3 text-slate-500 dark:text-slate-500">
 				{category.label}
 			</h2>
 			<div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
 				{#each list as tool (tool.slug)}
 					<a
 						href="/{tool.slug}"
-						class="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-teal-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-500/60 {tool.status ===
+						class="group flex flex-col border border-slate-200 bg-white p-4 transition-colors hover:border-teal-600 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-400 {tool.status ===
 						'planned'
 							? 'opacity-75'
 							: ''}"
 					>
 						<div class="flex items-center gap-3">
 							<span
-								class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-teal-50 text-teal-600 transition group-hover:bg-teal-100 dark:bg-teal-500/10 dark:text-teal-400 dark:group-hover:bg-teal-500/20"
+								class="grid h-10 w-10 shrink-0 place-items-center yk-chip bg-teal-50 text-teal-600 transition group-hover:bg-teal-100 dark:bg-teal-500/10 dark:text-teal-400 dark:group-hover:bg-teal-500/20"
 							>
 								<Icon name={tool.icon} size={20} />
 							</span>
 							<span class="font-semibold text-slate-900 dark:text-slate-100">{tool.name}</span>
 							<span class="ml-auto">
-								{#if tool.status === 'ready'}
-									<Badge tone="ready">Available</Badge>
-								{:else if tool.status === 'beta'}
+								{#if tool.status === 'beta'}
 									<Badge tone="beta">Beta</Badge>
-								{:else}
-									<Badge tone="planned">v2</Badge>
+								{:else if tool.status === 'planned'}
+									<Badge tone="planned">Coming soon</Badge>
 								{/if}
 							</span>
 						</div>

@@ -117,7 +117,7 @@
 			type="button"
 			onclick={() => ondecode?.()}
 			disabled={loading || value.trim().length === 0}
-			class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-500 focus:ring-2 focus:ring-teal-500/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+			class="yk-cut inline-flex items-center gap-2 bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
 		>
 			{#if loading}
 				<Icon name="clock" size={16} /> Analyzing…
@@ -138,7 +138,7 @@
 			<button
 				type="button"
 				onclick={() => (value = example)}
-				class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+				class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-400"
 			>
 				<Icon name="file-text" size={16} /> Load an example
 			</button>

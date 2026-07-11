@@ -46,7 +46,7 @@
 </script>
 
 <span
-	class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset {TONES[
+	class="yk-cut-sm inline-flex items-center gap-1 px-2 py-0.5 font-mono text-[11px] font-medium tracking-wide ring-1 ring-inset {TONES[
 		tone
 	]}"
 >

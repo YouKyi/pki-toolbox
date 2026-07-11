@@ -1,8 +1,184 @@
+/*
+ * youkyi · DA oblique — https://git.youkyi.net/youkyi-brand
+ * Neutres mats + orange unique, angles vifs (radius 0), pente 1/Φ² ≈ 21°.
+ * Les rampes Tailwind slate/teal/… sont remappées sur les tokens de la charte,
+ * si bien que les pages outils héritent de la DA sans modification.
+ */
+
+/* Fontes self-hosted (souveraineté / RGPD, zéro requête tierce · licences OFL). */
+@font-face {
+	font-family: 'Space Grotesk';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('/fonts/space-grotesk-700.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Poppins';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('/fonts/poppins-500.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Poppins';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('/fonts/poppins-600.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Poppins';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('/fonts/poppins-700.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('/fonts/inter-400.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('/fonts/inter-500.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'IBM Plex Mono';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('/fonts/ibm-plex-mono-400.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'IBM Plex Mono';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('/fonts/ibm-plex-mono-500.woff2') format('woff2');
+}
+
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
-/* Dark mode is driven by a `.dark` class on <html> and is the default. */
+/* Light is the default (DA: « clair par défaut + sombre signature »);
+   dark mode is driven by a `.dark` class on <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	/* ---- typographies de la charte ---- */
+	--font-sans: 'Inter', system-ui, sans-serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+	--font-head: 'Poppins', system-ui, sans-serif;
+	--font-display: 'Space Grotesk', system-ui, sans-serif;
+
+	/* ---- neutres mats (rampe slate → papier/encre youkyi) ---- */
+	--color-slate-50: #f8f7f4; /* --yk-bg clair */
+	--color-slate-100: #efece6; /* --yk-slat */
+	--color-slate-200: #e2ded6; /* --yk-line */
+	--color-slate-300: #c9c3b8; /* --yk-line-strong */
+	--color-slate-400: #98938b; /* --yk-muted sombre */
+	--color-slate-500: #6e6a63; /* --yk-muted clair */
+	--color-slate-600: #57534c;
+	--color-slate-700: #3a342e; /* --yk-line-strong sombre */
+	--color-slate-800: #2a2622; /* --yk-line sombre */
+	--color-slate-900: #1a1816; /* --yk-ink */
+	--color-slate-950: #131211; /* --yk-bg sombre */
+
+	/* ---- l'orange unique (rampe teal → accent youkyi) ---- */
+	--color-teal-50: #f7e9e0;
+	--color-teal-100: #f2dccc;
+	--color-teal-200: #e9c5ac;
+	--color-teal-300: #ff8f5c; /* accent-texte sombre (AAA sur #131211) */
+	--color-teal-400: #ff6a2e; /* accent sombre */
+	--color-teal-500: #b4380a; /* --yk-accent-deep · survol = orange assombri */
+	--color-teal-600: #d6470d; /* --yk-accent · CTA, libellé blanc gras */
+	--color-teal-700: #af3a0b; /* --yk-accent-txt · texte AA sur clair */
+	--color-teal-800: #8f2f09;
+	--color-teal-900: #6f2507;
+
+	/* ---- statuts techniques (badges, terminal) — ok / danger de la charte ---- */
+	--color-emerald-50: #edf2e4;
+	--color-emerald-100: #dfe9cf;
+	--color-emerald-200: #c9daaf;
+	--color-emerald-300: #8fb86b; /* ok sombre */
+	--color-emerald-400: #8fb86b;
+	--color-emerald-500: #6b9440;
+	--color-emerald-600: #4a7d1c;
+	--color-emerald-700: #3b6d11; /* ok clair */
+	--color-emerald-800: #2e5510;
+	--color-red-50: #f6eae8;
+	--color-red-100: #efd9d6;
+	--color-red-200: #e5c2be;
+	--color-red-300: #f0857a; /* danger sombre */
+	--color-red-400: #f0857a;
+	--color-red-500: #c0453d;
+	--color-red-600: #a32d2d; /* danger clair */
+	--color-red-700: #8e2727;
+	--color-red-800: #7c2323;
+
+	/* ---- warn/beta : neutralisés aussi. L'amber Tailwind (#b45309) est quasi
+	   indistinguable de --yk-accent-txt (#af3a0b) : ce serait un SECOND orange,
+	   contre la règle « orange unique ». On garde la distinction beta / coming-soon
+	   par la force de l'encre (amber = neutre appuyé, slate = neutre atténué), le
+	   libellé portant le sens — la couleur n'est jamais le seul vecteur d'info. ---- */
+	--color-amber-50: #efece6;
+	--color-amber-100: #e2ded6;
+	--color-amber-200: #c9c3b8;
+	--color-amber-300: #c9c3b8;
+	--color-amber-400: #98938b;
+	--color-amber-500: #6e6a63;
+	--color-amber-600: #3a342e;
+	--color-amber-700: #1a1816;
+	--color-amber-800: #1a1816;
+
+	/* ---- hors palette : info/chaîne re-neutralisés (un seul accent orange) ---- */
+	--color-cyan-50: #efece6;
+	--color-cyan-200: #d8d3c9;
+	--color-cyan-300: #c9c3b8;
+	--color-cyan-500: #6e6a63;
+	--color-cyan-700: #55514b;
+	--color-cyan-800: #3a342e;
+	--color-sky-50: #efece6;
+	--color-sky-200: #d8d3c9;
+	--color-sky-300: #c9c3b8;
+	--color-sky-400: #98938b;
+	--color-sky-500: #6e6a63;
+	--color-sky-600: #55514b;
+	--color-sky-700: #55514b;
+	--color-violet-50: #efece6;
+	--color-violet-200: #d8d3c9;
+	--color-violet-300: #c9c3b8;
+	--color-violet-400: #98938b;
+	--color-violet-500: #6e6a63;
+	--color-violet-600: #55514b;
+	--color-violet-700: #55514b;
+
+	/* ---- élévation = masse + arête, jamais d'ombre ---- */
+	--shadow-2xs: 0 0 #0000;
+	--shadow-xs: 0 0 #0000;
+	--shadow-sm: 0 0 #0000;
+	--shadow-md: 0 0 #0000;
+	--shadow-lg: 0 0 #0000;
+	--shadow-xl: 0 0 #0000;
+}
+
+/* Tokens runtime de la charte, thémables (utilisés par les helpers ci-dessous). */
+:root {
+	--yk-accent: #d6470d;
+	--yk-accent-txt: #af3a0b;
+	--yk-on-accent: #ffffff;
+}
+.dark {
+	--yk-accent: #ff6a2e;
+	--yk-accent-txt: #ff8f5c;
+	--yk-on-accent: #1d0e04;
+}
 
 html {
 	color-scheme: light dark;
@@ -10,10 +186,99 @@ html {
 
 body {
 	@apply bg-slate-50 text-slate-900 antialiased;
+	font-family: var(--font-sans);
 }
 
 :where(.dark) body {
 	@apply bg-slate-950 text-slate-100;
+}
+
+/* Titres en Poppins (charte : --font-head), corps en Inter. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: var(--font-head);
+	letter-spacing: -0.2px;
+}
+
+/* Rayon = TOUJOURS 0 (angles vifs, jamais d'arrondi) — règle non-layered,
+   elle prime sur les utilitaires rounded-* sans devoir les retirer un à un. */
+*,
+*::before,
+*::after {
+	border-radius: 0;
+}
+
+/* Exception DA assumée : les pastilles d'icônes restent arrondies (le glyphe
+   respire mieux dans un carré doux). Non-layered pour battre le reset ci-dessus. */
+.yk-chip {
+	border-radius: 0.625rem;
+}
+
+/* ---- helpers de coupe (pente 1/Φ² ≈ 21°) ---- */
+/* Coupe raide (contrôles) : coin bas-droit tranché, dx = 0,382 × dy. */
+.yk-cut {
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 4.6px) 100%, 0 100%);
+}
+.yk-cut-sm {
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 2.3px) 100%, 0 100%);
+}
+/* Coupe douce (plans : carte, hero) : arête haut-droite, dy = 0,382 × dx. */
+.yk-bevel {
+	clip-path: polygon(0 0, calc(100% - 42px) 0, 100% 16px, 100% 100%, 0 100%);
+}
+
+/* Coupe raide dont la bordure SUIT la coupe (clip-path seul supprime la bordure
+   sur la diagonale). Couche de fond = couleur bordure ; ::before inséré de 1px =
+   remplissage ; le clip de l'élément contient les deux. Thémable via les vars. */
+.yk-cut-bordered {
+	--yk-cut-bg: #ffffff;
+	--yk-cut-border: #c9c3b8;
+	position: relative;
+	background: var(--yk-cut-border);
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 4.6px) 100%, 0 100%);
+}
+.yk-cut-bordered::before {
+	content: '';
+	position: absolute;
+	inset: 1px;
+	background: var(--yk-cut-bg);
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 11px), calc(100% - 4.2px) 100%, 0 100%);
+}
+.yk-cut-bordered > * {
+	position: relative;
+	z-index: 1;
+}
+:where(.dark) .yk-cut-bordered {
+	--yk-cut-bg: #1a1816;
+	--yk-cut-border: #3a342e;
+}
+
+/* Kicker mono en capitales : signature youkyi. */
+.yk-kicker {
+	font-family: var(--font-mono);
+	font-size: 10px;
+	letter-spacing: 2.5px;
+	text-transform: uppercase;
+}
+
+/* Wordmark « pki-toolbox_ » : Space Grotesk, underscore orange. */
+.yk-wordmark {
+	font-family: var(--font-display);
+	font-weight: 700;
+	letter-spacing: -0.5px;
+}
+.yk-wordmark u {
+	text-decoration: none;
+	color: var(--yk-accent);
+}
+
+::selection {
+	background: var(--yk-accent);
+	color: var(--yk-on-accent);
 }
 
 /* Thin, theme-aware scrollbars for the sidebar and result panes. */
@@ -21,11 +286,36 @@ body {
 	scrollbar-width: thin;
 }
 
-/* Always-visible keyboard focus indicator (WCAG 2.4.7). */
+/* Tailwind v4 removed the default pointer cursor on buttons — restore it so
+   interactive controls read as clickable. */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']),
+label[for],
+summary {
+	cursor: pointer;
+}
+
+/* Native form controls take the brand orange instead of the browser blue. */
+input[type='checkbox'],
+input[type='radio'],
+input[type='range'],
+progress {
+	accent-color: var(--yk-accent);
+}
+
+/* Always-visible keyboard focus indicator (WCAG 2.4.7) — liseré orange net. */
 :focus-visible {
-	outline: 2px solid #14b8a6;
+	outline: 2px solid var(--yk-accent);
 	outline-offset: 2px;
-	border-radius: 2px;
+}
+
+/* Un clip-path rogne TOUT ce que peint l'élément — outline et ring extérieur
+   compris. Les contrôles taillés prennent donc un liseré de focus INTERNE, peint
+   à l'intérieur de la forme, qui survit à la coupe (WCAG 2.4.7). */
+.yk-cut:focus-visible,
+.yk-cut-sm:focus-visible {
+	outline: none;
+	box-shadow: inset 0 0 0 2.5px var(--yk-on-accent);
 }
 
 /* Respect users who ask for reduced motion (WCAG 2.3.3). */
