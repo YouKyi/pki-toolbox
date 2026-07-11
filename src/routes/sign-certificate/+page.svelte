@@ -23,13 +23,6 @@
 	let caError = $state('');
 	let caLoading = $state(false);
 
-	// Editing the CA material invalidates the previously loaded CA.
-	$effect(() => {
-		void caCertPem;
-		void caKeyPem;
-		ca = null;
-	});
-
 	async function loadCa() {
 		caLoading = true;
 		caError = '';
@@ -75,6 +68,17 @@
 	let result = $state<IssuedCertificate | null>(null);
 	let signError = $state('');
 	let signing = $state(false);
+
+	// Editing the CA material invalidates the previously loaded CA and any
+	// previously issued result, which was signed by the old CA.
+	$effect(() => {
+		void caCertPem;
+		void caKeyPem;
+		ca = null;
+		caError = '';
+		result = null;
+		signError = '';
+	});
 
 	async function sign() {
 		if (!ca) return;
