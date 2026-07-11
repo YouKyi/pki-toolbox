@@ -85,7 +85,10 @@
 		>
 			<Icon name="certificate" size={20} />
 		</span>
-		<div class="min-w-0 flex-1">
+		<!-- A floor (not min-w-0) so the title/expiry block cannot be squeezed to a
+		     few pixels by the badges: below it, the wrapping header drops the badges
+		     to their own line instead. -->
+		<div class="min-w-[10rem] flex-1">
 			<p class="truncate font-semibold text-slate-900 dark:text-slate-100" title={commonName}>
 				{#if index !== undefined}<span class="text-slate-500">#{index + 1}</span>
 				{/if}{commonName}

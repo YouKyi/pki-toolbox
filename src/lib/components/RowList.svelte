@@ -31,10 +31,15 @@
 
 <dl class="divide-y divide-slate-200 dark:divide-slate-800">
 	{#each rows as row (row.label)}
-		<div class="grid gap-1 py-2.5 sm:grid-cols-[200px_1fr] sm:gap-4">
+		<!-- minmax(0,1fr) + min-w-0: a `1fr` track and a grid/flex item both default
+		     to min-width:auto, so a long unbroken value (hex fingerprint, DN, serial)
+		     cannot shrink and gets clipped on narrow screens. `break-all` on mono
+		     values is what actually reduces their min-content size (overflow-wrap
+		     alone does not). -->
+		<div class="grid gap-1 py-2.5 sm:grid-cols-[200px_minmax(0,1fr)] sm:gap-4">
 			<dt class="text-sm font-medium text-slate-500 dark:text-slate-400">{row.label}</dt>
-			<dd class="flex items-start gap-2 text-sm text-slate-900 dark:text-slate-100">
-				<span class="min-w-0 break-words {row.mono ? 'font-mono text-[13px]' : ''}"
+			<dd class="flex min-w-0 items-start gap-2 text-sm text-slate-900 dark:text-slate-100">
+				<span class="min-w-0 {row.mono ? 'font-mono text-[13px] break-all' : 'break-words'}"
 					>{row.value}</span
 				>
 				{#if row.copy && row.value}
