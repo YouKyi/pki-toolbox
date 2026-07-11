@@ -9,6 +9,59 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-11
+
+Full visual and navigational rework on the youkyi design system. The decoding
+engine is untouched: everything still runs 100% client-side, and no data ever
+leaves the browser.
+
+### Added
+
+- The youkyi design system: matte neutrals with a single orange accent, fonts
+  self-hosted (Poppins, Inter, IBM Plex Mono, Space Grotesk — no third-party
+  request), sharp corners, and the signature oblique cuts.
+- A first-load loader (shown once per session) and a branded footer linking to
+  <https://youkyi.fr> and the source repository.
+- A Playwright end-to-end suite run against the real static build that nginx
+  serves: `smoke` (home, loader, navigation, theme persistence), `tools`
+  (certificate, CSR, chain, fingerprints, conversion and generation via each
+  page's "Load an example", plus the no-network contract), and `responsive`,
+  a guard that decodes every tool at 390px and fails if any element renders
+  content wider than its box. A new GitLab `e2e` stage runs them on every
+  pipeline and reports to the Tests tab.
+
+### Changed
+
+- **Navigation**: the sidebar is replaced by a navbar whose four category
+  dropdowns free the full content width for the tools — PEM blocks, ASN.1 trees
+  and CRL tables are wide.
+- **Light is now the default theme**; dark remains the signature one. The
+  choice is persisted and applied before the first paint, so the theme no
+  longer flashes on load.
+
+### Fixed
+
+- The primary actions (Decode, Generate) had **no visible keyboard focus at
+  all** (WCAG 2.4.7): a `clip-path` clips an element's outline and outer ring,
+  so the cut buttons showed nothing. They now take an inset ring, painted
+  inside the shape.
+- Contrast: white on the accent was 4.41:1, below AA; the call-to-action
+  surfaces move to the accessible accent token and gain the dark-theme variant
+  they lacked.
+- Long values (hex fingerprints, distinguished names, serial numbers) were
+  **silently clipped and unreadable on phones**: a `1fr` grid track and a
+  grid/flex item both resolve `min-width` to `auto`, so an unbreakable value
+  could not shrink — and since the certificate card is `overflow-hidden`, the
+  overflow was clipped rather than scrollable.
+- Navbar accessibility: the current page is marked with `aria-current` instead
+  of colour alone, the misleading `menu`/`menuitem` roles are gone (they
+  promised arrow-key navigation that was never implemented), Escape returns
+  focus to the trigger, and the mobile menu is capped so its last categories
+  stay reachable in landscape.
+- The pointer cursor is restored on interactive controls (Tailwind v4 dropped
+  it), and native form controls take the brand accent colour instead of the
+  browser blue.
+
 ## [1.1.0] - 2026-05-23
 
 ### Added
@@ -106,7 +159,8 @@ are not listed individually here.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.1.0...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.0.0...main
+[2.0.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.1.0...v2.0.0
 [1.1.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.4...v1.1.0
 [1.0.4]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.3...v1.0.4
 [1.0.3]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.2...v1.0.3
