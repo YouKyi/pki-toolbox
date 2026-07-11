@@ -25,10 +25,12 @@
 ### Task 1: Export shared helpers from `generate.ts`
 
 **Files:**
+
 - Modify: `src/lib/pki/generate.ts`
 - Test: existing `tests/pki/v2.test.ts` (no new test — pure visibility refactor, no behaviour change)
 
 **Interfaces:**
+
 - Produces: `export const ALGORITHMS: Record<KeyAlgorithmChoice, AlgoSpec>`, `export type AlgoSpec`, `export function randomSerial(crypto: Crypto): string`, `export function buildName(opts: Pick<GenerateOptions, 'commonName' | 'organization' | 'country'>): JsonName`, `export function webCrypto(): Crypto` — all consumed by Task 2/3.
 
 - [ ] **Step 1: Make the helpers exported**
@@ -41,16 +43,22 @@ export type AlgoSpec = {
 	sign: { name: string; hash?: string };
 };
 
-export const ALGORITHMS: Record<KeyAlgorithmChoice, AlgoSpec> = { /* unchanged body */ };
+export const ALGORITHMS: Record<KeyAlgorithmChoice, AlgoSpec> = {/* unchanged body */};
 
-export function webCrypto(): Crypto { /* unchanged body */ }
+export function webCrypto(): Crypto {
+	/* unchanged body */
+}
 
 /** A random, positive 16-byte serial number as a hex string. */
-export function randomSerial(crypto: Crypto): string { /* unchanged body */ }
+export function randomSerial(crypto: Crypto): string {
+	/* unchanged body */
+}
 
 export function buildName(
 	opts: Pick<GenerateOptions, 'commonName' | 'organization' | 'country'>
-): JsonName { /* unchanged body */ }
+): JsonName {
+	/* unchanged body */
+}
 ```
 
 No other change: bodies and the `generateSelfSigned` call sites stay identical.
@@ -74,10 +82,12 @@ Refs #11"
 ### Task 2: `sign.ts` — `importCa`
 
 **Files:**
+
 - Create: `src/lib/pki/sign.ts`
 - Create: `tests/pki/sign.test.ts`
 
 **Interfaces:**
+
 - Consumes: `webCrypto` from `$lib/pki/generate`, `pemToDer` from `$lib/pki/pem` (`pemToDer(pem: string): Uint8Array`, no label argument).
 - Produces: `export type CaContext = { cert: X509Certificate; key: CryptoKey; signingAlgorithm: { name: string; hash?: string }; warnings: string[] }`, `export async function importCa(certPem: string, keyPem: string): Promise<CaContext>` — consumed by Task 3/4 and the page (Task 6).
 
@@ -91,7 +101,10 @@ import { generateSelfSigned } from '$lib/pki/generate';
 import { importCa } from '$lib/pki/sign';
 
 /** Generate a fresh CA (cert + key PEM) with the existing generator. */
-async function makeCa(keyAlgorithm: 'ec-p256' | 'rsa-2048' | 'ed25519' = 'ec-p256', validityDays = 3650) {
+async function makeCa(
+	keyAlgorithm: 'ec-p256' | 'rsa-2048' | 'ed25519' = 'ec-p256',
+	validityDays = 3650
+) {
 	return generateSelfSigned({
 		commonName: 'sign.test CA',
 		keyAlgorithm,
@@ -132,7 +145,9 @@ describe('importCa', () => {
 	it('rejects a key that does not match the certificate', async () => {
 		const a = await makeCa();
 		const b = await makeCa();
-		await expect(importCa(a.certificatePem, b.privateKeyPem)).rejects.toThrowError(/does not match/i);
+		await expect(importCa(a.certificatePem, b.privateKeyPem)).rejects.toThrowError(
+			/does not match/i
+		);
 	});
 
 	it('rejects garbage instead of a certificate', async () => {
@@ -170,11 +185,7 @@ Create `src/lib/pki/sign.ts`:
  */
 // @peculiar/x509 v2 requires a Reflect metadata polyfill on the consumer side.
 import '@abraham/reflection';
-import {
-	X509Certificate,
-	BasicConstraintsExtension,
-	cryptoProvider
-} from '@peculiar/x509';
+import { X509Certificate, BasicConstraintsExtension, cryptoProvider } from '@peculiar/x509';
 import { pemToDer } from './pem';
 import { webCrypto } from './generate';
 
@@ -304,17 +315,18 @@ Refs #11"
 ### Task 3: `sign.ts` — `issueCertificate`, new-key mode
 
 **Files:**
+
 - Modify: `src/lib/pki/sign.ts`
 - Modify: `tests/pki/sign.test.ts`
 
 **Interfaces:**
+
 - Consumes: `CaContext`/`importCa` (Task 2); `ALGORITHMS`, `KEY_ALGORITHM_LABELS`, `randomSerial`, `buildName`, `webCrypto`, `KeyAlgorithmChoice` from `$lib/pki/generate`; `derToPem` from `$lib/pki/pem`.
 - Produces (consumed by Task 4 and the page):
 
 ```ts
 export type IssueSubject =
-	| { kind: 'generate'; keyAlgorithm: KeyAlgorithmChoice }
-	| { kind: 'csr'; csrPem: string };
+	{ kind: 'generate'; keyAlgorithm: KeyAlgorithmChoice } | { kind: 'csr'; csrPem: string };
 
 export type IssueOptions = {
 	commonName: string;
@@ -337,7 +349,10 @@ export type IssuedCertificate = {
 	warnings: string[];
 };
 
-export async function issueCertificate(ca: CaContext, opts: IssueOptions): Promise<IssuedCertificate>;
+export async function issueCertificate(
+	ca: CaContext,
+	opts: IssueOptions
+): Promise<IssuedCertificate>;
 ```
 
 - [ ] **Step 1: Write the failing tests**
@@ -580,10 +595,12 @@ Refs #11"
 ### Task 4: `sign.ts` — CSR mode
 
 **Files:**
+
 - Modify: `src/lib/pki/sign.ts`
 - Modify: `tests/pki/sign.test.ts`
 
 **Interfaces:**
+
 - Consumes: `TEST_CSR` from `tests/fixtures/certs.ts`; `decodeCsr` from `$lib/pki/parse` (page-side pre-fill — no new helper).
 - Produces: the `{ kind: 'csr'; csrPem: string }` branch of `IssueSubject` becomes functional. `sign.ts` verifies the CSR signature itself (`Pkcs10CertificateRequest.verify`) — `decodeCsr` does not.
 
@@ -708,11 +725,13 @@ Refs #11"
 ### Task 5: Shared `PemOutput.svelte` + optional decode button on `PemInput`
 
 **Files:**
+
 - Create: `src/lib/components/PemOutput.svelte`
 - Modify: `src/lib/components/PemInput.svelte` (decode button only when `ondecode` is provided)
 - Modify: `src/routes/generate-selfsigned/+page.svelte` (use `PemOutput`, drop the local snippet)
 
 **Interfaces:**
+
 - Produces: `PemOutput` props `{ title: string; value: string; filename: string }` — copy/download handled internally. Consumed by `generate-selfsigned` and the new page (Task 6).
 - `PemInput` change: the decode button and the Ctrl+Enter hint render only when `ondecode` is passed. All existing callers pass it → no visible change for them.
 
@@ -818,12 +837,14 @@ Refs #11"
 ### Task 6: Route `/sign-certificate` + catalogue + icon + README
 
 **Files:**
+
 - Modify: `src/lib/components/Icon.svelte` (add `stamp` icon)
 - Modify: `src/lib/tools.ts` (new entry)
 - Create: `src/routes/sign-certificate/+page.svelte`
 - Modify: `README.md` (tools table row)
 
 **Interfaces:**
+
 - Consumes: `importCa`, `issueCertificate`, `CaContext` (`$lib/pki/sign`); `KEY_ALGORITHM_LABELS`, `KeyAlgorithmChoice` (`$lib/pki/generate`); `decodeCsr` (`$lib/pki/parse`); `PemInput` (no `ondecode` for CA fields), `PemOutput`, `ToolHeader`, `Alert`, `Icon`.
 - Produces: tool slug `sign-certificate` (used by the e2e test in Task 7).
 
@@ -919,8 +940,7 @@ In `src/lib/tools.ts`, append after the `generate-selfsigned` entry:
 		csrError = '';
 		try {
 			const csr = await decodeCsr(csrPem);
-			const part = (key: string) =>
-				csr.subjectParts.find((p) => p.key === key)?.value ?? '';
+			const part = (key: string) => csr.subjectParts.find((p) => p.key === key)?.value ?? '';
 			commonName = part('CN');
 			organization = part('O');
 			country = part('C');
@@ -951,8 +971,7 @@ In `src/lib/tools.ts`, append after the `generate-selfsigned` entry:
 				validityDays,
 				sans: sansText.split(/[\n,]+/),
 				isCa,
-				subject:
-					mode === 'csr' ? { kind: 'csr', csrPem } : { kind: 'generate', keyAlgorithm }
+				subject: mode === 'csr' ? { kind: 'csr', csrPem } : { kind: 'generate', keyAlgorithm }
 			});
 		} catch (e) {
 			signError = e instanceof Error ? e.message : String(e);
@@ -1102,10 +1121,7 @@ In `src/lib/tools.ts`, append after the `generate-selfsigned` entry:
 	<button
 		type="button"
 		onclick={sign}
-		disabled={signing ||
-			!ca ||
-			!commonName.trim() ||
-			(mode === 'csr' && !csrPem.trim())}
+		disabled={signing || !ca || !commonName.trim() || (mode === 'csr' && !csrPem.trim())}
 		class="yk-cut mt-5 inline-flex items-center gap-2 bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
 	>
 		<Icon name={signing ? 'clock' : 'stamp'} size={16} />
@@ -1157,7 +1173,7 @@ Check `Alert.svelte`'s accepted `variant` values first; if `info` is not one of 
 In `README.md`, add to the tools table (match the existing column formatting):
 
 ```markdown
-| Sign from a CA      | ready    | Issue certificates signed by an existing CA: new key or CSR, leaf or intermediate. |
+| Sign from a CA | ready | Issue certificates signed by an existing CA: new key or CSR, leaf or intermediate. |
 ```
 
 - [ ] **Step 5: Verify**
@@ -1179,9 +1195,11 @@ Refs #11"
 ### Task 7: E2e happy path
 
 **Files:**
+
 - Create: `e2e/sign-certificate.spec.ts`
 
 **Interfaces:**
+
 - Consumes: the `/generate-selfsigned` and `/sign-certificate` pages as shipped; PemInput textareas carry `aria-label="PKI artefact input"` (two on the sign page: index 0 = CA cert, 1 = CA key).
 
 - [ ] **Step 1: Write the e2e test**

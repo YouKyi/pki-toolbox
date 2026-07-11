@@ -6,7 +6,7 @@ Status: validated
 ## Goal
 
 pki-toolbox can generate a self-signed certificate (optionally a CA), but cannot issue a
-certificate *signed by* an existing CA. This tool closes the loop: paste a CA certificate
+certificate _signed by_ an existing CA. This tool closes the loop: paste a CA certificate
 and its private key, get a signed leaf (or intermediate CA) certificate — entirely
 client-side, nothing leaves the browser.
 
@@ -41,15 +41,15 @@ Out of scope for v1:
   - Derive the WebCrypto import algorithm from the CA certificate's public key — this is
     independent of the generation picker's `ALGORITHMS`, so a pasted CA may use a key
     type the picker does not offer. Supported CA key types and signing algorithms:
-    | CA key | Import algorithm | Signing algorithm |
-    | --- | --- | --- |
-    | RSA (rsaEncryption) | RSASSA-PKCS1-v1_5 / SHA-256 | RSASSA-PKCS1-v1_5 / SHA-256 |
-    | EC P-256 | ECDSA P-256 | ECDSA / SHA-256 |
-    | EC P-384 | ECDSA P-384 | ECDSA / SHA-384 |
-    | EC P-521 | ECDSA P-521 | ECDSA / SHA-512 |
-    | Ed25519 | Ed25519 | Ed25519 |
-    Any other key type (including RSA-PSS keys, id-RSASSA-PSS OID) → clear error,
-    out of scope for v1. Then `crypto.subtle.importKey('pkcs8', …)`.
+    | CA key                                                                        | Import algorithm            | Signing algorithm           |
+    | ----------------------------------------------------------------------------- | --------------------------- | --------------------------- |
+    | RSA (rsaEncryption)                                                           | RSASSA-PKCS1-v1_5 / SHA-256 | RSASSA-PKCS1-v1_5 / SHA-256 |
+    | EC P-256                                                                      | ECDSA P-256                 | ECDSA / SHA-256             |
+    | EC P-384                                                                      | ECDSA P-384                 | ECDSA / SHA-384             |
+    | EC P-521                                                                      | ECDSA P-521                 | ECDSA / SHA-512             |
+    | Ed25519                                                                       | Ed25519                     | Ed25519                     |
+    | Any other key type (including RSA-PSS keys, id-RSASSA-PSS OID) → clear error, |
+    | out of scope for v1. Then `crypto.subtle.importKey('pkcs8', …)`.              |
   - Verify the private key matches the certificate via a sign/verify probe.
   - Surface a **non-blocking warning** when the CA certificate lacks
     `BasicConstraints cA=true`.
@@ -79,14 +79,14 @@ Export the currently private helpers so `sign.ts` reuses them instead of duplica
 
 ## Extensions on the issued certificate
 
-| Extension | Value | Critical |
-| --- | --- | --- |
-| BasicConstraints | cA per "intermediate CA" checkbox | yes |
-| KeyUsage | leaf: digitalSignature + keyEncipherment; CA: keyCertSign + cRLSign | yes |
-| ExtendedKeyUsage | serverAuth + clientAuth (leaf only) | no |
-| SubjectAlternativeName | DNS entries from the form | no |
-| SubjectKeyIdentifier | from the subject public key | no |
-| AuthorityKeyIdentifier | from the CA certificate's public key | no |
+| Extension              | Value                                                               | Critical |
+| ---------------------- | ------------------------------------------------------------------- | -------- |
+| BasicConstraints       | cA per "intermediate CA" checkbox                                   | yes      |
+| KeyUsage               | leaf: digitalSignature + keyEncipherment; CA: keyCertSign + cRLSign | yes      |
+| ExtendedKeyUsage       | serverAuth + clientAuth (leaf only)                                 | no       |
+| SubjectAlternativeName | DNS entries from the form                                           | no       |
+| SubjectKeyIdentifier   | from the subject public key                                         | no       |
+| AuthorityKeyIdentifier | from the CA certificate's public key                                | no       |
 
 SKI/AKI are new to the codebase (generate-selfsigned does not emit them) and are required
 for clean chain building.
