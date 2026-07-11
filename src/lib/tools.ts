@@ -108,6 +108,15 @@ export const tools: Tool[] = [
 		icon: 'sparkles',
 		category: 'generate',
 		status: 'ready'
+	},
+	{
+		slug: 'sign-certificate',
+		name: 'Sign from a CA',
+		description:
+			'Issue a certificate signed by an existing CA: new key pair or CSR, leaf or intermediate CA, with a ready-to-use fullchain.',
+		icon: 'stamp',
+		category: 'generate',
+		status: 'ready'
 	}
 ];
 

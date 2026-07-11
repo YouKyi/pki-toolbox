@@ -11,3 +11,4 @@ bun.lockb
 /.svelte-kit/
 /.pnpm-store/
 node_modules/
+.superpowers/

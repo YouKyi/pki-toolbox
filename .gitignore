@@ -33,3 +33,6 @@ vite.config.ts.timestamp-*
 /playwright-report/
 /playwright/.cache/
 junit.xml
+
+# Subagent-driven development scratch
+.superpowers/

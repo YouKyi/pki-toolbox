@@ -38,7 +38,9 @@
 		shield:
 			'<path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />',
 		info: '<circle cx="12" cy="12" r="9" /><path d="M12 8h.01" /><path d="M11 12h1v4h1" />',
-		clock: '<circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" />'
+		clock: '<circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" />',
+		stamp:
+			'<path d="M5 21h14" /><path d="M5 18a1 1 0 0 1 -1 -1v-1a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v1a1 1 0 0 1 -1 1z" /><path d="M14.5 14c.318 -1.483 .509 -2.734 .509 -4a3.5 3.5 0 1 0 -6.918 .75" /><path d="M14.5 14c-.318 -1.483 -.509 -2.734 -.509 -4" />'
 	};
 
 	const FALLBACK = '<circle cx="12" cy="12" r="2" />';

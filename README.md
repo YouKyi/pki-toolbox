@@ -28,6 +28,7 @@ request.
 | ASN.1 viewer        | ✅ ready | Expandable tag/length/value tree of any DER artefact        |
 | Format convert      | ✅ ready | PEM ↔ DER ↔ PKCS#7 conversion                               |
 | Self-signed cert    | ✅ ready | Generate a self-signed cert + key pair (RSA / EC / Ed25519) |
+| Sign from a CA      | ✅ ready | Issue a cert from a CA: new key or CSR, leaf/intermediate   |
 
 ## Run it
 

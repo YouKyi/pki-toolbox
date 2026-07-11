@@ -6,12 +6,11 @@
 		type KeyAlgorithmChoice
 	} from '$lib/pki/generate';
 	import { decodeCertificate, type DecodedCertificate } from '$lib/pki/parse';
-	import { downloadText } from '$lib/download';
-	import { writeToClipboard } from '$lib/clipboard';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import CertCard from '$lib/components/CertCard.svelte';
 	import Alert from '$lib/components/Alert.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import PemOutput from '$lib/components/PemOutput.svelte';
 
 	const tool = requireTool('generate-selfsigned');
 
@@ -34,7 +33,6 @@
 	} | null>(null);
 	let error = $state('');
 	let loading = $state(false);
-	let copied = $state('');
 
 	async function generate() {
 		loading = true;
@@ -56,16 +54,6 @@
 			error = e instanceof Error ? e.message : String(e);
 		} finally {
 			loading = false;
-		}
-	}
-
-	async function copy(text: string, id: string) {
-		const ok = await writeToClipboard(text);
-		if (ok) {
-			copied = id;
-			setTimeout(() => {
-				if (copied === id) copied = '';
-			}, 1200);
 		}
 	}
 </script>
@@ -147,42 +135,17 @@
 	{#if result}
 		<CertCard cert={result.cert} />
 
-		{#snippet pemBlock(title: string, value: string, id: string, filename: string)}
-			<article
-				class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-			>
-				<header class="flex items-center justify-between px-5 py-3">
-					<span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</span>
-					<div class="flex gap-2">
-						<button
-							type="button"
-							onclick={() => copy(value, id)}
-							class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-						>
-							<Icon name={copied === id ? 'check' : 'copy'} size={13} />
-							{copied === id ? 'Copied' : 'Copy'}
-						</button>
-						<button
-							type="button"
-							onclick={() => downloadText(filename, value, 'application/x-pem-file')}
-							class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-						>
-							<Icon name="upload" size={13} class="rotate-180" /> Download
-						</button>
-					</div>
-				</header>
-				<pre
-					class="max-h-56 overflow-auto border-t border-slate-200 bg-slate-50 p-4 font-mono text-[12px] leading-relaxed text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">{value}</pre>
-			</article>
-		{/snippet}
-
-		{@render pemBlock('Certificate (PEM)', result.certificatePem, 'cert', 'certificate.crt')}
+		<PemOutput title="Certificate (PEM)" value={result.certificatePem} filename="certificate.crt" />
 
 		<Alert variant="warn" title="Private key">
 			Keep this private key in a safe place and never share it. It is shown only here and is stored
 			nowhere.
 		</Alert>
 
-		{@render pemBlock('Private key (PEM, PKCS#8)', result.privateKeyPem, 'key', 'private-key.key')}
+		<PemOutput
+			title="Private key (PEM, PKCS#8)"
+			value={result.privateKeyPem}
+			filename="private-key.key"
+		/>
 	{/if}
 </div>

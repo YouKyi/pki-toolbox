@@ -113,18 +113,20 @@
 	{/if}
 
 	<div class="flex flex-wrap items-center gap-2">
-		<button
-			type="button"
-			onclick={() => ondecode?.()}
-			disabled={loading || value.trim().length === 0}
-			class="yk-cut inline-flex items-center gap-2 bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
-		>
-			{#if loading}
-				<Icon name="clock" size={16} /> Analyzing…
-			{:else}
-				<Icon name="shield" size={16} /> {decodeLabel}
-			{/if}
-		</button>
+		{#if ondecode}
+			<button
+				type="button"
+				onclick={() => ondecode?.()}
+				disabled={loading || value.trim().length === 0}
+				class="yk-cut inline-flex items-center gap-2 bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
+			>
+				{#if loading}
+					<Icon name="clock" size={16} /> Analyzing…
+				{:else}
+					<Icon name="shield" size={16} /> {decodeLabel}
+				{/if}
+			</button>
+		{/if}
 
 		<button
 			type="button"
@@ -169,6 +171,8 @@
 	</div>
 	<p class="text-xs text-slate-500 dark:text-slate-500">
 		Everything is decoded locally in your browser, no data is sent.
-		<span class="hidden sm:inline">Tip: Ctrl/⌘ + Enter to decode.</span>
+		{#if ondecode}
+			<span class="hidden sm:inline">Tip: Ctrl/⌘ + Enter to decode.</span>
+		{/if}
 	</p>
 </div>
