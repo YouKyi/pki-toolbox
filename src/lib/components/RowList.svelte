@@ -48,7 +48,7 @@
 					<button
 						type="button"
 						onclick={() => copyValue(row)}
-						class="shrink-0 rounded p-1 text-slate-500 transition hover:bg-slate-100 hover:text-teal-600 dark:hover:bg-slate-800 dark:hover:text-teal-400"
+						class="shrink-0 rounded p-1 text-slate-500 transition hover:bg-slate-100 hover:text-teal-700 dark:hover:bg-slate-800 dark:hover:text-teal-400"
 						aria-label="Copy {row.label}"
 						title="Copy"
 					>

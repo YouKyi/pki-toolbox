@@ -129,7 +129,7 @@
 		type="button"
 		onclick={generate}
 		disabled={loading || !commonName.trim()}
-		class="yk-cut mt-5 inline-flex items-center gap-2 bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-500 focus:ring-2 focus:ring-teal-500/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+		class="yk-cut mt-5 inline-flex items-center gap-2 bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
 	>
 		<Icon name={loading ? 'clock' : 'sparkles'} size={16} />
 		{loading ? 'Generating…' : 'Generate the certificate'}

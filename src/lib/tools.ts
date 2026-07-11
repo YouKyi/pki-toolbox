@@ -1,5 +1,5 @@
 /**
- * Single source of truth for the tool catalogue. The sidebar and the home
+ * Single source of truth for the tool catalogue. The navbar and the home
  * grid both read from this registry.
  */
 
@@ -17,7 +17,7 @@ export type Tool = {
 	status: ToolStatus;
 };
 
-/** Display metadata for each category, in sidebar order. */
+/** Display metadata for each category, in navbar order. */
 export const categories: { id: ToolCategory; label: string }[] = [
 	{ id: 'decode', label: 'Decoding' },
 	{ id: 'inspect', label: 'Inspection' },
