@@ -97,6 +97,9 @@ e2e:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH
+    # Tag pipelines set CI_COMMIT_TAG and no CI_COMMIT_BRANCH: without this rule
+    # the released artefact would never be exercised end-to-end.
+    - if: $CI_COMMIT_TAG
 
 # Supply-chain scan: source-side complement to the runtime image scan.
 #
@@ -168,7 +171,15 @@ docker:
   cache: {}
   # Waits for supply-chain too: a fixable HIGH/CRITICAL CVE, a committed secret
   # or a restricted license fails the scan stage and blocks the image build.
-  needs: [lint, test, supply-chain]
+  # And for e2e: the release job needs this one, so gating here is what actually
+  # stops a browser-broken build from being published. `optional` keeps the DAG
+  # valid on the pipelines where e2e is not created.
+  needs:
+    - lint
+    - test
+    - supply-chain
+    - job: e2e
+      optional: true
   variables:
     DOCKER_TLS_CERTDIR: ''
     DOCKER_BUILDKIT: '1'
