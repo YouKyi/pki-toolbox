@@ -9,6 +9,33 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-11
+
+### Added
+
+- **Sign from a CA**, a new generation tool (`/sign-certificate`): paste a CA
+  certificate and its unencrypted PKCS#8 private key, and issue a certificate
+  signed by that CA — entirely in the browser, the CA key is imported
+  non-extractable into WebCrypto and never leaves the page. Two modes: generate
+  a new key pair, or sign a pasted PKCS#10 CSR (its subject and DNS SANs
+  pre-fill the form, the form wins; the CSR signature is verified before
+  issuance — proof of possession). The issued certificate can itself be an
+  intermediate CA, enabling full root → intermediate → leaf hierarchies. Issued
+  certificates carry Subject Key Identifier and Authority Key Identifier
+  extensions, and a ready-to-serve fullchain (certificate + CA) is offered
+  alongside the certificate and private key.
+- Guardrails on CA import: encrypted keys are rejected with an `openssl pkey`
+  hint, a key that does not match the certificate is refused (sign/verify
+  probe), unsupported key types (including RSA-PSS) are refused, a certificate
+  without `cA=true` triggers a warning, and a requested validity outliving the
+  CA certificate is flagged.
+
+### Changed
+
+- The PEM result block (copy/download) of the generation tools is now a shared
+  component; the paste area's Decode button only renders for tools that decode
+  on the spot.
+
 ## [2.0.0] - 2026-07-11
 
 Full visual and navigational rework on the youkyi design system. The decoding
@@ -159,7 +186,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.0.0...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.1.0...main
+[2.1.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.0.0...v2.1.0
 [2.0.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.1.0...v2.0.0
 [1.1.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.4...v1.1.0
 [1.0.4]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.3...v1.0.4
