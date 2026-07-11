@@ -4,9 +4,29 @@
  */
 // @peculiar/x509 v2 requires a Reflect metadata polyfill on the consumer side.
 import '@abraham/reflection';
-import { X509Certificate, BasicConstraintsExtension, cryptoProvider } from '@peculiar/x509';
-import { pemToDer } from './pem';
-import { webCrypto } from './generate';
+import {
+	X509Certificate,
+	X509CertificateGenerator,
+	BasicConstraintsExtension,
+	KeyUsagesExtension,
+	KeyUsageFlags,
+	ExtendedKeyUsageExtension,
+	SubjectAlternativeNameExtension,
+	SubjectKeyIdentifierExtension,
+	AuthorityKeyIdentifierExtension,
+	cryptoProvider,
+	type Extension,
+	type PublicKeyType
+} from '@peculiar/x509';
+import { pemToDer, derToPem } from './pem';
+import {
+	ALGORITHMS,
+	KEY_ALGORITHM_LABELS,
+	randomSerial,
+	buildName,
+	webCrypto,
+	type KeyAlgorithmChoice
+} from './generate';
 
 export type CaContext = {
 	cert: X509Certificate;
@@ -112,4 +132,125 @@ export async function importCa(certPem: string, keyPem: string): Promise<CaConte
 	}
 
 	return { cert, key, signingAlgorithm: algo.sign, warnings };
+}
+
+export type IssueSubject =
+	{ kind: 'generate'; keyAlgorithm: KeyAlgorithmChoice } | { kind: 'csr'; csrPem: string };
+
+export type IssueOptions = {
+	commonName: string;
+	organization?: string;
+	country?: string;
+	validityDays: number;
+	/** DNS Subject Alternative Names. */
+	sans: string[];
+	/** Issue an intermediate CA (Basic Constraints cA = true). */
+	isCa: boolean;
+	subject: IssueSubject;
+};
+
+export type IssuedCertificate = {
+	certificatePem: string;
+	/** Only present when the tool generated the key pair. */
+	privateKeyPem?: string;
+	/** Issued certificate followed by the CA certificate. */
+	fullchainPem: string;
+	warnings: string[];
+};
+
+/**
+ * Issue a certificate signed by the imported CA. The subject key pair is
+ * either generated locally or taken from a verified CSR (Task 4).
+ */
+export async function issueCertificate(
+	ca: CaContext,
+	opts: IssueOptions
+): Promise<IssuedCertificate> {
+	if (!opts.commonName.trim()) throw new Error('The Common Name (CN) is required.');
+
+	const crypto = webCrypto();
+	cryptoProvider.set(crypto);
+
+	let publicKey: PublicKeyType;
+	let privateKeyPem: string | undefined;
+
+	if (opts.subject.kind === 'generate') {
+		const spec = ALGORITHMS[opts.subject.keyAlgorithm];
+		let keys: CryptoKeyPair;
+		try {
+			keys = (await crypto.subtle.generateKey(spec.generate, true, [
+				'sign',
+				'verify'
+			])) as CryptoKeyPair;
+		} catch (e) {
+			throw new Error(
+				`This browser cannot generate a ${KEY_ALGORITHM_LABELS[opts.subject.keyAlgorithm]} key.`,
+				{ cause: e }
+			);
+		}
+		publicKey = keys.publicKey;
+		const pkcs8 = await crypto.subtle.exportKey('pkcs8', keys.privateKey);
+		privateKeyPem = derToPem(new Uint8Array(pkcs8), 'PRIVATE KEY');
+	} else {
+		publicKey = await csrPublicKey(opts.subject.csrPem, crypto); // Task 4
+	}
+
+	const notBefore = new Date(Date.now() - 60_000); // 1 min in the past for clock skew
+	const notAfter = new Date(notBefore.getTime() + opts.validityDays * 86_400_000);
+
+	const warnings: string[] = [];
+	if (notAfter > ca.cert.notAfter) {
+		warnings.push(
+			`The requested validity ends after the CA certificate expires (${ca.cert.notAfter.toISOString().slice(0, 10)}); the chain will not verify past that date.`
+		);
+	}
+
+	const keyUsage = opts.isCa
+		? KeyUsageFlags.keyCertSign | KeyUsageFlags.cRLSign
+		: KeyUsageFlags.digitalSignature | KeyUsageFlags.keyEncipherment;
+
+	const extensions: Extension[] = [
+		new BasicConstraintsExtension(opts.isCa, undefined, true),
+		new KeyUsagesExtension(keyUsage, true),
+		await SubjectKeyIdentifierExtension.create(publicKey, false, crypto),
+		await AuthorityKeyIdentifierExtension.create(ca.cert.publicKey, false, crypto)
+	];
+	if (!opts.isCa) {
+		// serverAuth + clientAuth
+		extensions.push(
+			new ExtendedKeyUsageExtension(['1.3.6.1.5.5.7.3.1', '1.3.6.1.5.5.7.3.2'], false)
+		);
+	}
+	const sans = opts.sans.map((v) => v.trim()).filter(Boolean);
+	if (sans.length) {
+		extensions.push(
+			new SubjectAlternativeNameExtension(sans.map((value) => ({ type: 'dns' as const, value })))
+		);
+	}
+
+	const cert = await X509CertificateGenerator.create({
+		serialNumber: randomSerial(crypto),
+		subject: buildName(opts),
+		issuer: ca.cert.subjectName,
+		notBefore,
+		notAfter,
+		signingAlgorithm: ca.signingAlgorithm,
+		publicKey,
+		signingKey: ca.key,
+		extensions
+	});
+
+	const certificatePem = cert.toString('pem');
+	return {
+		certificatePem,
+		privateKeyPem,
+		fullchainPem: `${certificatePem}\n${ca.cert.toString('pem')}\n`,
+		warnings
+	};
+}
+
+async function csrPublicKey(csrPem: string, crypto: Crypto): Promise<PublicKeyType> {
+	void csrPem;
+	void crypto;
+	throw new Error('CSR mode not implemented yet.');
 }

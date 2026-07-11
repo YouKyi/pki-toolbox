@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { generateSelfSigned } from '$lib/pki/generate';
-import { importCa } from '$lib/pki/sign';
+import { importCa, issueCertificate } from '$lib/pki/sign';
+import {
+	X509Certificate,
+	AuthorityKeyIdentifierExtension,
+	SubjectKeyIdentifierExtension,
+	KeyUsagesExtension,
+	KeyUsageFlags
+} from '@peculiar/x509';
+import { decodeCertificate } from '$lib/pki/parse';
 
 /** Generate a fresh CA (cert + key PEM) with the existing generator. */
 async function makeCa(
@@ -67,5 +75,97 @@ describe('importCa', () => {
 		});
 		const ctx = await importCa(leaf.certificatePem, leaf.privateKeyPem);
 		expect(ctx.warnings.some((w) => /not marked as a CA/i.test(w))).toBe(true);
+	});
+});
+
+describe('issueCertificate (new key pair)', () => {
+	it('issues a leaf signed by the CA, with SKI/AKI and a fullchain', async () => {
+		const caPems = await makeCa('ec-p256');
+		const ca = await importCa(caPems.certificatePem, caPems.privateKeyPem);
+		const issued = await issueCertificate(ca, {
+			commonName: 'leaf.sign.test',
+			organization: 'pki-toolbox',
+			country: 'FR',
+			validityDays: 365,
+			sans: ['leaf.sign.test', 'alt.sign.test'],
+			isCa: false,
+			subject: { kind: 'generate', keyAlgorithm: 'ec-p256' }
+		});
+
+		expect(issued.privateKeyPem).toContain('BEGIN PRIVATE KEY');
+		expect(issued.warnings).toHaveLength(0);
+		// fullchain = leaf + CA
+		expect(issued.fullchainPem.match(/BEGIN CERTIFICATE/g)).toHaveLength(2);
+
+		const leaf = new X509Certificate(issued.certificatePem);
+		// signed by the CA, not self-signed
+		expect(await leaf.verify({ publicKey: ca.cert.publicKey })).toBe(true);
+		expect(leaf.issuer).toBe(ca.cert.subject);
+
+		// AKI == SHA-1 key id of the CA public key (the generated CA has no SKI
+		// extension, so compute the expected id directly from its key)
+		const expectedSki = await SubjectKeyIdentifierExtension.create(ca.cert.publicKey);
+		expect(leaf.getExtension(AuthorityKeyIdentifierExtension)?.keyId).toBe(expectedSki.keyId);
+		expect(leaf.getExtension(SubjectKeyIdentifierExtension)?.keyId).toBeTruthy();
+
+		const decoded = await decodeCertificate(issued.certificatePem);
+		expect(decoded.isCA).toBe(false);
+		expect(decoded.subjectAltNames.map((s) => s.value)).toContain('alt.sign.test');
+	});
+
+	it('issues an intermediate CA that can itself sign', async () => {
+		const rootPems = await makeCa('ec-p256');
+		const root = await importCa(rootPems.certificatePem, rootPems.privateKeyPem);
+		const inter = await issueCertificate(root, {
+			commonName: 'sign.test Intermediate CA',
+			validityDays: 1825,
+			sans: [],
+			isCa: true,
+			subject: { kind: 'generate', keyAlgorithm: 'ec-p256' }
+		});
+
+		const interCert = new X509Certificate(inter.certificatePem);
+		const ku = interCert.getExtension(KeyUsagesExtension);
+		expect((ku!.usages & KeyUsageFlags.keyCertSign) !== 0).toBe(true);
+		expect((await decodeCertificate(inter.certificatePem)).isCA).toBe(true);
+
+		// The intermediate can sign a leaf in turn.
+		const interCtx = await importCa(inter.certificatePem, inter.privateKeyPem!);
+		const leaf = await issueCertificate(interCtx, {
+			commonName: 'deep.sign.test',
+			validityDays: 365,
+			sans: ['deep.sign.test'],
+			isCa: false,
+			subject: { kind: 'generate', keyAlgorithm: 'ec-p256' }
+		});
+		const leafCert = new X509Certificate(leaf.certificatePem);
+		expect(await leafCert.verify({ publicKey: interCert.publicKey })).toBe(true);
+	});
+
+	it('warns when the requested validity outlives the CA', async () => {
+		const caPems = await makeCa('ec-p256', 30);
+		const ca = await importCa(caPems.certificatePem, caPems.privateKeyPem);
+		const issued = await issueCertificate(ca, {
+			commonName: 'outlives.sign.test',
+			validityDays: 365,
+			sans: [],
+			isCa: false,
+			subject: { kind: 'generate', keyAlgorithm: 'ec-p256' }
+		});
+		expect(issued.warnings.some((w) => /CA certificate expires/i.test(w))).toBe(true);
+	});
+
+	it('requires a Common Name', async () => {
+		const caPems = await makeCa();
+		const ca = await importCa(caPems.certificatePem, caPems.privateKeyPem);
+		await expect(
+			issueCertificate(ca, {
+				commonName: '  ',
+				validityDays: 365,
+				sans: [],
+				isCa: false,
+				subject: { kind: 'generate', keyAlgorithm: 'ec-p256' }
+			})
+		).rejects.toThrowError(/Common Name/);
 	});
 });
