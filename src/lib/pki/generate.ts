@@ -29,12 +29,12 @@ export const KEY_ALGORITHM_LABELS: Record<KeyAlgorithmChoice, string> = {
 	ed25519: 'Ed25519'
 };
 
-type AlgoSpec = {
+export type AlgoSpec = {
 	generate: RsaHashedKeyGenParams | EcKeyGenParams | { name: 'Ed25519' };
 	sign: { name: string; hash?: string };
 };
 
-const ALGORITHMS: Record<KeyAlgorithmChoice, AlgoSpec> = {
+export const ALGORITHMS: Record<KeyAlgorithmChoice, AlgoSpec> = {
 	'rsa-2048': {
 		generate: {
 			name: 'RSASSA-PKCS1-v1_5',
@@ -84,20 +84,22 @@ export type GeneratedCertificate = {
 	privateKeyPem: string;
 };
 
-function webCrypto(): Crypto {
+export function webCrypto(): Crypto {
 	const crypto = (globalThis as { crypto?: Crypto }).crypto;
 	if (!crypto?.subtle) throw new Error('Web Crypto API is not available in this environment.');
 	return crypto;
 }
 
 /** A random, positive 16-byte serial number as a hex string. */
-function randomSerial(crypto: Crypto): string {
+export function randomSerial(crypto: Crypto): string {
 	const bytes = crypto.getRandomValues(new Uint8Array(16));
 	bytes[0] &= 0x7f; // keep the integer positive
 	return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-function buildName(opts: GenerateOptions): JsonName {
+export function buildName(
+	opts: Pick<GenerateOptions, 'commonName' | 'organization' | 'country'>
+): JsonName {
 	const name: JsonName = [{ CN: [opts.commonName] }];
 	if (opts.organization?.trim()) name.push({ O: [opts.organization.trim()] });
 	if (opts.country?.trim()) name.push({ C: [opts.country.trim().toUpperCase()] });
