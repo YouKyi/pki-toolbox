@@ -4,6 +4,13 @@
 	"lockFileMaintenance": {
 		"enabled": true
 	},
+	"packageRules": [
+		{
+			"description": "TS 7 ships no programmatic compiler API; typescript-eslint needs it (peer <6.1.0) and crashes at load. Revisit when TS 7.1 lands and typescript-eslint announces support.",
+			"matchPackageNames": ["typescript"],
+			"allowedVersions": "<7.0.0"
+		}
+	],
 	"customManagers": [
 		{
 			"customType": "regex",
