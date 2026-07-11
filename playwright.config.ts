@@ -34,11 +34,7 @@ export default defineConfig({
 	fullyParallel: true,
 
 	// html for humans, junit for the GitLab "Tests" tab (reports.junit).
-	reporter: [
-		['html', { open: 'never' }],
-		['junit', { outputFile: 'junit.xml' }],
-		['list']
-	],
+	reporter: [['html', { open: 'never' }], ['junit', { outputFile: 'junit.xml' }], ['list']],
 
 	use: {
 		baseURL,
