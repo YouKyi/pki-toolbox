@@ -13,6 +13,77 @@ import { decodeCertificate } from '$lib/pki/parse';
 import { derToPem } from '$lib/pki/pem';
 import { TEST_CSR } from '../fixtures/certs';
 
+/**
+ * A self-signed RSA-PSS CA (cert + PKCS#8 key), generated once via openssl:
+ *
+ *   openssl genpkey -algorithm RSA-PSS -pkeyopt rsa_keygen_bits:2048 \
+ *     -pkeyopt rsa_pss_keygen_md:sha256 -pkeyopt rsa_pss_keygen_mgf1_md:sha256 \
+ *     -pkeyopt rsa_pss_keygen_saltlen:32 -out rsapss.key
+ *   openssl req -new -x509 -key rsapss.key -out rsapss.crt -days 3650 \
+ *     -subj "/CN=rsa-pss.sign.test" -sha256
+ *   openssl pkey -in rsapss.key -out rsapss_pkcs8.key
+ *
+ * Inlined as a static fixture rather than generated in-test: Node's WebCrypto
+ * exports RSA-PSS public keys under the plain `rsaEncryption` SPKI OID (no PSS
+ * parameters), identical to a PKCS#1 v1.5 key, so a cert built in-test via
+ * `X509CertificateGenerator.createSelfSigned` with WebCrypto RSA-PSS keys is
+ * indistinguishable from RSASSA-PKCS1-v1_5 to `caAlgorithm` and never exercises
+ * the "Unsupported CA key type" branch. openssl encodes the SPKI with the
+ * `id-RSASSA-PSS` OID instead, which `@peculiar/x509` reports as `RSA-PSS`.
+ */
+const RSA_PSS_CA_CERT = `-----BEGIN CERTIFICATE-----
+MIIDtTCCAmmgAwIBAgIUL7ruKIxEdF1hOgfS8MHTCRfglv0wQQYJKoZIhvcNAQEK
+MDSgDzANBglghkgBZQMEAgEFAKEcMBoGCSqGSIb3DQEBCDANBglghkgBZQMEAgEF
+AKIDAgEgMBwxGjAYBgNVBAMMEXJzYS1wc3Muc2lnbi50ZXN0MB4XDTI2MDcxMTEz
+MTgyNVoXDTM2MDcwODEzMTgyNVowHDEaMBgGA1UEAwwRcnNhLXBzcy5zaWduLnRl
+c3QwggFWMEEGCSqGSIb3DQEBCjA0oA8wDQYJYIZIAWUDBAIBBQChHDAaBgkqhkiG
+9w0BAQgwDQYJYIZIAWUDBAIBBQCiAwIBIAOCAQ8AMIIBCgKCAQEAuupx2ZgE7OL1
+nzwgzd2xewD7NiZBVDd6jMOcHQChNSMr2NefNsEmPidePaVodSoe2TUCSGgSsKaY
+UKnmI9ILzIUuTFnm706Z/wwzNt4Zqqw+TZdtLgV272pIujQ9GquJoGmiRGAuYnG9
+qRIKNSMWrKfsQLUX9eT+e98kiCsJjug/uH8eOyhdW66nTiMJPaStHCJeluXC6qfC
+53g8ZMI40nIZya8ttmzJleSTmYmlguVY+J9Anr/G+xcz9gBP8wijy2xjw6jBluL8
+/DKOQrg4nI1r7MKKJg6gT/rej0sN+lBfyWgto97jI13rB/uP07WxwiJARM9RLDeY
+HwDcbzWUywIDAQABo1MwUTAdBgNVHQ4EFgQUlqJICKSq+veO3OHyyLAjzLd2eaAw
+HwYDVR0jBBgwFoAUlqJICKSq+veO3OHyyLAjzLd2eaAwDwYDVR0TAQH/BAUwAwEB
+/zBBBgkqhkiG9w0BAQowNKAPMA0GCWCGSAFlAwQCAQUAoRwwGgYJKoZIhvcNAQEI
+MA0GCWCGSAFlAwQCAQUAogMCASADggEBAHZNm/MNCXA4wZWwjG83RKToCnqBiugl
+qPfYkfXfK6RqRPsaVCBqKFZHkzt0tYQ+RS2xDYZTIbd8xRE8DIhGBfIRSYtVc+CO
+7D93HxpRLclBy80Tx5t4Sl1Ud2BjD5Ifd6xDRYODlaJ5jFMyY2ijVSNanwHOispe
++wGqdEtDT+8bM5iAekukW0gPER3dlKWlS6lg52AB0/4+gyBVIGnjjD/U7cre7GIc
+sYZtQCbE1mbttZ2iSZcFnWJ3xj+NNQjYVEazSWSSI8ityRzGPCvn9h+ST9Q0F7Gm
+FD+/wEq194z7N0NrZMr4F64Ojxd4mtuiv73OYSqru9zmEUMrpe8eAT8=
+-----END CERTIFICATE-----`;
+
+const RSA_PSS_CA_KEY = `-----BEGIN PRIVATE KEY-----
+MIIE7wIBADBBBgkqhkiG9w0BAQowNKAPMA0GCWCGSAFlAwQCAQUAoRwwGgYJKoZI
+hvcNAQEIMA0GCWCGSAFlAwQCAQUAogMCASAEggSlMIIEoQIBAAKCAQEAuupx2ZgE
+7OL1nzwgzd2xewD7NiZBVDd6jMOcHQChNSMr2NefNsEmPidePaVodSoe2TUCSGgS
+sKaYUKnmI9ILzIUuTFnm706Z/wwzNt4Zqqw+TZdtLgV272pIujQ9GquJoGmiRGAu
+YnG9qRIKNSMWrKfsQLUX9eT+e98kiCsJjug/uH8eOyhdW66nTiMJPaStHCJeluXC
+6qfC53g8ZMI40nIZya8ttmzJleSTmYmlguVY+J9Anr/G+xcz9gBP8wijy2xjw6jB
+luL8/DKOQrg4nI1r7MKKJg6gT/rej0sN+lBfyWgto97jI13rB/uP07WxwiJARM9R
+LDeYHwDcbzWUywIDAQABAoH/Lxfil3A1zXlhaT09BqFUlikpIfuBejaAKfce3i/K
+bhjuczPgaWtAt2gz1lRWfS6flxpD+Po/u0I+HhSwZ1YEowLrJ1F/XcvwANKSFMDg
+tp+vEt2UJIQ78xZUPJXsz0to4YG74H5bMXJ21qI08C5nCBlG7QazgsCvXYZbLfOp
+9Ncf6btSdqWbJP/Dkl1D2BRiOZc52z+np12lutCl6cVDnFRbp8Xk4+LxdOuFvcsC
+QGlsdQDKGQ9WeP8jzS/cysipLA4EBDcu26uIA4PPZ3c6Hxv853HLg8gLhFiyKcHr
+n2z1Ky54xTeCOFsOHTz29H/tKGvCG0x4cHSuEFLP9qntAoGBAPt5YZGXlwV15n7x
+tFt3SbaLRHzygldyJOGjQZO6DPWqcXw8UFhtpos11iZV2D4vjuO/5SPMNMNnTVaA
+tytq3w+mrsRDDYybD69BjulMe9AALTkVa2nD+DH23JGulJIqc5PGkpgvUX4aMfUD
+atUaFpfZ8Lt1HhUDSH2Co9oiTDpVAoGBAL5Hn5fFbVi5tK0KjxQkPka4qH6ghRx6
+ad7nF2RJymNhLmITy8i6wu+eHmKzjqybGD4tHFvs8HqEkdpKUG4KjvmHHCIySwkI
+UMQRxhRqOedFtRj9UGIIe2c11Adh48uqxKnmf7Ft2a62XHsZOxU+uV69I/XRc2jb
+1NUTa2Ri1fKfAoGABWgRqfCpZYuoXfhSWVkSM6OA4HLSTJD+q/83jLaGSs3UTMh7
+LbuFxh5tMTvNP2EEYG8ivQdJ5x2UcxSnW36btxltTnjmlKxMxQbSzL9BNjKaxkxo
+l8iH0IMvMM6hERdqjrXJNw5lYSGtC0h8hoJeE/uyikU1VVxRtakWXr04CFUCgYBA
+wSEnxlFLE4/QH7rHcPocmTUGOtxx75rd96j3QUF2BpmBWRlNy3kRkK7oihCw3usm
+JbXz9rN0Dm+QaR/sAv3bH0bMwG7WuRS7VQ0i32+rLAbQZUyYwCg23JO2m3KpWgkp
+hL7KBAdDtN3OKqz3suvkuNtnCYuMENviU4SFmjkTIwKBgQDCuYmHUhpBchUkY2+G
+5eyOsiGWJ4LzZoNu4IjrUT3hV5e9xqw5nOV0RQG2Ak8kXS2p9oUVLGcqrjHpRasb
+vQNobgWkZxMMHdUMaxwZmNOoupI5/pPxzsGwH3LBH6ywlx1cowrvlI09XD1yIe0X
+c7IpubDWshDA9AAQfy8fk4i8kw==
+-----END PRIVATE KEY-----`;
+
 /** Generate a fresh CA (cert + key PEM) with the existing generator. */
 async function makeCa(
 	keyAlgorithm: 'ec-p256' | 'rsa-2048' | 'ed25519' = 'ec-p256',
@@ -66,6 +137,12 @@ describe('importCa', () => {
 	it('rejects garbage instead of a certificate', async () => {
 		const ca = await makeCa();
 		await expect(importCa('not a cert', ca.privateKeyPem)).rejects.toThrowError(/CA certificate/i);
+	});
+
+	it('rejects an unsupported CA key type (RSA-PSS)', async () => {
+		await expect(importCa(RSA_PSS_CA_CERT, RSA_PSS_CA_KEY)).rejects.toThrowError(
+			/Unsupported CA key type/
+		);
 	});
 
 	it('warns (non-blocking) when the certificate is not a CA', async () => {
