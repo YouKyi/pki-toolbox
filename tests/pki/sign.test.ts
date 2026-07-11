@@ -3,12 +3,14 @@ import { generateSelfSigned } from '$lib/pki/generate';
 import { importCa, issueCertificate } from '$lib/pki/sign';
 import {
 	X509Certificate,
+	Pkcs10CertificateRequest,
 	AuthorityKeyIdentifierExtension,
 	SubjectKeyIdentifierExtension,
 	KeyUsagesExtension,
 	KeyUsageFlags
 } from '@peculiar/x509';
 import { decodeCertificate } from '$lib/pki/parse';
+import { derToPem } from '$lib/pki/pem';
 import { TEST_CSR } from '../fixtures/certs';
 
 /** Generate a fresh CA (cert + key PEM) with the existing generator. */
@@ -194,14 +196,24 @@ describe('issueCertificate (CSR)', () => {
 		expect(leaf.subject).toContain('from-csr.sign.test');
 	});
 
-	it('rejects a CSR with a broken signature', async () => {
+	it('rejects a CSR that parses fine but whose signature does not verify (proof-of-possession)', async () => {
 		const caPems = await makeCa('ec-p256');
 		const ca = await importCa(caPems.certificatePem, caPems.privateKeyPem);
-		// Flip characters in the base64 body to corrupt the signature.
-		const lines = TEST_CSR.trim().split('\n');
-		const bodyIdx = Math.floor(lines.length / 2);
-		lines[bodyIdx] = lines[bodyIdx].replace(/[A-Za-z]/g, (c) => (c === 'A' ? 'B' : 'A'));
-		const tampered = lines.join('\n');
+
+		// Flip a low-order bit in one of the last bytes of the DER, which lands
+		// inside the signature BIT STRING (not the certificationRequestInfo),
+		// so the outer PKCS#10 structure still parses cleanly and only the
+		// signature itself becomes bogus.
+		const original = new Pkcs10CertificateRequest(TEST_CSR);
+		const raw = new Uint8Array(original.rawData);
+		raw[raw.length - 1] ^= 0x01;
+		const tampered = derToPem(raw, 'CERTIFICATE REQUEST');
+
+		// Sanity check: this is the load-bearing assumption of the test. If the
+		// tampered CSR failed to parse, the assertion below would pass for the
+		// wrong reason (parse-failure branch instead of verify-false branch).
+		expect(() => new Pkcs10CertificateRequest(tampered)).not.toThrow();
+
 		await expect(
 			issueCertificate(ca, {
 				commonName: 'tampered.sign.test',
@@ -210,7 +222,7 @@ describe('issueCertificate (CSR)', () => {
 				isCa: false,
 				subject: { kind: 'csr', csrPem: tampered }
 			})
-		).rejects.toThrowError(/CSR|PKCS#10/i);
+		).rejects.toThrowError(/CSR signature is invalid/i);
 	});
 
 	it('rejects input that is not a CSR', async () => {
