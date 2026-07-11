@@ -113,7 +113,7 @@ export async function importCa(certPem: string, keyPem: string): Promise<CaConte
 
 	// Sign/verify probe: proves the pasted key is the certificate's key.
 	const probe = crypto.getRandomValues(new Uint8Array(32));
-	let matches = false;
+	let matches: boolean;
 	try {
 		const publicKey = await cert.publicKey.export(algo.import, ['verify'], crypto);
 		const signature = await crypto.subtle.sign(algo.sign, key, probe);
