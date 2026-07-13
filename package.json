@@ -27,7 +27,7 @@
 	},
 	"devDependencies": {
 		"@eslint/compat": "2.1.0",
-		"@playwright/test": "1.55.1",
+		"@playwright/test": "1.61.1",
 		"@eslint/js": "10.0.1",
 		"@sveltejs/adapter-static": "3.0.10",
 		"@sveltejs/kit": "2.69.2",
