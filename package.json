@@ -50,9 +50,9 @@
 		"vite": "8.1.5",
 		"vitest": "4.1.10"
 	},
-	"packageManager": "pnpm@11.14.0",
+	"packageManager": "pnpm@11.15.0",
 	"engines": {
 		"node": ">=20",
-		"pnpm": "11.14.0"
+		"pnpm": "11.15.0"
 	}
 }
