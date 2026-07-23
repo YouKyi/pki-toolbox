@@ -45,7 +45,7 @@
 					>
 						<div class="flex items-center gap-3">
 							<span
-								class="grid h-10 w-10 shrink-0 place-items-center yk-chip bg-teal-50 text-teal-600 transition group-hover:bg-teal-100 dark:bg-teal-500/10 dark:text-teal-400 dark:group-hover:bg-teal-500/20"
+								class="yk-chip grid h-10 w-10 shrink-0 place-items-center bg-teal-50 text-teal-600 transition group-hover:bg-teal-100 dark:bg-teal-500/10 dark:text-teal-400 dark:group-hover:bg-teal-500/20"
 							>
 								<Icon name={tool.icon} size={20} />
 							</span>

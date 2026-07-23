@@ -8,7 +8,7 @@
 <div class="flex min-h-screen flex-col">
 	<a
 		href="#main"
-		class="sr-only bg-teal-700 px-4 py-2 text-sm font-semibold text-white dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:outline-2 focus:outline-offset-2 focus:outline-teal-700"
+		class="sr-only bg-teal-700 px-4 py-2 text-sm font-semibold text-white focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:outline-2 focus:outline-offset-2 focus:outline-teal-700 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)]"
 	>
 		Skip to main content
 	</a>
