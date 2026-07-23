@@ -10,7 +10,7 @@
 <header class="mb-6">
 	<div class="flex items-center gap-3">
 		<span
-			class="grid h-11 w-11 shrink-0 place-items-center yk-chip bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400"
+			class="yk-chip grid h-11 w-11 shrink-0 place-items-center bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400"
 		>
 			<Icon name={tool.icon} size={24} />
 		</span>
