@@ -65,23 +65,23 @@ include:
       # Republication vers les registres publics, sur tag git uniquement, donc
       # toujours une reference immuable. Chaque miroir reste inerte tant que sa
       # variable de token est vide : ce sont les NOMS qui sont passes ici.
-      mirrors: "ghcr.io|ghcr.io/youkyi/pki-toolbox|GHCR_USER|GHCR_TOKEN docker.io|docker.io/youkyi/pki-toolbox|DOCKERHUB_USER|DOCKERHUB_TOKEN"
+      mirrors: 'ghcr.io|ghcr.io/youkyi/pki-toolbox|GHCR_USER|GHCR_TOKEN docker.io|docker.io/youkyi/pki-toolbox|DOCKERHUB_USER|DOCKERHUB_TOKEN'
   - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitlab-release@v2.0.0
     inputs:
       stage: release
-      release_name: "pki-toolbox $CI_COMMIT_TAG"
-      extra_notes: "Container image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+      release_name: 'pki-toolbox $CI_COMMIT_TAG'
+      extra_notes: 'Container image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG'
 
 # Surcharges des composants. Les jobs sont redeclares par leur job_name ; rules,
 # needs et changes etant des tableaux, ces valeurs remplacent celles du composant.
-"catalog:trivy-scan":
+'catalog:trivy-scan':
   needs: []
 
-"catalog:docker-build":
+'catalog:docker-build':
   needs:
     - lint
     - test
-    - "catalog:trivy-scan"
+    - 'catalog:trivy-scan'
     - job: e2e
       optional: true
   rules:
@@ -91,8 +91,8 @@ include:
     - if: $CI_COMMIT_BRANCH
       changes: *build-paths
 
-"catalog:gitlab-release":
-  needs: ["catalog:docker-build"]
+'catalog:gitlab-release':
+  needs: ['catalog:docker-build']
 
 # Run exactly one pipeline per change: a merge-request pipeline when an MR is
 # open, otherwise a branch pipeline, plus tag pipelines.
