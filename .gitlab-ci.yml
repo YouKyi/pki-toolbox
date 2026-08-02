@@ -35,6 +35,65 @@ variables:
   - '.dockerignore'
   - '.gitlab-ci.yml'
 
+# Composants du CI/CD Catalog. Ce depot est la source d'origine de docker-build,
+# trivy-scan et gitlab-release : les jobs qui vivaient ici ont ete extraits vers le
+# catalog, corriges, puis republies en v2.0.0.
+#
+# Corrections apportees par les composants, par rapport aux jobs locaux :
+#   - trivy-scan : le scanner de licences sortait du gate en cassant le pipeline sur
+#     toute dependance GPL ou LGPL. Il est desormais dans une passe separee, non
+#     bloquante, activee ici car ce projet est publie sous MIT et distribue ;
+#   - docker-build : le scan sortait VERT sur une image dont l'OS de base est en fin
+#     de vie, ignore_unfixed masquant les paquets en statut end_of_life. exit_on_eol
+#     ferme ce trou ;
+#   - docker-build : le volume trivy-cache ne cachait rien, cree sur le daemon dind
+#     et detruit avec lui ;
+#   - gitlab-release : une section de changelog absente publiait une release aux
+#     notes VIDES, definitivement et sans signal.
+include:
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-scan@v2.0.1
+    inputs:
+      stage: scan
+      # Ce projet est publie sous MIT et distribue publiquement (GitHub, GHCR,
+      # Docker Hub) : le controle de licences y a un objet juridique reel, ce qui
+      # n'est pas le cas d'un depot prive non distribue.
+      license_scan: true
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/docker-build@v2.0.1
+    inputs:
+      stage: docker
+      source_url: https://github.com/youkyi/pki-toolbox
+      # Republication vers les registres publics, sur tag git uniquement, donc
+      # toujours une reference immuable. Chaque miroir reste inerte tant que sa
+      # variable de token est vide : ce sont les NOMS qui sont passes ici.
+      mirrors: 'ghcr.io|ghcr.io/youkyi/pki-toolbox|GHCR_USER|GHCR_TOKEN docker.io|docker.io/youkyi/pki-toolbox|DOCKERHUB_USER|DOCKERHUB_TOKEN'
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitlab-release@v2.0.1
+    inputs:
+      stage: release
+      release_name: 'pki-toolbox $CI_COMMIT_TAG'
+      extra_notes: 'Container image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG'
+
+# Surcharges des composants. Les jobs sont redeclares par leur job_name ; rules,
+# needs et changes etant des tableaux, ces valeurs remplacent celles du composant.
+'catalog:trivy-scan':
+  needs: []
+
+'catalog:docker-build':
+  needs:
+    - lint
+    - test
+    - 'catalog:trivy-scan'
+    - job: e2e
+      optional: true
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes: *build-paths
+    - if: $CI_COMMIT_BRANCH
+      changes: *build-paths
+
+'catalog:gitlab-release':
+  needs: ['catalog:docker-build']
+
 # Run exactly one pipeline per change: a merge-request pipeline when an MR is
 # open, otherwise a branch pipeline, plus tag pipelines.
 workflow:
@@ -100,190 +159,6 @@ e2e:
     # Tag pipelines set CI_COMMIT_TAG and no CI_COMMIT_BRANCH: without this rule
     # the released artefact would never be exercised end-to-end.
     - if: $CI_COMMIT_TAG
-
-# Supply-chain scan: source-side complement to the runtime image scan.
-#
-# The `docker` job runs `trivy image` against the built image, but the
-# multi-stage Dockerfile discards node_modules before the final layer, so
-# dependency CVEs and committed secrets that exist in the source tree are
-# never visible in the image scan. This job fills that gap by scanning the
-# repository itself with `trivy fs`:
-#   - vuln: finds CVEs in package-lock / pnpm-lock before they reach the image
-#   - secret: catches credentials accidentally committed to the repo
-#   - license: flags copyleft or restricted licenses introduced by new deps
-# It also emits a CycloneDX SBOM so downstream consumers can audit the
-# dependency tree without re-running the scan themselves.
-supply-chain:
-  stage: scan
-  image:
-    name: aquasec/trivy:$TRIVY_VERSION
-    # Clear the image ENTRYPOINT (['trivy']) so GitLab runs this job's shell
-    # script; otherwise the script lines are passed as arguments to `trivy`.
-    entrypoint: ['']
-  needs: []
-  cache: {}
-  before_script: []
-  script:
-    # Gate scan: fails the job on any fixable HIGH/CRITICAL finding and writes a
-    # JUnit XML report that GitLab surfaces in the Tests tab. The template ships
-    # inside the aquasec/trivy image at /contrib/junit.tpl. `when: always` on the
-    # artifacts block ensures the report is uploaded even when this step exits 1.
-    - >-
-      trivy fs
-      --scanners vuln,secret,license
-      --severity HIGH,CRITICAL
-      --ignore-unfixed
-      --exit-code 1
-      --format template
-      --template "@/contrib/junit.tpl"
-      --output trivy-fs-junit.xml
-      .
-    # Emit a CycloneDX SBOM for downstream consumers (separate invocation so the
-    # format flag does not conflict with the JUnit template above).
-    - trivy fs --format cyclonedx --output sbom.cdx.json .
-  artifacts:
-    when: always
-    paths:
-      - sbom.cdx.json
-      - trivy-fs-junit.xml
-    reports:
-      junit: trivy-fs-junit.xml
-    expire_in: 30 days
-
-# Builds the Docker image, scans it for CVEs, then pushes it. Runs on tags
-# always, and on branches/MRs only when a file that affects the build changed.
-#
-# The multi-stage Dockerfile runs `pnpm build` internally, so the app is built
-# exactly once here: there is no separate `build` job. Trivy scans the freshly
-# built image before any push; a fixable HIGH/CRITICAL CVE fails the pipeline,
-# so a vulnerable image can never be pushed or released. Scanning runs on
-# merge requests too, not only on tags/main.
-#
-# Docker-in-Docker config mirrors the working pipeline of youkyi/unifi-flowmatrix
-# on this GitLab instance: TLS disabled and the job pinned to the `docker` runner.
-docker:
-  stage: docker
-  image: docker:29@sha256:bfec1f5159c63a81ca6fdedbd81404d2c0e16378ed0feec3bb3fbf3998847659
-  services:
-    - docker:29-dind@sha256:bfec1f5159c63a81ca6fdedbd81404d2c0e16378ed0feec3bb3fbf3998847659
-  tags:
-    - docker
-  cache: {}
-  # Waits for supply-chain too: a fixable HIGH/CRITICAL CVE, a committed secret
-  # or a restricted license fails the scan stage and blocks the image build.
-  # And for e2e: the release job needs this one, so gating here is what actually
-  # stops a browser-broken build from being published. `optional` keeps the DAG
-  # valid on the pipelines where e2e is not created.
-  needs:
-    - lint
-    - test
-    - supply-chain
-    - job: e2e
-      optional: true
-  variables:
-    DOCKER_TLS_CERTDIR: ''
-    DOCKER_BUILDKIT: '1'
-  before_script:
-    - docker info
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
-  script:
-    # Warm the BuildKit layer cache from the previously published image.
-    - docker pull "$IMAGE:latest" || true
-    - >-
-      docker build
-      --build-arg BUILDKIT_INLINE_CACHE=1
-      --build-arg SOURCE_URL="$SOURCE_URL"
-      --build-arg VCS_REF="$CI_COMMIT_SHA"
-      --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-      --cache-from "$IMAGE:latest"
-      -t "$IMAGE:$TAG_SHA" .
-    # Scan the freshly built image BEFORE any push. A HIGH or CRITICAL
-    # vulnerability that has a fix available exits non-zero and fails the job,
-    # so the push steps below never run for a vulnerable image. Trivy runs from
-    # its own pinned container against the dind daemon's image store.
-    # The JUnit report is written to stdout and redirected into the job
-    # workspace. A `-v "$(pwd)":/scan` bind mount cannot be used here: with
-    # docker-in-docker the path would resolve on the dind daemon, not in this
-    # job container, so the file would never reach the GitLab workspace.
-    - >-
-      docker run --rm
-      -v /var/run/docker.sock:/var/run/docker.sock
-      -v trivy-cache:/root/.cache
-      "aquasec/trivy:$TRIVY_VERSION"
-      image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1
-      --format template --template "@/contrib/junit.tpl"
-      "$IMAGE:$TAG_SHA"
-      > trivy-image-junit.xml
-    # Push only from the default branch and from tags, never from feature branches/MRs.
-    - |
-      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ] || [ -n "$CI_COMMIT_TAG" ]; then
-        docker push "$IMAGE:$TAG_SHA"
-      fi
-    # `latest` is a rolling tag for the build cache and quick trials only.
-    # Deployments must pin an immutable tag: the per-commit `:$TAG_SHA` or the
-    # per-release `:$CI_COMMIT_TAG`, ideally by digest.
-    - if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:latest" && docker push "$IMAGE:latest"; fi
-    - if [ -n "$CI_COMMIT_TAG" ]; then docker tag "$IMAGE:$TAG_SHA" "$IMAGE:$CI_COMMIT_TAG" && docker push "$IMAGE:$CI_COMMIT_TAG"; fi
-    # Mirror release images to the public registries on a semver tag only, so
-    # the open-source artefacts are always immutable, pinned `vX.Y.Z` tags
-    # (never a moving `latest`). Each block is skipped unless its token is
-    # configured, so this whole section is inert until publishing is enabled.
-    - |
-      if [ -n "$CI_COMMIT_TAG" ] && [ -n "$GHCR_TOKEN" ]; then
-        echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
-        docker tag "$IMAGE:$TAG_SHA" "$GHCR_IMAGE:$CI_COMMIT_TAG"
-        docker push "$GHCR_IMAGE:$CI_COMMIT_TAG"
-      fi
-    - |
-      if [ -n "$CI_COMMIT_TAG" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
-        echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USER" --password-stdin
-        docker tag "$IMAGE:$TAG_SHA" "$DOCKERHUB_IMAGE:$CI_COMMIT_TAG"
-        docker push "$DOCKERHUB_IMAGE:$CI_COMMIT_TAG"
-      fi
-  artifacts:
-    when: always
-    paths:
-      - trivy-image-junit.xml
-    reports:
-      junit: trivy-image-junit.xml
-    expire_in: 30 days
-  rules:
-    - if: $CI_COMMIT_TAG
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes: *build-paths
-    - if: $CI_COMMIT_BRANCH
-      changes: *build-paths
-
-# Publishes a GitLab Release whenever a semver tag (vX.Y.Z) is pushed. The
-# release notes are the matching section extracted from CHANGELOG.md.
-# release-cli is version-pinned so Renovate keeps it current.
-release:
-  stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:v0.24.0@sha256:3f52d526f48e8d10625c722fa6d6423ee82aadeae1b1aa91f07b62551d96dacf
-  needs:
-    - docker
-  cache: {}
-  before_script: []
-  rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
-  script:
-    # Extract the "## [VERSION]" section of CHANGELOG.md as the release notes.
-    - VERSION="${CI_COMMIT_TAG#v}"
-    - |
-      awk -v ver="[$VERSION]" '
-        /^## \[/ { if (found) exit; if (index($0, ver)) { found=1; next } }
-        found { print }
-      ' CHANGELOG.md > release-notes.md
-    - |
-      {
-        echo
-        echo "Container image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
-      } >> release-notes.md
-    - echo "--- release notes ---" && cat release-notes.md
-  release:
-    tag_name: $CI_COMMIT_TAG
-    name: pki-toolbox $CI_COMMIT_TAG
-    description: release-notes.md
 
 # Optional deployment job, disabled by default.
 # Define these CI/CD variables in GitLab before enabling it:
