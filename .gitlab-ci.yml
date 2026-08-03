@@ -58,7 +58,7 @@ include:
       # Docker Hub) : le controle de licences y a un objet juridique reel, ce qui
       # n'est pas le cas d'un depot prive non distribue.
       license_scan: true
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/docker-build@v2.0.1
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/docker-build@v2.0.5
     inputs:
       stage: docker
       source_url: https://github.com/youkyi/pki-toolbox
