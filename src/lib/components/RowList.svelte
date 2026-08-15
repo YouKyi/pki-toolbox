@@ -38,7 +38,11 @@
 		     min-content, and not `break-all`, which would split "CN=" mid-token)
 		     lets a value break at its spaces and commas first, and only inside a
 		     token when there is no other choice — e.g. a colon-delimited hash. -->
-		<div class="grid gap-1 py-2.5 sm:grid-cols-[200px_minmax(0,1fr)] sm:gap-4">
+		<!-- The last row drops its bottom padding: it would otherwise stack with the
+		     enclosing section's own, leaving 26px under the last value against 21px
+		     between values and 18px above the first. A list has to end on the same
+		     breath it keeps inside. -->
+		<div class="grid gap-1 py-2.5 last:pb-0 sm:grid-cols-[200px_minmax(0,1fr)] sm:gap-4">
 			<dt class="text-sm font-medium text-slate-500 dark:text-slate-400">{row.label}</dt>
 			<dd class="flex min-w-0 items-start gap-2 text-sm text-slate-900 dark:text-slate-100">
 				<!-- `leading-5` is what makes the rhythm a decision instead of an accident:
