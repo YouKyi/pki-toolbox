@@ -119,7 +119,10 @@
 				"displayName": "Page Title",
 				"purpose": "One per surface, at the top of the content threshold."
 			},
-			"title": { "displayName": "Tool Title", "purpose": "Tool page headings." },
+			"title": {
+				"displayName": "Tool Title",
+				"purpose": "Tool page headings."
+			},
 			"body": {
 				"displayName": "Reading",
 				"purpose": "Running copy, measure capped around 65-75ch."
@@ -131,6 +134,10 @@
 			"data": {
 				"displayName": "Instrument",
 				"purpose": "Fingerprints, DNs, serials, PEM bodies, badge text."
+			},
+			"data-small": {
+				"displayName": "Instrument, small",
+				"purpose": "Badge text and the terminal body, where the token or the window sets the measure."
 			}
 		},
 		"shadows": [
@@ -173,10 +180,22 @@
 			}
 		],
 		"breakpoints": [
-			{ "name": "sm", "value": "640px" },
-			{ "name": "lg", "value": "1024px" },
-			{ "name": "xl", "value": "1280px" },
-			{ "name": "container", "value": "1152px" }
+			{
+				"name": "sm",
+				"value": "640px"
+			},
+			{
+				"name": "lg",
+				"value": "1024px"
+			},
+			{
+				"name": "xl",
+				"value": "1280px"
+			},
+			{
+				"name": "container",
+				"value": "1152px"
+			}
 		]
 	},
 	"components": [
@@ -251,7 +270,7 @@
 		"keyCharacteristics": [
 			"One accent, five uses, and nothing else coloured",
 			"Matte neutrals in both themes; zero gradient, zero halo, zero glow",
-			"Elevation by value: a hairline or a shadow, never both",
+			"Elevation by value: at rest, a hairline or a shadow, never both",
 			"Radius as the default shape (≈ 0.30 × control height); the slope is a signature",
 			"Glass is reserved for floating chrome — the nav bar and its panels",
 			"Mono carries data, commands and measures; it never dresses a paragraph",
@@ -285,7 +304,7 @@
 			},
 			{
 				"name": "The Value-Separates Rule",
-				"body": "Elevation is declared once: a hairline or a shadow, never both on the same edge.",
+				"body": "Elevation is declared once: a hairline or a shadow, never both on the same edge — at rest. A surface that leaves the page keeps its hairline and gains a shadow: a card on hover, and the floating chrome. Nothing that sits still carries both.",
 				"section": "elevation"
 			},
 			{
@@ -295,7 +314,7 @@
 			},
 			{
 				"name": "The Floating Chrome Rule",
-				"body": "Glass — a translucent ground plus a 20px backdrop blur — belongs to the navigation bar and to panels that float above the content. Never a card, never a field, never a section background.",
+				"body": "Glass — a translucent ground plus a 20px backdrop blur — belongs to the navigation bar and to panels that float above the content. Never a card, never a field, never a section background. A panel is denser than a bar: what floats over the page ground may be translucent, what sits on text may not.",
 				"section": "elevation"
 			},
 			{
@@ -327,7 +346,9 @@
 			"Don't ship a gradient, a glow, or a shadow without offset.",
 			"Don't set running text in the monospace face, or a paragraph in the compliance green.",
 			"Don't load a font, a script, or an image from a third-party origin; every asset is served from this origin, which the CSP enforces.",
-			"Don't let any element render content wider than its box at 390px — the end-to-end suite fails the pipeline for it."
+			"Don't let any element render content wider than its box at 390px — the end-to-end suite fails the pipeline for it.",
+			"Don't let a hit area be the painted area: enlarge the box for the thumb, keep the paint at the glyph's size.",
+			"Don't write a rule that sets display outside the components layer — an ordinary rule after the Tailwind import outranks lg:hidden by source order alone."
 		]
 	}
 }

@@ -67,8 +67,14 @@ typography:
     fontFamily: 'IBM Plex Mono, ui-monospace, SFMono-Regular, Menlo, monospace'
     fontSize: '13px'
     fontWeight: 400
-    lineHeight: 1.75
+    lineHeight: '20px'
     letterSpacing: 'normal'
+  data-small:
+    fontFamily: 'IBM Plex Mono, ui-monospace, SFMono-Regular, Menlo, monospace'
+    fontSize: '11px'
+    fontWeight: 500
+    lineHeight: 1.75
+    letterSpacing: '0.02em'
 rounded:
   check: '6px'
   micro: '8px'
@@ -169,7 +175,7 @@ usually settles for.
 
 - One accent, five uses, and nothing else coloured
 - Matte neutrals in both themes; zero gradient, zero halo, zero glow
-- Elevation by value: a hairline **or** a shadow, never both
+- Elevation by value: at rest, a hairline **or** a shadow, never both
 - Radius as the default shape (≈ 0.30 × control height); the slope is a signature
 - Glass is reserved for floating chrome — the nav bar and its panels
 - Mono carries data, commands and measures; it never dresses a paragraph
@@ -264,8 +270,13 @@ serials and commands, where character-level legibility is the whole job.
   65–75ch by a `max-w-2xl` measure.
 - **Label** (IBM Plex Mono 400, 10px, letter-spacing 2.5px, uppercase): the
   kicker — category headings, the footer's legal line, the client-side claim.
-- **Data** (IBM Plex Mono 400, 12–13px, line-height 1.75): fingerprints,
-  distinguished names, serials, PEM bodies, badge text.
+- **Data** (IBM Plex Mono 400, 13px, line-height 20px): fingerprints,
+  distinguished names, serials, values in a row list. The line box is fixed
+  rather than inherited, so a row's height never depends on which face its
+  value happens to use.
+- **Data, small** (IBM Plex Mono 400/500, 11px): badge text and the terminal
+  body, where the token or the window sets the measure rather than a text
+  column.
 
 ### Named Rules
 
@@ -317,7 +328,11 @@ separation, because in the dark it is the value ramp that separates.
 ### Named Rules
 
 **The Value-Separates Rule.** Elevation is declared once: a hairline **or** a
-shadow, never both on the same edge.
+shadow, never both on the same edge — **at rest**. A surface that leaves the
+page keeps its hairline and gains a shadow, because the hairline is what draws
+its edge and the shadow is what says it has left: a card taking **Lift** on
+hover, and the floating chrome taking **Float**, both carry the two. Nothing
+that sits still ever does.
 
 **The Offset Rule.** Every shadow has a vertical offset and a wide blur. A
 shadow without offset is a halo, which makes it decoration, which makes it
@@ -325,7 +340,9 @@ forbidden.
 
 **The Floating Chrome Rule.** Glass — a translucent ground plus a 20px backdrop
 blur — belongs to the navigation bar and to panels that float above the content.
-Never a card, never a field, never a section background.
+Never a card, never a field, never a section background. A panel is denser than
+a bar: what floats over the page ground may be translucent, what sits on text
+may not.
 
 ## Shapes
 
@@ -341,8 +358,11 @@ A radius outside this scale is a bug.
 The 1/Φ² slope (≈ 21°, ratio 0.382) is the brand's silhouette and appears in
 exactly three places on this surface: the wordmark and y-mark, the threshold
 hatch that marks the shift from chrome to content, and the footer's boundary
-between two masses. Borders are 1px hairlines; the only 2px stroke is the
-dashed drop zone, and the only 2.5px one is the active-nav underline.
+between two masses. Borders are 1px hairlines. Two thicker strokes exist, and
+both mark a state rather than an edge: **2px** for the dashed drop zone, and
+**2.5px** for the accent markers that say "you are here" — the active-nav
+underline, the current item's bar in a dropdown, and the marker rail of an
+alert (3px there, on a plane rather than a control).
 
 ### Named Rules
 
@@ -415,9 +435,48 @@ primary action, an active section, a status.
   active category carries a 2.5px orange underline. Dropdown panels are glass
   cards (16px radius, **Float** shadow) whose items reveal a 2.5px orange bar on
   the left edge, scaled from 0 on hover and pinned for the current page.
+- **Panels are denser than the bar** (94% light, 95% dark, same 20px blur). A
+  bar floats over the page ground and can afford to be translucent; a panel
+  sits on **text**, and at the bar's value the lines underneath read through it.
 - **Mobile:** a stacked panel under the bar, capped to the remaining viewport
   height, items at 12px radius with a left border that takes the orange when
   current. Current page is marked with `aria-current`, not colour alone.
+
+### Theme control
+
+- **Style:** a ghost button in the bar carrying the mode's glyph, its label and
+  a caret, opening a radio menu of three rows — **Auto**, **Light**, **Dark** —
+  the selected one taking the accent tick.
+- **Character:** the control states the **mode**, never the colour it currently
+  resolves to. A two-state toggle cannot express "follows the system"; it can
+  only leave the reader guessing which of its two states means "I did not
+  choose". `auto` is the default and is a persisted answer like any other.
+- **Glyphs:** a sun for light, a crescent for dark, and a **half-filled disc**
+  for auto — neither one nor the other, which is what the mode means.
+
+### Row list
+
+- **Rhythm:** every single-line row is **40px** — 20px of line box plus 10px
+  above and below — whatever face its value uses. The line height is declared,
+  not inherited: left to the font metrics, a mono value produced 18.57px and a
+  sans value 20px, so a row's height depended on its content. A wrapping value
+  grows by whole 20px steps.
+- **Separator:** a 1px hairline between rows, none after the last, and the last
+  row drops its bottom padding so a list ends on the same breath it keeps
+  inside.
+- **Copy affordance:** a 44px hit box bled into the row's padding with a
+  negative margin, so it changes neither the rhythm nor the glyph's alignment,
+  and an inner span carries everything **painted** — a 44px hover surface would
+  reach into the rows above and below.
+
+### Status line (invisible component)
+
+One short sentence per result, for assistive technology only: _"Certificate
+decoded: ISRG Root X1"_, _"Decoding failed: …"_. A live region is for the
+**news**, not for the document — the result itself used to be announced, which
+recited some forty rows including three hex fingerprints with no way to
+interrupt. The detail is reached by walking into the result, which takes focus
+on success.
 
 ### Terminal Block (signature component)
 
@@ -467,3 +526,8 @@ only thing naming the artefact.
   asset is served from this origin, which the CSP enforces.
 - **Don't** let any element render content wider than its box at 390px — the
   end-to-end suite fails the pipeline for it.
+- **Don't** let a hit area be the painted area: enlarge the box for the thumb,
+  keep the paint at the glyph's size.
+- **Don't** write a rule that sets `display` outside the `components` layer —
+  an ordinary rule after the Tailwind import outranks `lg:hidden` and friends
+  by source order alone.
