@@ -160,7 +160,7 @@
 									<!-- Panneau posé au-dessus du contenu : avec la barre, c'est le seul
 									     endroit où la charte v2 autorise le verre. -->
 									<div
-										class="yk-chrome min-w-[248px] overflow-hidden rounded-xl border py-1.5 shadow-md"
+										class="yk-chrome yk-chrome--panel min-w-[248px] overflow-hidden rounded-xl border py-1.5 shadow-md"
 									>
 										{#each list as tool (tool.slug)}
 											{@const isCurrent = current === `/${tool.slug}`}
@@ -232,7 +232,7 @@
 
 					{#if themeOpen}
 						<div
-							class="yk-chrome absolute top-full right-0 z-40 mt-2 min-w-[180px] overflow-hidden rounded-xl border py-1.5 shadow-md"
+							class="yk-chrome yk-chrome--panel absolute top-full right-0 z-40 mt-2 min-w-[180px] overflow-hidden rounded-xl border py-1.5 shadow-md"
 							role="menu"
 							aria-label="Theme"
 						>

@@ -251,6 +251,7 @@
 	   au-dessus du contenu). Jamais une carte, jamais un champ, jamais un
 	   fond de section. */
 	--yk-chrome: rgb(255 255 255 / 0.62);
+	--yk-chrome-panel: rgb(255 255 255 / 0.94);
 	--yk-chrome-line: rgb(26 24 22 / 0.08);
 	--yk-chrome-blur: 20px;
 
@@ -308,6 +309,7 @@
 	--yk-on-ok: #08150a;
 
 	--yk-chrome: rgb(26 25 23 / 0.58);
+	--yk-chrome-panel: rgb(31 29 27 / 0.95);
 	--yk-chrome-line: rgb(255 255 255 / 0.12);
 
 	/* en sombre l'ombre ne se lit presque pas : elle sert de profondeur, pas de
@@ -393,6 +395,13 @@ textarea::placeholder {
 		-webkit-backdrop-filter: blur(var(--yk-chrome-blur)) saturate(140%);
 		backdrop-filter: blur(var(--yk-chrome-blur)) saturate(140%);
 	}
+	/* Un panneau n'est pas une barre. La barre flotte au-dessus du fond de page
+	   et peut se permettre d'être très translucide ; un panneau se pose sur du
+	   TEXTE, et la même valeur y laisse lire les lignes du dessous à travers les
+	   siennes. Même matière, même flou, ground bien plus dense. */
+	.yk-chrome--panel {
+		background: var(--yk-chrome-panel);
+	}
 }
 
 /* ---- v2 · semis de seuil ----
@@ -417,12 +426,19 @@ textarea::placeholder {
    l'élément peint hors de sa boîte compte dans le `scrollWidth` du parent, donc
    la garde responsive à 390px le signalait — à juste titre — comme du contenu
    qui déborde. Une cible qu'on ne peut pas mesurer est une cible qu'on ne peut
-   pas garantir. */
-.yk-hit {
-	display: inline-grid;
-	place-items: center;
-	min-width: 44px;
-	min-height: 44px;
+   pas garantir.
+
+   Déclarée dans la couche `components` : elle pose un `display`, et une règle
+   ordinaire écrite après l'import écraserait `lg:hidden` à spécificité égale —
+   c'est ce qui a fait réapparaître le bouton de menu mobile sur grand écran.
+   Dans cette couche, tout utilitaire reprend la main. */
+@layer components {
+	.yk-hit {
+		display: inline-grid;
+		place-items: center;
+		min-width: 44px;
+		min-height: 44px;
+	}
 }
 
 /* ---- v2 · tout élément pressable répond à l'appui ----
