@@ -18,10 +18,12 @@ are not listed individually here.
 
 ### Added
 
-- A verdict band at the top of a decoded certificate: the subject as a heading,
-  then the expiry answered with an **absolute date** (the relative day count
-  trails as context), the issuer, and the alternative-name count — above the
-  detail rows rather than below them. On a successful decode the input folds
+- A verdict band at the top of every decoded artefact, answering the question
+  that tool exists for before any detail row: a certificate answers its expiry
+  with an **absolute date** (the relative day count trails as context), a CRL
+  answers whether it is still current or overdue, a chain answers whether it
+  holds, a keystore and a PKCS#7 bundle answer what they carry, and a signing
+  request answers which key it asks for. On a successful decode the input folds
   into a one-line recap, so the answer takes back the viewport the pasted PEM
   was holding, and the result region takes focus.
 

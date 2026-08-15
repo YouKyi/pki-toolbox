@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { requireTool } from '$lib/tools';
 	import { decodePkcs7, type DecodedPkcs7 } from '$lib/pki/pkcs7';
 	import { TEST_PKCS7 } from '$lib/samples';
@@ -7,6 +8,7 @@
 	import CertCard from '$lib/components/CertCard.svelte';
 	import Alert from '$lib/components/Alert.svelte';
 	import RowList from '$lib/components/RowList.svelte';
+	import VerdictBand from '$lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-pkcs7');
 
@@ -14,6 +16,8 @@
 	let result = $state<DecodedPkcs7 | null>(null);
 	let error = $state('');
 	let loading = $state(false);
+	let collapsed = $state(false);
+	let resultRegion: HTMLDivElement | undefined = $state();
 
 	async function decode() {
 		loading = true;
@@ -21,12 +25,25 @@
 		result = null;
 		try {
 			result = await decodePkcs7(input.trim());
+			collapsed = true;
+			await tick();
+			resultRegion?.focus();
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
+			collapsed = false;
 		} finally {
 			loading = false;
 		}
 	}
+
+	/** A bundle is opened to find out what it carries. */
+	const carried = $derived(
+		result
+			? result.certificateCount === 1
+				? '1 certificate'
+				: `${result.certificateCount} certificates`
+			: ''
+	);
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -35,6 +52,8 @@
 
 <PemInput
 	bind:value={input}
+	bind:collapsed
+	summary={result ? `PKCS#7 bundle · ${carried}` : ''}
 	{loading}
 	ondecode={decode}
 	decodeLabel="Decode the bundle"
@@ -43,30 +62,47 @@
 	placeholder="Paste a PKCS#7 bundle here (-----BEGIN PKCS7-----)…"
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
+<div
+	bind:this={resultRegion}
+	tabindex="-1"
+	class="mt-6 space-y-4 outline-none"
+	aria-live="polite"
+	aria-atomic="false"
+>
 	{#if error}
 		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 
 	{#if result}
-		<div
-			class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+		<article
+			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 		>
-			<RowList
-				rows={[
-					{ label: 'Type', value: 'PKCS#7 SignedData' },
-					{
-						label: 'Certificates included',
-						value: String(result.certificateCount)
-					},
-					{ label: 'Signers', value: String(result.signerCount) },
-					{
-						label: 'Hash algorithms',
-						value: result.digestAlgorithms.length ? result.digestAlgorithms.join(', ') : '-'
-					}
-				]}
+			<VerdictBand
+				icon="package"
+				title="PKCS#7 bundle"
+				lead="Carries"
+				value={carried}
+				meta={`${result.signerCount} signer${result.signerCount === 1 ? '' : 's'}${
+					result.digestAlgorithms.length ? ` · ${result.digestAlgorithms.join(', ')}` : ''
+				}`}
 			/>
-		</div>
+			<div class="px-5 py-4">
+				<RowList
+					rows={[
+						{ label: 'Type', value: 'PKCS#7 SignedData' },
+						{
+							label: 'Certificates included',
+							value: String(result.certificateCount)
+						},
+						{ label: 'Signers', value: String(result.signerCount) },
+						{
+							label: 'Hash algorithms',
+							value: result.digestAlgorithms.length ? result.digestAlgorithms.join(', ') : '-'
+						}
+					]}
+				/>
+			</div>
+		</article>
 
 		{#if result.certificates.length}
 			{#each result.certificates as cert, i (i)}

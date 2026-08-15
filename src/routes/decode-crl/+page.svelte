@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { requireTool } from '$lib/tools';
 	import { decodeCrl, type DecodedCrl } from '$lib/pki/crl';
 	import { formatDate } from '$lib/pki/format';
@@ -7,25 +8,59 @@
 	import PemInput from '$lib/components/PemInput.svelte';
 	import Alert from '$lib/components/Alert.svelte';
 	import RowList from '$lib/components/RowList.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import Badge from '$lib/components/Badge.svelte';
+	import VerdictBand from '$lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-crl');
 
 	const MAX_ROWS = 250;
+	const DAY_MS = 86_400_000;
 
 	let input = $state('');
 	let result = $state<DecodedCrl | null>(null);
 	let error = $state('');
+	let collapsed = $state(false);
+	let resultRegion: HTMLDivElement | undefined = $state();
 
-	function decode() {
+	async function decode() {
 		error = '';
 		result = null;
 		try {
 			result = decodeCrl(input.trim());
+			collapsed = true;
+			await tick();
+			resultRegion?.focus();
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
+			collapsed = false;
 		}
 	}
+
+	/** The issuer's CN if the DN carries one; the whole DN is for the rows below. */
+	const issuerName = $derived(
+		result ? (/CN=([^,]+)/.exec(result.issuer)?.[1]?.trim() ?? result.issuer) : ''
+	);
+
+	const revoked = $derived(
+		result
+			? result.entryCount === 1
+				? '1 revoked certificate'
+				: `${result.entryCount} revoked certificates`
+			: ''
+	);
+
+	/**
+	 * A CRL past its next update is stale, and a stale CRL is the reason someone
+	 * opens this tool at 2am. The band says so before the entry table does.
+	 */
+	const freshness = $derived.by(() => {
+		if (!result?.nextUpdate) return { note: 'no next update announced', overdue: false };
+		const days = Math.round((result.nextUpdate.getTime() - Date.now()) / DAY_MS);
+		const count = new Intl.NumberFormat('en').format(Math.abs(days));
+		return days < 0
+			? { note: `overdue by ${count} days`, overdue: true }
+			: { note: days === 0 ? 'due today' : `in ${count} days`, overdue: false };
+	});
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -34,6 +69,8 @@
 
 <PemInput
 	bind:value={input}
+	bind:collapsed
+	summary={issuerName ? `${issuerName} · revocation list` : ''}
 	ondecode={decode}
 	decodeLabel="Decode the CRL"
 	derLabel="X509 CRL"
@@ -41,7 +78,13 @@
 	placeholder="Paste a CRL here (-----BEGIN X509 CRL-----)…"
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
+<div
+	bind:this={resultRegion}
+	tabindex="-1"
+	class="mt-6 space-y-4 outline-none"
+	aria-live="polite"
+	aria-atomic="false"
+>
 	{#if error}
 		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
@@ -50,21 +93,21 @@
 		<article
 			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 		>
-			<header class="flex items-center gap-3 px-5 py-4">
-				<span
-					class="yk-chip grid h-9 w-9 place-items-center bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-				>
-					<Icon name="ban" size={20} />
-				</span>
-				<div class="min-w-0 flex-1">
-					<p class="font-semibold text-slate-900 dark:text-slate-100">
-						Revocation list, {result.entryCount} revoked certificate{result.entryCount > 1
-							? 's'
-							: ''}
-					</p>
-				</div>
-			</header>
-			<div class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
+			{#snippet crlBadges()}
+				{#if freshness.overdue}<Badge tone="expired">Overdue</Badge>
+				{:else if result?.nextUpdate}<Badge tone="valid">Current</Badge>{/if}
+			{/snippet}
+			<VerdictBand
+				icon="ban"
+				title={issuerName}
+				lead="Next update"
+				value={result.nextUpdate ? formatDate(result.nextUpdate) : 'not announced'}
+				datetime={result.nextUpdate?.toISOString()}
+				note={freshness.note}
+				meta={`${revoked} · issued ${formatDate(result.thisUpdate)}`}
+				badges={crlBadges}
+			/>
+			<div class="px-5 py-4">
 				<RowList
 					rows={[
 						{ label: 'Issuer', value: result.issuer, mono: true },

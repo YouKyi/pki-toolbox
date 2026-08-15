@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { requireTool } from '$lib/tools';
 	import { decodeCertificate, type DecodedCertificate } from '$lib/pki/parse';
 	import { hexWithColons } from '$lib/pki/format';
@@ -7,7 +8,7 @@
 	import PemInput from '$lib/components/PemInput.svelte';
 	import Alert from '$lib/components/Alert.svelte';
 	import RowList from '$lib/components/RowList.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import VerdictBand from '$lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('fingerprint');
 
@@ -15,6 +16,8 @@
 	let result = $state<DecodedCertificate | null>(null);
 	let error = $state('');
 	let loading = $state(false);
+	let collapsed = $state(false);
+	let resultRegion: HTMLDivElement | undefined = $state();
 
 	async function decode() {
 		loading = true;
@@ -22,12 +25,20 @@
 		result = null;
 		try {
 			result = await decodeCertificate(input.trim());
+			collapsed = true;
+			await tick();
+			resultRegion?.focus();
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
+			collapsed = false;
 		} finally {
 			loading = false;
 		}
 	}
+
+	const commonName = $derived(
+		result?.subjectParts.find((p) => p.key === 'CN')?.value ?? result?.subject ?? ''
+	);
 
 	const fingerprintRows = $derived(
 		result
@@ -61,13 +72,21 @@
 
 <PemInput
 	bind:value={input}
+	bind:collapsed
+	summary={commonName ? `${commonName} · certificate` : ''}
 	{loading}
 	ondecode={decode}
 	decodeLabel="Compute fingerprints"
 	example={ISRG_ROOT_X1}
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
+<div
+	bind:this={resultRegion}
+	tabindex="-1"
+	class="mt-6 space-y-4 outline-none"
+	aria-live="polite"
+	aria-atomic="false"
+>
 	{#if error}
 		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
@@ -76,20 +95,17 @@
 		<article
 			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 		>
-			<header class="flex items-center gap-3 px-5 py-4">
-				<span
-					class="yk-chip grid h-9 w-9 place-items-center bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-				>
-					<Icon name="fingerprint" size={20} />
-				</span>
-				<div class="min-w-0 flex-1">
-					<p class="truncate font-semibold text-slate-900 dark:text-slate-100">{result.subject}</p>
-					<p class="text-xs text-slate-500 dark:text-slate-500">
-						Fingerprints computed over {result.der.length} bytes of DER
-					</p>
-				</div>
-			</header>
-			<div class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
+			<!-- The digests themselves are the answer, and they are one row below;
+			     the band names what was hashed and over how much. -->
+			<VerdictBand
+				icon="fingerprint"
+				title={commonName}
+				lead="Computed over"
+				value={`${result.der.length} bytes`}
+				note="the certificate's complete DER"
+				meta={result.subject}
+			/>
+			<div class="px-5 py-4">
 				<RowList rows={fingerprintRows} />
 			</div>
 		</article>

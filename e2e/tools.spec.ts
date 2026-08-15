@@ -91,11 +91,16 @@ test('S5 decode CSR example', async ({ page }) => {
 	const result = region(page);
 
 	// Structural labels only — the CN of the test CSR is not asserted (not
-	// guaranteed stable). Scoped to the result region so "PKCS#10 signing
-	// request" / "Public key" / "Signature algorithm" don't collide with the
-	// ToolHeader description prose above.
-	await expect(result.getByText('PKCS#10 signing request')).toBeVisible();
+	// guaranteed stable). Scoped to the result region so "Public key" /
+	// "Signature algorithm" don't collide with the ToolHeader prose above.
+	// The verdict band names the request and answers what key it asks for.
+	await expect(result.getByRole('heading', { level: 2 })).toBeVisible();
+	await expect(result.getByText(/signed with/)).toBeVisible();
 	await expect(result.getByText('CSR', { exact: true })).toBeVisible();
+
+	// The editor folds into its recap once the request is decoded.
+	await expect(page.getByLabel('PKI artefact input')).toBeHidden();
+	await expect(page.getByRole('button', { name: 'Edit input' })).toBeVisible();
 
 	await expect(result.getByRole('heading', { name: 'Identity' })).toBeVisible();
 	await expect(result.getByRole('heading', { name: 'Key & signature' })).toBeVisible();
@@ -115,10 +120,13 @@ test('S6 decode chain example (ordered, verified)', async ({ page }) => {
 
 	const result = region(page);
 
-	// Validity alert: the self-consistent EC sample should verify as complete,
-	// but tolerate the fallback so the test never flaps on the alert wording.
+	// The verdict band answers the only question this tool exists for: does the
+	// chain hold. Tolerate either outcome so the test never flaps on wording.
+	await expect(result.getByText(/Chain of/)).toBeVisible();
 	await expect(
-		result.getByText('Valid chain').or(result.getByText('Incomplete or unordered chain'))
+		result
+			.getByText('Verified', { exact: true })
+			.or(result.getByText('Incomplete', { exact: true }))
 	).toBeVisible();
 
 	// The three roles are rendered, one CertCard each (badge labels, exact).

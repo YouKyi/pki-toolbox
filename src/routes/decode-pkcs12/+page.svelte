@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { requireTool } from '$lib/tools';
 	import { decodePkcs12, type DecodedPkcs12 } from '$lib/pki/pkcs12';
 	import { TEST_PKCS12, TEST_PKCS12_PASSWORD } from '$lib/samples';
@@ -8,6 +9,7 @@
 	import Alert from '$lib/components/Alert.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import VerdictBand from '$lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-pkcs12');
 
@@ -16,6 +18,8 @@
 	let result = $state<DecodedPkcs12 | null>(null);
 	let error = $state('');
 	let loading = $state(false);
+	let collapsed = $state(false);
+	let resultRegion: HTMLDivElement | undefined = $state();
 
 	async function decode() {
 		loading = true;
@@ -23,12 +27,28 @@
 		result = null;
 		try {
 			result = await decodePkcs12(input.trim(), password);
+			collapsed = true;
+			await tick();
+			resultRegion?.focus();
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
+			collapsed = false;
 		} finally {
 			loading = false;
 		}
 	}
+
+	/** A keystore is opened to find out what came out of it. */
+	const contents = $derived(
+		result
+			? [
+					result.certificateCount === 1
+						? '1 certificate'
+						: `${result.certificateCount} certificates`,
+					result.keyCount === 1 ? '1 private key' : `${result.keyCount} private keys`
+				].join(', ')
+			: ''
+	);
 
 	function loadExample() {
 		input = TEST_PKCS12;
@@ -62,6 +82,8 @@
 
 <PemInput
 	bind:value={input}
+	bind:collapsed
+	summary={result ? `PKCS#12 keystore · ${contents}` : ''}
 	{loading}
 	ondecode={decode}
 	decodeLabel="Decrypt"
@@ -69,20 +91,36 @@
 	placeholder="Import a .p12 / .pfx file, or paste its base64 content…"
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
+<div
+	bind:this={resultRegion}
+	tabindex="-1"
+	class="mt-6 space-y-4 outline-none"
+	aria-live="polite"
+	aria-atomic="false"
+>
 	{#if error}
 		<Alert variant="error" title="Decryption failed">{error}</Alert>
 	{/if}
 
 	{#if result}
-		<Alert variant={result.integrityVerified ? 'success' : 'warn'}>
-			{#if result.integrityVerified}
-				MAC integrity verified, password correct. {result.certificateCount} certificate(s) and {result.keyCount}
-				private key(s).
-			{:else}
-				Content decrypted (this file has no integrity MAC).
-			{/if}
-		</Alert>
+		<article
+			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+		>
+			{#snippet p12Badges()}
+				{#if result?.integrityVerified}<Badge tone="valid">MAC verified</Badge>
+				{:else}<Badge tone="warn">No integrity MAC</Badge>{/if}
+			{/snippet}
+			<VerdictBand
+				icon="lock"
+				title="PKCS#12 keystore"
+				lead="Contains"
+				value={contents}
+				meta={result.integrityVerified
+					? 'Password correct, MAC integrity verified'
+					: 'Content decrypted; this file carries no integrity MAC'}
+				badges={p12Badges}
+			/>
+		</article>
 
 		{#if result.keys.length}
 			<div

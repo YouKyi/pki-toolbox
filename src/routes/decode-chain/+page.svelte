@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { requireTool } from '$lib/tools';
 	import { decodeChain, type DecodedChain } from '$lib/pki/chain';
 	import { TEST_CHAIN } from '$lib/samples';
@@ -6,7 +7,9 @@
 	import PemInput from '$lib/components/PemInput.svelte';
 	import CertCard from '$lib/components/CertCard.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import Badge from '$lib/components/Badge.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import VerdictBand from '$lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-chain');
 
@@ -14,6 +17,8 @@
 	let result = $state<DecodedChain | null>(null);
 	let error = $state('');
 	let loading = $state(false);
+	let collapsed = $state(false);
+	let resultRegion: HTMLDivElement | undefined = $state();
 
 	async function decode() {
 		loading = true;
@@ -21,12 +26,31 @@
 		result = null;
 		try {
 			result = await decodeChain(input.trim());
+			collapsed = true;
+			await tick();
+			resultRegion?.focus();
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
+			collapsed = false;
 		} finally {
 			loading = false;
 		}
 	}
+
+	const length = $derived(
+		result
+			? result.links.length === 1
+				? '1 certificate'
+				: `${result.links.length} certificates`
+			: ''
+	);
+
+	/** The leaf is what the chain is actually about; it names the whole result. */
+	const leafName = $derived(
+		result?.links[0]?.certificate.subjectParts.find((p) => p.key === 'CN')?.value ??
+			result?.links[0]?.certificate.subject ??
+			'Certificate chain'
+	);
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -35,6 +59,8 @@
 
 <PemInput
 	bind:value={input}
+	bind:collapsed
+	summary={result ? `${leafName} · chain of ${length}` : ''}
 	{loading}
 	ondecode={decode}
 	decodeLabel="Decode the chain"
@@ -42,18 +68,41 @@
 	placeholder="Paste several concatenated PEM certificates here (leaf → … → root)…"
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
+<div
+	bind:this={resultRegion}
+	tabindex="-1"
+	class="mt-6 space-y-4 outline-none"
+	aria-live="polite"
+	aria-atomic="false"
+>
 	{#if error}
 		<Alert variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 
 	{#if result}
-		{#if result.complete}
-			<Alert variant="success" title="Valid chain">
-				The {result.links.length} certificates link together correctly: every signature has been verified
-				cryptographically, and the chain ends with a valid self-signed root.
-			</Alert>
-		{:else}
+		<!-- One question owns this tool: does the chain hold. The band answers it,
+		     and the alert below stays only when there is something to fix. -->
+		<article
+			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+		>
+			{#snippet chainBadges()}
+				{#if result?.complete}<Badge tone="valid">Verified</Badge>
+				{:else}<Badge tone="expired">Incomplete</Badge>{/if}
+			{/snippet}
+			<VerdictBand
+				icon="link"
+				title={leafName}
+				lead="Chain of"
+				value={length}
+				note={result.complete ? 'every signature verified' : 'a link could not be verified'}
+				meta={result.complete
+					? 'Ends with a valid self-signed root'
+					: 'Does not end with a valid self-signed root'}
+				badges={chainBadges}
+			/>
+		</article>
+
+		{#if !result.complete}
 			<Alert variant="warn" title="Incomplete or unordered chain">
 				A signature could not be verified, or the chain does not end with a valid self-signed root.
 				Check the order of the certificates (leaf first, root last).

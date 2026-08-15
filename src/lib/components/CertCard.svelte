@@ -6,7 +6,7 @@
 	import { formatDate, formatSerial, hexWithColons } from '$lib/pki/format';
 	import RowList, { type Row } from './RowList.svelte';
 	import Badge, { type BadgeTone } from './Badge.svelte';
-	import Icon from './Icon.svelte';
+	import VerdictBand from './VerdictBand.svelte';
 
 	let { cert, role, index }: { cert: DecodedCertificate; role?: ChainRole; index?: number } =
 		$props();
@@ -55,6 +55,11 @@
 				: ''
 	);
 
+	/** Self-signed is already stated by its badge; repeating it wastes the line. */
+	const provenance = $derived(
+		[cert.isSelfSigned ? '' : `Issued by ${issuerName}`, coverage].filter(Boolean).join(' · ')
+	);
+
 	const identity: Row[] = $derived([
 		{ label: 'Subject', value: cert.subject || '-', mono: true },
 		{ label: 'Issuer', value: cert.issuer || '-', mono: true },
@@ -99,53 +104,26 @@
 <article
 	class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 >
-	<!-- The verdict band. Three questions bring a user to a certificate decoder —
-	     what is it, when does it expire, who signed it — and they are answered
-	     here, above the fifteen rows that answer everything else. It sits one
-	     plane above the card so the eye lands on it first, without a second
-	     accent colour doing the work. -->
-	<header class="border-b border-slate-200 bg-surface-2 px-5 py-5 dark:border-slate-800">
-		<div class="flex flex-wrap items-start gap-3">
-			<span
-				class="yk-chip grid h-9 w-9 shrink-0 place-items-center bg-slate-200 text-ink-2 dark:bg-slate-700"
-			>
-				<Icon name="certificate" size={20} />
-			</span>
-			<!-- A floor (not min-w-0) so the title block cannot be squeezed to a few
-			     pixels by the badges: below it, the wrapping header drops the badges
-			     to their own line instead. -->
-			<div class="min-w-[10rem] flex-1">
-				<h2
-					class="font-head text-xl leading-tight font-bold tracking-tight [overflow-wrap:anywhere] text-ink"
-				>
-					{#if index !== undefined}<span class="text-ink-3">#{index + 1}</span>
-					{/if}{commonName}
-				</h2>
-				<!-- Parentheses rather than a separator: when the line wraps on a phone,
-				     a leading middot reads as a stray bullet. -->
-				<p class="mt-2 text-[15px] text-ink">
-					{verdict.lead}
-					<time datetime={cert.notAfter.toISOString()} class="font-mono">{verdict.date}</time>
-					<span class="text-ink-3">({verdict.note})</span>
-				</p>
-				<!-- Self-signed is already stated by its badge; repeating it here would
-				     spend the only other line on nothing. -->
-				{#if !cert.isSelfSigned || coverage}
-					<p class="mt-1 text-sm text-ink-3">
-						{#if !cert.isSelfSigned}Issued by {issuerName}{/if}{#if coverage}<span
-								class="whitespace-nowrap">{cert.isSelfSigned ? '' : ' · '}{coverage}</span
-							>{/if}
-					</p>
-				{/if}
-			</div>
-			<div class="flex flex-wrap items-center gap-1.5">
-				{#if role}<Badge tone={role}>{ROLE_LABEL[role]}</Badge>{/if}
-				{#if cert.isCA && !role}<Badge tone="info">CA</Badge>{/if}
-				{#if cert.isSelfSigned}<Badge tone="neutral">Self-signed</Badge>{/if}
-				<Badge tone={VALIDITY[cert.validity].tone}>{VALIDITY[cert.validity].label}</Badge>
-			</div>
-		</div>
-	</header>
+	<!-- Three questions bring a user to a certificate decoder — what is it, when
+	     does it expire, who signed it — and the band answers all three above the
+	     fifteen rows that answer everything else. -->
+	{#snippet certBadges()}
+		{#if role}<Badge tone={role}>{ROLE_LABEL[role]}</Badge>{/if}
+		{#if cert.isCA && !role}<Badge tone="info">CA</Badge>{/if}
+		{#if cert.isSelfSigned}<Badge tone="neutral">Self-signed</Badge>{/if}
+		<Badge tone={VALIDITY[cert.validity].tone}>{VALIDITY[cert.validity].label}</Badge>
+	{/snippet}
+	<VerdictBand
+		icon="certificate"
+		title={commonName}
+		{index}
+		lead={verdict.lead}
+		value={verdict.date}
+		datetime={cert.notAfter.toISOString()}
+		note={verdict.note}
+		meta={provenance}
+		badges={certBadges}
+	/>
 
 	{#snippet identityBody()}<RowList rows={identity} />{/snippet}
 	{@render section('Identity', identityBody)}
