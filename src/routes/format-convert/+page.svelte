@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { requireTool } from '$lib/tools';
 	import { convertArtefact, buildPkcs7, type ConvertedItem } from '$lib/pki/convert';
 	import { hexWithColons } from '$lib/pki/format';
@@ -17,16 +18,32 @@
 	let items = $state<ConvertedItem[]>([]);
 	let error = $state('');
 	let copied = $state('');
+	/** Folded once converted: the outputs are the point, the source is not. */
+	let collapsed = $state(false);
+	let resultRegion: HTMLDivElement | undefined = $state();
 
 	const certItems = $derived(items.filter((i) => i.label.endsWith('CERTIFICATE')));
 
-	function decode() {
+	/**
+	 * One entry per artefact found in the input, each rendered in every format —
+	 * so the recap counts artefacts, and names the single one when there is only
+	 * one.
+	 */
+	const summary = $derived(
+		items.length === 1 ? items[0].label : items.length ? `${items.length} artefacts` : ''
+	);
+
+	async function decode() {
 		error = '';
 		items = [];
 		try {
 			items = convertArtefact(input.trim());
+			collapsed = true;
+			await tick();
+			resultRegion?.focus();
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
+			collapsed = false;
 		}
 	}
 
@@ -59,13 +76,21 @@
 
 <PemInput
 	bind:value={input}
+	bind:collapsed
+	{summary}
 	ondecode={decode}
 	decodeLabel="Convert"
 	example={ISRG_ROOT_X2}
 	placeholder="Paste a PEM/DER certificate or a PKCS#7 bundle, or import a file…"
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
+<div
+	bind:this={resultRegion}
+	tabindex="-1"
+	class="mt-6 space-y-4 outline-none"
+	aria-live="polite"
+	aria-atomic="false"
+>
 	{#if error}
 		<Alert variant="error" title="Conversion failed">{error}</Alert>
 	{/if}
