@@ -135,8 +135,9 @@
 								<Icon name={copied === blockId ? 'check' : 'copy'} size={14} />
 							</button>
 						</div>
-						<pre
-							class="max-h-48 overflow-auto rounded-lg bg-slate-50 p-3 font-mono text-[12px] leading-relaxed text-slate-700 dark:bg-slate-950 dark:text-slate-300">{value}</pre>
+						<!-- Du code : bloc terminal de la charte, sombre même en page claire.
+						     Variante sans barre, le titre étant déjà porté au-dessus. -->
+						<pre class="ykterm ykterm__body max-h-48">{value}</pre>
 					</div>
 				{/snippet}
 

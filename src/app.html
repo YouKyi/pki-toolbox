@@ -5,6 +5,9 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="color-scheme" content="light dark" />
+		<!-- Chrome du navigateur accordé au fond de page de la charte (v2). -->
+		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8f7f4" />
+		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131211" />
 		<meta
 			name="description"
 			content="Self-hosted, 100% client-side decoder for X.509 certificates, CSRs and certificate chains."
@@ -47,7 +50,9 @@
 			}
 		</script>
 		<!-- youkyi loader — critical CSS, painted on the first frame, hidden by
-		     `html.yk-ready`. Mark « Y » taillé + barre orange (pente 1/Φ² ≈ 21°). -->
+		     `html.yk-ready`. Mark « Y » (emploi autorisé de la pente) + piste de
+		     progression en pilule : DA v2, une piste est ronde par nature et
+		     l'inclinaison n'est plus un vocabulaire de contrôle. -->
 		<style>
 			:root {
 				--ykl-bg: #f8f7f4;
@@ -99,8 +104,9 @@
 			#yk-loader .bar {
 				position: relative;
 				width: 120px;
-				height: 2px;
+				height: 3px;
 				background: var(--ykl-track);
+				border-radius: 999px;
 				overflow: hidden;
 			}
 			#yk-loader .bar i {
@@ -110,7 +116,7 @@
 				bottom: 0;
 				width: 40%;
 				background: var(--ykl-acc);
-				transform: skewX(-21deg);
+				border-radius: 999px;
 				animation: yklsw 0.9s linear infinite;
 			}
 			@keyframes yklsw {

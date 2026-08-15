@@ -79,7 +79,7 @@
 		role="group"
 		aria-label="PEM input area"
 		class="relative rounded-xl border-2 border-dashed transition-colors {dragOver
-			? 'border-teal-500 bg-teal-50/60 dark:bg-teal-500/5'
+			? 'border-[color:var(--yk-accent)] bg-slate-100 dark:bg-slate-800'
 			: 'border-slate-300 dark:border-slate-700'}"
 		ondragover={(e) => {
 			e.preventDefault();
@@ -101,7 +101,7 @@
 		></textarea>
 		{#if dragOver}
 			<div
-				class="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-teal-50/80 text-sm font-medium text-teal-700 dark:bg-slate-900/80 dark:text-teal-300"
+				class="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-slate-100/90 text-sm font-medium text-teal-700 dark:bg-slate-900/85 dark:text-teal-300"
 			>
 				<Icon name="upload" size={18} class="mr-2" /> Drop the file
 			</div>
@@ -118,7 +118,7 @@
 				type="button"
 				onclick={() => ondecode?.()}
 				disabled={loading || value.trim().length === 0}
-				class="yk-cut inline-flex items-center gap-2 bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
+				class="yk-pressable inline-flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
 			>
 				{#if loading}
 					<Icon name="clock" size={16} /> Analyzing…
@@ -131,7 +131,7 @@
 		<button
 			type="button"
 			onclick={() => fileInput?.click()}
-			class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+			class="yk-pressable inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
 		>
 			<Icon name="upload" size={16} /> Import a file
 		</button>

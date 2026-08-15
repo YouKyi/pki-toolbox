@@ -78,7 +78,7 @@
 		>
 			<header class="flex items-center gap-3 px-5 py-4">
 				<span
-					class="yk-chip grid h-9 w-9 place-items-center bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400"
+					class="yk-chip grid h-9 w-9 place-items-center bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
 				>
 					<Icon name="fingerprint" size={20} />
 				</span>

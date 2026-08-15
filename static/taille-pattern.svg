@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="44" viewBox="0 0 64 44">
+	<!-- youkyi DA v2 · semis de seuil : deux traits à la pente 1/Φ² (≈ 21°).
+	     Repris de design-system/assets/taille-pattern.svg ; le currentColor du
+	     master devient une encre neutre fixe, un SVG chargé en background-image
+	     n'héritant pas de la couleur du document. L'intensité se règle côté CSS
+	     (opacity + mask), le motif restant localisé et fondu. -->
+	<path
+		d="M6 10 l13 4.97 M38 30 l13 4.97"
+		fill="none"
+		stroke="#98938b"
+		stroke-width="1"
+		opacity="0.55"
+	/>
+</svg>

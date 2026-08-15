@@ -1,9 +1,9 @@
 <script lang="ts">
 	/**
-	 * Top navigation bar (youkyi DA). Replaces the sidebar: the four tool
-	 * categories are cut dropdown folders; the active one carries the orange
-	 * underline with an oblique diving terminaison. The bar sits on the page
-	 * background over a full-width hairline.
+	 * Top navigation bar (youkyi DA v2). Replaces the sidebar: the four tool
+	 * categories are dropdown folders and the active one carries the orange
+	 * underline. The bar is the site's floating chrome, so it is the one surface
+	 * the charter renders in glass, over a full-width hairline.
 	 *
 	 * A11y: this is a disclosure pattern (button toggling a group of links), not a
 	 * menubar — so it deliberately does NOT claim role="menu"/"menuitem", which
@@ -58,10 +58,7 @@
 
 <svelte:window onclick={onWindowClick} onkeydown={onKeydown} />
 
-<div
-	bind:this={navEl}
-	class="sticky top-0 z-40 border-b border-slate-200 bg-slate-50/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90"
->
+<div bind:this={navEl} class="yk-chrome sticky top-0 z-40 border-b">
 	<nav aria-label="Primary">
 		<div class="relative mx-auto flex h-16 max-w-6xl items-center gap-8 px-4 sm:px-6 lg:px-8">
 			<!-- Wordmark. The text and its underscore are one flex item, otherwise the
@@ -70,9 +67,7 @@
 				href="/"
 				class="yk-wordmark flex shrink-0 items-center gap-2.5 text-[17px] text-slate-900 dark:text-slate-100"
 			>
-				<span
-					class="yk-chip grid h-9 w-9 place-items-center bg-slate-900 text-[color:var(--yk-accent)] dark:bg-slate-800"
-				>
+				<span class="yk-chip grid h-9 w-9 place-items-center bg-ink-solid text-on-ink">
 					<Icon name="shield" size={20} />
 				</span>
 				<span>pki-toolbox<u>_</u></span>
@@ -119,12 +114,11 @@
 									/>
 								</svg>
 								{#if isActive}
-									<!-- underline orange + terminaison oblique plongeante -->
+									<!-- Soulignement orange plein : emploi 3 du territoire de l'accent.
+									     La terminaison oblique de la v1 est retirée — en v2 la pente ne
+									     s'applique plus à un contrôle. -->
 									<span
-										class="absolute right-2 -bottom-[7px] left-0 h-[2.5px] bg-[color:var(--yk-accent)]"
-									></span>
-									<span
-										class="absolute right-0 -bottom-[7px] h-[2.5px] w-[7px] origin-left rotate-[21deg] bg-[color:var(--yk-accent)]"
+										class="absolute right-0 -bottom-[7px] left-0 h-[2.5px] rounded-full bg-[color:var(--yk-accent)]"
 									></span>
 								{/if}
 							</button>
@@ -133,7 +127,11 @@
 								<!-- top-full + transparent pt bridges the gap so the pointer never
 								     leaves the wrapper on its way down to the panel. -->
 								<div class="absolute top-full left-0 z-40 pt-2">
-									<div class="yk-cut-bordered min-w-[248px] py-1.5">
+									<!-- Panneau posé au-dessus du contenu : avec la barre, c'est le seul
+									     endroit où la charte v2 autorise le verre. -->
+									<div
+										class="yk-chrome min-w-[248px] overflow-hidden rounded-xl border py-1.5 shadow-md"
+									>
 										{#each list as tool (tool.slug)}
 											{@const isCurrent = current === `/${tool.slug}`}
 											<a
@@ -171,7 +169,7 @@
 				<button
 					type="button"
 					onclick={toggleTheme}
-					class="p-2 text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+					class="yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
 					aria-label={themeAction}
 					title={themeAction}
 				>
@@ -182,7 +180,7 @@
 					href="https://github.com/youkyi/pki-toolbox"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="hidden items-center gap-2 border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-teal-700 hover:text-slate-900 sm:inline-flex dark:border-slate-700 dark:text-slate-200 dark:hover:border-teal-400 dark:hover:text-slate-100"
+					class="yk-pressable hidden items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-teal-700 hover:text-slate-900 sm:inline-flex dark:border-slate-700 dark:text-slate-200 dark:hover:border-teal-400 dark:hover:text-slate-100"
 				>
 					<Icon name="github" size={16} /> GitHub
 				</a>
@@ -190,7 +188,7 @@
 				<button
 					type="button"
 					onclick={() => (mobileOpen = !mobileOpen)}
-					class="p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+					class="yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
 					aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
 					aria-expanded={mobileOpen}
 				>
@@ -218,7 +216,7 @@
 									<a
 										href="/{tool.slug}"
 										aria-current={isCurrent ? 'page' : undefined}
-										class="flex items-center gap-2.5 border-l-2 px-2.5 py-2 text-sm transition-colors {isCurrent
+										class="flex items-center gap-2.5 rounded-lg border-l-2 px-2.5 py-2 text-sm transition-colors {isCurrent
 											? 'border-[color:var(--yk-accent)] bg-slate-100 font-medium text-slate-900 dark:bg-slate-800 dark:text-slate-100'
 											: 'border-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}"
 									>

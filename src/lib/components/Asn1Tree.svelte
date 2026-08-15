@@ -49,7 +49,7 @@
 		{:else}
 			<span class="pl-[18px] font-semibold {tagColor(node)}">{node.tag}</span>
 			{#if node.value}
-				<span class="break-all text-slate-800 dark:text-slate-200">{node.value}</span>
+				<span class="break-all text-slate-900 dark:text-slate-200">{node.value}</span>
 			{:else if node.tag !== 'NULL'}
 				<span class="text-slate-500 dark:text-slate-600">(empty)</span>
 			{/if}

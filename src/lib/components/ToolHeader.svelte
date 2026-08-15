@@ -7,10 +7,12 @@
 	let { tool }: { tool: Tool } = $props();
 </script>
 
-<header class="mb-6">
+<!-- Même seuil que la page d'accueil : le semis marque la bascule du chrome
+     vers le contenu, une fois par page et fondu avant d'occuper la surface. -->
+<header class="yk-semis relative mb-6">
 	<div class="flex items-center gap-3">
 		<span
-			class="yk-chip grid h-11 w-11 shrink-0 place-items-center bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400"
+			class="yk-chip grid h-11 w-11 shrink-0 place-items-center bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
 		>
 			<Icon name={tool.icon} size={24} />
 		</span>

@@ -131,7 +131,7 @@
 		type="button"
 		onclick={loadCa}
 		disabled={caLoading || !caCertPem.trim() || !caKeyPem.trim()}
-		class="yk-cut mt-4 inline-flex items-center gap-2 bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
+		class="yk-pressable mt-4 inline-flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
 	>
 		<Icon name={caLoading ? 'clock' : 'shield'} size={16} />
 		{caLoading ? 'Loading…' : 'Load the CA'}
@@ -244,7 +244,7 @@
 		type="button"
 		onclick={sign}
 		disabled={signing || !ca || !commonName.trim() || (mode === 'csr' && !csrPem.trim())}
-		class="yk-cut mt-5 inline-flex items-center gap-2 bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
+		class="yk-pressable mt-5 inline-flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
 	>
 		<Icon name={signing ? 'clock' : 'stamp'} size={16} />
 		{signing ? 'Signing…' : 'Sign the certificate'}

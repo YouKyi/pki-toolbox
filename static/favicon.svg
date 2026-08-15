@@ -1,15 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-	<!-- youkyi DA oblique: encre mate, orange unique, coin bas-droit taillé à 1/Φ². -->
-	<path d="M0 0h32v27.4l-1.8 4.6H0z" fill="#1a1816" />
+	<!-- youkyi DA v2 : masse d'encre (verrouillée sombre dans tous les thèmes),
+	     rayon de l'échelle au lieu du coin taillé de la v1 — la pente n'est plus
+	     un vocabulaire de forme. Accent orange sombre, posé sur l'encre. -->
+	<rect width="32" height="32" rx="8" fill="#1a1816" />
 	<path
-		d="M16 4l9 3.2v7.1c0 6-3.8 11.3-9 13.1-5.2-1.8-9-7.1-9-13.1V7.2L16 4z"
+		d="M16 5l8.5 3v6.7c0 5.7-3.6 10.7-8.5 12.3-4.9-1.6-8.5-6.6-8.5-12.3V8L16 5z"
 		fill="none"
 		stroke="#ff6a2e"
 		stroke-width="2"
 		stroke-linejoin="round"
 	/>
 	<path
-		d="M11.5 16.2l3 3 6-6.4"
+		d="M12 16.3l3 3 5.6-6"
 		fill="none"
 		stroke="#ff6a2e"
 		stroke-width="2.4"
