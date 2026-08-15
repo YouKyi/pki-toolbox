@@ -3,29 +3,38 @@ import { test, expect } from '@playwright/test';
 /**
  * Smoke suite for pki-toolbox — fast health check of the REAL static build
  * served by `pnpm preview` (adapter-static, prerender=true; see
- * playwright.config.ts). Covers the shell: home render, the first-load loader,
- * navigation, and theme persistence. Feature coverage lives in tools.spec.ts.
+ * playwright.config.ts). Covers the shell: home render, navigation, and theme
+ * persistence. Feature coverage lives in tools.spec.ts.
  *
  * Selectors are functional contracts only (roles / accessible names / visible
- * text / the `#yk-loader` node / the `.dark` & `.yk-ready` <html> classes). No
- * reliance on Tailwind/DA classes or colours, which change with the design.
+ * text / the `.dark` <html> class). No reliance on Tailwind/DA classes or
+ * colours, which change with the design.
  *
- * Loader nuance (app.html): each Playwright test gets a fresh context, so
- * sessionStorage is empty and the first `goto` behaves like the session's first
- * load — `#yk-loader` is shown then REMOVED from the DOM (no `html.yk-ready`). A
- * second full document load in the same context hits the sessionStorage flag, so
- * `html.yk-ready` is applied before paint and the loader stays but is hidden via
- * CSS. S2 exercises both paths.
+ * There is deliberately no loading screen to assert: the site is prerendered
+ * and paints on the first frame, so nothing may gate the content behind a
+ * timer. S1 asserts the shell is present immediately.
  */
 
-test('S1 home renders, loader removed on first load, title set', async ({ page }) => {
+test('S1 home renders with content on the first frame, title set', async ({ page }) => {
 	await page.goto('/');
 
 	await expect(page).toHaveTitle(/PKI-Toolbox/i);
 	await expect(page.getByRole('heading', { name: 'PKI toolbox', level: 1 })).toBeVisible();
 
-	// First load of the session: the loader is removed from the DOM after fade.
-	await expect(page.locator('#yk-loader')).toHaveCount(0);
+	// No splash may cover the page: nothing fixed and full-viewport on top.
+	expect(
+		await page.evaluate(() =>
+			Array.from(document.body.querySelectorAll('*')).some((el) => {
+				const s = getComputedStyle(el as HTMLElement);
+				return (
+					s.position === 'fixed' &&
+					(el as HTMLElement).clientHeight >= window.innerHeight &&
+					s.visibility !== 'hidden' &&
+					s.display !== 'none'
+				);
+			})
+		)
+	).toBe(false);
 
 	// A couple of the ten "ready" tool cards must be present (nav links).
 	await expect(page.getByRole('link', { name: 'Certificate decoder' })).toBeVisible();
@@ -34,7 +43,7 @@ test('S1 home renders, loader removed on first load, title set', async ({ page }
 	await expect(page.getByText('100% client-side, no data sent')).toBeVisible();
 });
 
-test('S2 navigate home → tool → home, yk-ready on a second load', async ({ page }) => {
+test('S2 navigate home → tool → home, then a second full document load', async ({ page }) => {
 	await page.goto('/');
 
 	// Navigate via the home card (robust, unlike the hover-driven desktop menu).
@@ -50,13 +59,10 @@ test('S2 navigate home → tool → home, yk-ready on a second load', async ({ p
 	await expect(page).toHaveURL(/\/$/);
 	await expect(page.getByRole('heading', { name: 'PKI toolbox', level: 1 })).toBeVisible();
 
-	// Second FULL document load in the same context: the sessionStorage flag is
-	// set, so html.yk-ready is applied before paint and the loader is kept in the
-	// DOM but hidden by CSS (`html.yk-ready #yk-loader { display: none }`).
+	// A second FULL document load lands directly on the tool, with no gate.
 	await page.goto('/decode-certificate');
-	await expect(page.locator('html')).toHaveClass(/yk-ready/);
-	await expect(page.locator('#yk-loader')).toHaveCount(1);
-	await expect(page.locator('#yk-loader')).toBeHidden();
+	await expect(page.getByRole('heading', { name: 'Certificate decoder', level: 1 })).toBeVisible();
+	await expect(page.getByLabel('PKI artefact input')).toBeVisible();
 });
 
 test('S3 theme toggle persists across reload (pre-paint head script)', async ({ page }) => {
