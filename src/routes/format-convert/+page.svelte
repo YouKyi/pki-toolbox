@@ -112,7 +112,7 @@
 				<button
 					type="button"
 					onclick={downloadPkcs7}
-					class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+					class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-surface-2 dark:border-slate-700 dark:text-slate-200"
 				>
 					<Icon name="package" size={15} /> Download as PKCS#7 (.p7b)
 				</button>
@@ -136,14 +136,14 @@
 									item.pem,
 									'application/x-pem-file'
 								)}
-							class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+							class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-surface-2 dark:border-slate-700 dark:text-slate-300"
 						>
 							<Icon name="upload" size={13} class="rotate-180" /> .pem
 						</button>
 						<button
 							type="button"
 							onclick={() => downloadBytes(`${slug(item.label)}-${i + 1}.der`, item.der)}
-							class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+							class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-surface-2 dark:border-slate-700 dark:text-slate-300"
 						>
 							<Icon name="upload" size={13} class="rotate-180" /> .der
 						</button>

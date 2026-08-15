@@ -2,10 +2,6 @@
 	import { categories, toolsByCategory } from '$lib/tools';
 	import Icon from '$lib/components/Icon.svelte';
 	import Badge from '$lib/components/Badge.svelte';
-
-	const readyCount = $derived(
-		categories.flatMap((c) => toolsByCategory(c.id)).filter((t) => t.status === 'ready').length
-	);
 </script>
 
 <svelte:head>
@@ -15,17 +11,16 @@
 <!-- Seuil : le semis à la pente 1/Φ² marque la bascule du chrome vers le
      contenu. Localisé et fondu, jamais un fond plein (DA v2). -->
 <section class="yk-semis relative mb-10">
-	<div
-		class="yk-kicker inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-3 py-1.5 text-teal-700 dark:bg-slate-800 dark:text-teal-300"
-	>
-		<Icon name="lock" size={13} /> 100% client-side, no data sent
-	</div>
-	<h1 class="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-slate-50">
-		PKI toolbox
+	<!-- The heading used to read "PKI toolbox", restating the wordmark sitting 40px
+	     above it: the largest type on the page for no information. It carries the
+	     promise now, and the claim that used to sit above it as an eyebrow is part
+	     of the sentence that follows — where it is read rather than decorated. -->
+	<h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-slate-50">
+		Decode a certificate without uploading it
 	</h1>
-	<p class="mt-3 max-w-2xl text-slate-500 dark:text-slate-400">
-		Decode and inspect your PKI artefacts, X.509 certificates, CSRs, chains and fingerprints,
-		directly in the browser. {readyCount} tools are available today.
+	<p class="mt-3 max-w-2xl text-ink-2">
+		X.509 certificates, signing requests, chains, revocation lists, keystores and raw ASN.1 — read
+		in your browser, on your machine. Nothing you paste leaves the page.
 	</p>
 </section>
 
@@ -47,7 +42,7 @@
 					>
 						<div class="flex items-center gap-3">
 							<span
-								class="yk-chip grid h-10 w-10 shrink-0 place-items-center bg-slate-100 text-slate-600 transition group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:group-hover:bg-slate-700"
+								class="yk-chip grid h-10 w-10 shrink-0 place-items-center bg-surface-2 text-slate-600 transition group-hover:bg-slate-200 dark:text-slate-300 dark:group-hover:bg-slate-700"
 							>
 								<Icon name={tool.icon} size={20} />
 							</span>

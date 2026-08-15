@@ -131,7 +131,7 @@
 				<button
 					type="button"
 					onclick={edit}
-					class="yk-pressable inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 max-sm:min-h-11 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+					class="yk-pressable inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-surface-2 max-sm:min-h-11 dark:border-slate-700 dark:text-slate-200"
 				>
 					<Icon name="file-text" size={13} /> Edit input
 				</button>
@@ -149,7 +149,7 @@
 			role="group"
 			aria-label="PEM input area"
 			class="relative rounded-xl border-2 border-dashed transition-colors {dragOver
-				? 'border-[color:var(--yk-accent)] bg-slate-100 dark:bg-slate-800'
+				? 'border-[color:var(--yk-accent)] bg-surface-2'
 				: 'border-slate-300 dark:border-slate-700'}"
 			ondragover={(e) => {
 				e.preventDefault();
@@ -212,7 +212,7 @@
 		<button
 			type="button"
 			onclick={() => fileInput?.click()}
-			class="yk-pressable inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 max-sm:min-h-11 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+			class="yk-pressable inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-surface-2 max-sm:min-h-11 dark:border-slate-700 dark:text-slate-200"
 		>
 			<Icon name="upload" size={16} /> Import a file
 		</button>
@@ -231,7 +231,7 @@
 			<button
 				type="button"
 				onclick={clear}
-				class="ml-auto inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-red-600 max-sm:min-h-11 dark:text-slate-400 dark:hover:text-red-400"
+				class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-red-600 max-sm:min-h-11 dark:text-slate-400 dark:hover:text-red-400"
 			>
 				<Icon name="close" size={16} /> Clear
 			</button>

@@ -77,7 +77,7 @@
 						title="Copy"
 					>
 						<span
-							class="grid place-items-center rounded-md p-1 transition group-hover/copy:bg-slate-100 group-hover/copy:text-teal-700 dark:group-hover/copy:bg-slate-800 dark:group-hover/copy:text-teal-400"
+							class="grid place-items-center rounded-md p-1 transition group-hover/copy:bg-surface-2 group-hover/copy:text-teal-700 dark:group-hover/copy:text-teal-400"
 						>
 							<Icon name={copied === row.label ? 'check' : 'copy'} size={15} />
 						</span>

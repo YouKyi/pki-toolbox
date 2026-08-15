@@ -19,7 +19,9 @@ test('S1 home renders with content on the first frame, title set', async ({ page
 	await page.goto('/');
 
 	await expect(page).toHaveTitle(/PKI-Toolbox/i);
-	await expect(page.getByRole('heading', { name: 'PKI toolbox', level: 1 })).toBeVisible();
+	await expect(
+		page.getByRole('heading', { name: /Decode a certificate without uploading it/, level: 1 })
+	).toBeVisible();
 
 	// No splash may cover the page: nothing fixed and full-viewport on top.
 	expect(
@@ -40,7 +42,9 @@ test('S1 home renders with content on the first frame, title set', async ({ page
 	await expect(page.getByRole('link', { name: 'Certificate decoder' })).toBeVisible();
 	await expect(page.getByRole('link', { name: 'Self-signed certificate' })).toBeVisible();
 
-	await expect(page.getByText('100% client-side, no data sent')).toBeVisible();
+	// The no-network claim is part of the sentence under the heading now, not an
+	// eyebrow above it.
+	await expect(page.getByText('Nothing you paste leaves the page.')).toBeVisible();
 });
 
 test('S2 navigate home → tool → home, then a second full document load', async ({ page }) => {
@@ -57,7 +61,9 @@ test('S2 navigate home → tool → home, then a second full document load', asy
 		.first()
 		.click();
 	await expect(page).toHaveURL(/\/$/);
-	await expect(page.getByRole('heading', { name: 'PKI toolbox', level: 1 })).toBeVisible();
+	await expect(
+		page.getByRole('heading', { name: /Decode a certificate without uploading it/, level: 1 })
+	).toBeVisible();
 
 	// A second FULL document load lands directly on the tool, with no gate.
 	await page.goto('/decode-certificate');

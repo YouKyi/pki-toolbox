@@ -54,7 +54,7 @@
 </script>
 
 <span
-	class="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-medium tracking-wide ring-1 ring-slate-200 ring-inset dark:bg-slate-800 dark:ring-slate-800 {muted
+	class="inline-flex items-center gap-1.5 rounded-md bg-surface-2 px-2 py-0.5 font-mono text-[11px] font-medium tracking-wide ring-1 ring-line ring-inset {muted
 		? 'text-slate-500 dark:text-slate-400'
 		: 'text-slate-600 dark:text-slate-300'}"
 >

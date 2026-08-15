@@ -171,7 +171,7 @@
 				onclick={() => (mode = m.id as typeof mode)}
 				class="rounded-md px-3 py-1.5 font-medium transition {mode === m.id
 					? 'bg-teal-700 text-white dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)]'
-					: 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}"
+					: 'text-slate-600 hover:bg-surface-2 dark:text-slate-300'}"
 			>
 				{m.label}
 			</button>

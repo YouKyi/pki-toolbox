@@ -167,7 +167,7 @@
 											<a
 												href="/{tool.slug}"
 												aria-current={isCurrent ? 'page' : undefined}
-												class="group/item relative flex items-center gap-2.5 py-2 pr-4 pl-4 text-sm transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 {isCurrent
+												class="group/item relative flex items-center gap-2.5 py-2 pr-4 pl-4 text-sm transition-colors hover:bg-surface-2 {isCurrent
 													? 'font-medium text-slate-900 dark:text-slate-100'
 													: 'text-slate-600 dark:text-slate-300'}"
 											>
@@ -209,7 +209,7 @@
 						aria-expanded={themeOpen}
 						aria-label={themeLabel}
 						title={themeLabel}
-						class="yk-pressable inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+						class="yk-pressable inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-600 transition hover:bg-surface-2 dark:text-slate-300"
 					>
 						<Icon name={THEME_ICON[theme.mode]} size={17} />
 						<span class="hidden sm:inline">{THEME_LABEL[theme.mode]}</span>
@@ -243,7 +243,7 @@
 									role="menuitemradio"
 									aria-checked={on}
 									onclick={() => chooseTheme(mode)}
-									class="flex min-h-11 w-full items-center gap-2.5 px-4 text-sm transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 {on
+									class="flex min-h-11 w-full items-center gap-2.5 px-4 text-sm transition-colors hover:bg-surface-2 {on
 										? 'font-medium text-slate-900 dark:text-slate-100'
 										: 'text-slate-600 dark:text-slate-300'}"
 								>
@@ -270,7 +270,7 @@
 				<button
 					type="button"
 					onclick={() => (mobileOpen = !mobileOpen)}
-					class="yk-hit yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+					class="yk-hit yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-surface-2 lg:hidden dark:text-slate-300"
 					aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
 					aria-expanded={mobileOpen}
 				>
@@ -299,8 +299,8 @@
 										href="/{tool.slug}"
 										aria-current={isCurrent ? 'page' : undefined}
 										class="flex min-h-11 items-center gap-2.5 rounded-lg border-l-2 px-2.5 py-2 text-sm transition-colors {isCurrent
-											? 'border-[color:var(--yk-accent)] bg-slate-100 font-medium text-slate-900 dark:bg-slate-800 dark:text-slate-100'
-											: 'border-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}"
+											? 'border-[color:var(--yk-accent)] bg-surface-2 font-medium text-slate-900 dark:text-slate-100'
+											: 'border-transparent text-slate-600 hover:bg-surface-2 dark:text-slate-300'}"
 									>
 										<Icon name={tool.icon} size={18} class="shrink-0" />
 										<span class="flex-1 truncate">{tool.name}</span>
