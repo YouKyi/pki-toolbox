@@ -25,10 +25,11 @@
 		     the page from screen readers, and make the fastest decoder feel slow. -->
 		<script>
 			try {
-				var saved = localStorage.getItem('pki-toolbox-theme');
+				var mode = localStorage.getItem('pki-toolbox-theme');
+				if (mode !== 'light' && mode !== 'dark') mode = 'auto';
 				var dark =
-					saved === 'dark' ||
-					(saved !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+					mode === 'dark' ||
+					(mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 				if (dark) document.documentElement.classList.add('dark');
 			} catch (e) {}
 		</script>

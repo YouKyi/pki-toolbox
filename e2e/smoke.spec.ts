@@ -73,10 +73,14 @@ test('S3 theme follows the OS until the reader chooses', async ({ page }) => {
 	await expect(page.locator('html')).toHaveClass(/dark/);
 	expect(await page.evaluate(() => localStorage.getItem('pki-toolbox-theme'))).toBeNull();
 
+	// The control states the mode, not the colour it resolves to.
+	await expect(page.getByRole('button', { name: /Theme: Auto/ })).toBeVisible();
+
 	// The OS changing mid-session moves the page with it, while no explicit
 	// choice exists.
 	await page.emulateMedia({ colorScheme: 'light' });
 	await expect(page.locator('html')).not.toHaveClass(/dark/);
+	await expect(page.getByRole('button', { name: /Theme: Auto/ })).toBeVisible();
 });
 
 test('S3b an explicit choice outranks the OS and survives a reload', async ({ page }) => {
@@ -85,13 +89,18 @@ test('S3b an explicit choice outranks the OS and survives a reload', async ({ pa
 
 	// Light, because the OS says so and nothing was chosen yet.
 	await expect(page.locator('html')).not.toHaveClass(/dark/);
-	const toggle = page.getByRole('button', { name: /Switch to (dark|light) theme/ });
-	await expect(page.getByRole('button', { name: 'Switch to dark theme' })).toBeVisible();
 
-	// Switch to dark: class flips, label flips, choice persisted to localStorage.
-	await toggle.click();
+	// Open the menu and pick Dark: the mode is stated, checked, and persisted.
+	await page.getByRole('button', { name: /Theme: Auto/ }).click();
+	const menu = page.getByRole('menu', { name: 'Theme' });
+	await expect(menu.getByRole('menuitemradio', { name: 'Auto' })).toHaveAttribute(
+		'aria-checked',
+		'true'
+	);
+	await menu.getByRole('menuitemradio', { name: 'Dark' }).click();
+
 	await expect(page.locator('html')).toHaveClass(/dark/);
-	await expect(page.getByRole('button', { name: 'Switch to light theme' })).toBeVisible();
+	await expect(page.getByRole('button', { name: /Theme: Dark/ })).toBeVisible();
 	expect(await page.evaluate(() => localStorage.getItem('pki-toolbox-theme'))).toBe('dark');
 
 	// The head pre-script re-applies .dark before hydration on reload.

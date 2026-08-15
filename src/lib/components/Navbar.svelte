@@ -16,14 +16,24 @@
 	import { categories, toolsByCategory, toolBySlug, type ToolCategory } from '$lib/tools';
 	import Icon from './Icon.svelte';
 	import Badge from './Badge.svelte';
-	import { initTheme, toggleTheme, theme } from '$lib/theme.svelte';
+	import {
+		initTheme,
+		setThemeMode,
+		theme,
+		THEME_ICON,
+		THEME_LABEL,
+		THEME_MODES,
+		type ThemeMode
+	} from '$lib/theme.svelte';
 	import { onMount } from 'svelte';
 
 	onMount(initTheme);
 
 	let openCat = $state<ToolCategory | null>(null);
 	let mobileOpen = $state(false);
+	let themeOpen = $state(false);
 	let navEl: HTMLElement | undefined = $state();
+	let themeTrigger: HTMLButtonElement | undefined = $state();
 	/** Trigger buttons, so Escape can hand focus back to the one that opened. */
 	let triggers = $state<Partial<Record<ToolCategory, HTMLButtonElement>>>({});
 
@@ -31,18 +41,29 @@
 	/** Category that owns the current route (drives the active underline). */
 	const activeCat = $derived(toolBySlug(current.replace(/^\//, ''))?.category ?? null);
 
-	const themeAction = $derived(
-		theme.value === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
+	/** The control states the MODE, not the colour it currently resolves to. */
+	const themeLabel = $derived(
+		`Theme: ${THEME_LABEL[theme.mode]}${theme.mode === 'auto' ? ' (follows the system)' : ''}`
 	);
+
+	function chooseTheme(mode: ThemeMode) {
+		setThemeMode(mode);
+		themeOpen = false;
+		themeTrigger?.focus();
+	}
 
 	// Any navigation closes the open folder and the mobile panel.
 	afterNavigate(() => {
 		openCat = null;
 		mobileOpen = false;
+		themeOpen = false;
 	});
 
 	function onWindowClick(event: MouseEvent) {
-		if (navEl && !navEl.contains(event.target as Node)) openCat = null;
+		if (navEl && !navEl.contains(event.target as Node)) {
+			openCat = null;
+			themeOpen = false;
+		}
 	}
 
 	function onKeydown(event: KeyboardEvent) {
@@ -51,6 +72,10 @@
 			const trigger = triggers[openCat];
 			openCat = null;
 			trigger?.focus();
+		}
+		if (themeOpen) {
+			themeOpen = false;
+			themeTrigger?.focus();
 		}
 		mobileOpen = false;
 	}
@@ -171,15 +196,67 @@
 			</div>
 
 			<div class="ml-auto flex shrink-0 items-center gap-2">
-				<button
-					type="button"
-					onclick={toggleTheme}
-					class="yk-hit yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-					aria-label={themeAction}
-					title={themeAction}
-				>
-					<Icon name={theme.value === 'dark' ? 'sun' : 'moon'} size={19} />
-				</button>
+				<!-- Three modes, not a two-state flip: "follows the system" is an answer
+				     in its own right, and a toggle cannot express it — it can only leave
+				     the reader guessing which of the two states means "I did not
+				     choose". The control states the mode, never the resolved colour. -->
+				<div class="relative">
+					<button
+						type="button"
+						bind:this={themeTrigger}
+						onclick={() => (themeOpen = !themeOpen)}
+						aria-haspopup="true"
+						aria-expanded={themeOpen}
+						aria-label={themeLabel}
+						title={themeLabel}
+						class="yk-pressable inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+					>
+						<Icon name={THEME_ICON[theme.mode]} size={17} />
+						<span class="hidden sm:inline">{THEME_LABEL[theme.mode]}</span>
+						<svg
+							viewBox="0 0 10 6"
+							width="9"
+							height="6"
+							aria-hidden="true"
+							class="transition-transform {themeOpen ? 'rotate-180' : ''}"
+						>
+							<polyline
+								points="1,0.8 5,4.8 9,0.8"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.6"
+								stroke-linecap="square"
+							/>
+						</svg>
+					</button>
+
+					{#if themeOpen}
+						<div
+							class="yk-chrome absolute top-full right-0 z-40 mt-2 min-w-[180px] overflow-hidden rounded-xl border py-1.5 shadow-md"
+							role="menu"
+							aria-label="Theme"
+						>
+							{#each THEME_MODES as mode (mode)}
+								{@const on = theme.mode === mode}
+								<button
+									type="button"
+									role="menuitemradio"
+									aria-checked={on}
+									onclick={() => chooseTheme(mode)}
+									class="flex min-h-11 w-full items-center gap-2.5 px-4 text-sm transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 {on
+										? 'font-medium text-slate-900 dark:text-slate-100'
+										: 'text-slate-600 dark:text-slate-300'}"
+								>
+									<Icon name={THEME_ICON[mode]} size={16} class="shrink-0 text-ink-3" />
+									<span class="flex-1 text-left">{THEME_LABEL[mode]}</span>
+									{#if on}
+										<Icon name="check" size={15} class="shrink-0 text-[color:var(--yk-accent)]" />
+									{/if}
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
 				<!-- Right anchor (like the DA nav's CTA): bordered GitHub link. -->
 				<a
 					href="https://github.com/youkyi/pki-toolbox"
