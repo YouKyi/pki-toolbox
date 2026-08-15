@@ -65,7 +65,7 @@
 			     container's gap lands between the word and the underscore. -->
 			<a
 				href="/"
-				class="yk-wordmark flex shrink-0 items-center gap-2.5 text-[17px] text-slate-900 dark:text-slate-100"
+				class="yk-wordmark flex min-h-11 shrink-0 items-center gap-2.5 text-[17px] text-slate-900 dark:text-slate-100"
 			>
 				<!-- `ink` and `page` swap with the theme, so the plate inverts on its own:
 				     dark plate on paper in light, paper plate on ink in dark. The locked
@@ -174,7 +174,7 @@
 				<button
 					type="button"
 					onclick={toggleTheme}
-					class="yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+					class="yk-hit yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
 					aria-label={themeAction}
 					title={themeAction}
 				>
@@ -193,7 +193,7 @@
 				<button
 					type="button"
 					onclick={() => (mobileOpen = !mobileOpen)}
-					class="yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+					class="yk-hit yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
 					aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
 					aria-expanded={mobileOpen}
 				>
@@ -221,7 +221,7 @@
 									<a
 										href="/{tool.slug}"
 										aria-current={isCurrent ? 'page' : undefined}
-										class="flex items-center gap-2.5 rounded-lg border-l-2 px-2.5 py-2 text-sm transition-colors {isCurrent
+										class="flex min-h-11 items-center gap-2.5 rounded-lg border-l-2 px-2.5 py-2 text-sm transition-colors {isCurrent
 											? 'border-[color:var(--yk-accent)] bg-slate-100 font-medium text-slate-900 dark:bg-slate-800 dark:text-slate-100'
 											: 'border-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}"
 									>

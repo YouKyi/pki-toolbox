@@ -34,7 +34,7 @@
 			<button
 				type="button"
 				onclick={copy}
-				class="yk-pressable inline-flex items-center gap-1.5 rounded-md border border-[#3a342e] px-2.5 py-1 font-mono text-xs font-medium text-[#f2f0ec] transition hover:bg-[#2a2622]"
+				class="yk-pressable inline-flex items-center gap-1.5 rounded-md border border-[#3a342e] px-2.5 py-1 font-mono text-xs font-medium text-[#f2f0ec] transition hover:bg-[#2a2622] max-sm:min-h-11"
 			>
 				<Icon name={copied ? 'check' : 'copy'} size={13} />
 				{copied ? 'Copied' : 'Copy'}
@@ -42,7 +42,7 @@
 			<button
 				type="button"
 				onclick={() => downloadText(filename, value, 'application/x-pem-file')}
-				class="yk-pressable inline-flex items-center gap-1.5 rounded-md border border-[#3a342e] px-2.5 py-1 font-mono text-xs font-medium text-[#f2f0ec] transition hover:bg-[#2a2622]"
+				class="yk-pressable inline-flex items-center gap-1.5 rounded-md border border-[#3a342e] px-2.5 py-1 font-mono text-xs font-medium text-[#f2f0ec] transition hover:bg-[#2a2622] max-sm:min-h-11"
 			>
 				<Icon name="upload" size={13} class="rotate-180" /> Download
 			</button>

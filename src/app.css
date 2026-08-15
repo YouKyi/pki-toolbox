@@ -411,6 +411,20 @@ textarea::placeholder {
 	-webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
 }
 
+/* ---- cible tactile ----
+   La boîte est agrandie pour de vrai, le glyphe reste petit et centré. Une
+   variante en pseudo-élément débordant a été essayée puis abandonnée : ce que
+   l'élément peint hors de sa boîte compte dans le `scrollWidth` du parent, donc
+   la garde responsive à 390px le signalait — à juste titre — comme du contenu
+   qui déborde. Une cible qu'on ne peut pas mesurer est une cible qu'on ne peut
+   pas garantir. */
+.yk-hit {
+	display: inline-grid;
+	place-items: center;
+	min-width: 44px;
+	min-height: 44px;
+}
+
 /* ---- v2 · tout élément pressable répond à l'appui ----
    Le retour est instantané et se joue à la pression, pas au relâchement. */
 .yk-pressable {

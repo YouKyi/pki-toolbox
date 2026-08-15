@@ -6,9 +6,12 @@
 </script>
 
 <div class="flex min-h-screen flex-col">
+	<!-- `not-sr-only` resets padding to 0, so the revealed link has to restate its
+	     own: without `focus:px-4 focus:py-3` it appears 137x20, under the 24px
+	     minimum, and it is the very first target a keyboard user meets. -->
 	<a
 		href="#main"
-		class="sr-only rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:outline-2 focus:outline-offset-2 focus:outline-teal-700 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)]"
+		class="sr-only rounded-lg bg-teal-500 text-sm font-semibold text-white focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:px-4 focus:py-3 focus:outline-2 focus:outline-offset-2 focus:outline-teal-700 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)]"
 	>
 		Skip to main content
 	</a>
@@ -66,7 +69,7 @@
 					href="https://youkyi.fr"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="yk-wordmark text-slate-900 hover:text-teal-700 dark:text-slate-100 dark:hover:text-teal-300"
+					class="yk-wordmark inline-flex min-h-11 items-center text-slate-900 hover:text-teal-700 dark:text-slate-100 dark:hover:text-teal-300"
 					>youkyi<u>_</u></a
 				>
 				<p class="mt-2 text-xs">
@@ -80,13 +83,15 @@
 						href="https://youkyi.fr"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-teal-700 hover:underline dark:text-teal-300">youkyi.fr</a
+						class="inline-flex min-h-11 items-center text-teal-700 hover:underline dark:text-teal-300"
+						>youkyi.fr</a
 					>
 					<a
 						href="https://github.com/youkyi/pki-toolbox"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-teal-700 hover:underline dark:text-teal-300">github</a
+						class="inline-flex min-h-11 items-center text-teal-700 hover:underline dark:text-teal-300"
+						>github</a
 					>
 				</span>
 				<span>© 2026 · Agasseau Alexandre</span>
