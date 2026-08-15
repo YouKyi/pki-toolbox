@@ -12,7 +12,10 @@
 			name="description"
 			content="Self-hosted, 100% client-side decoder for X.509 certificates, CSRs and certificate chains."
 		/>
-		<!-- No-FOUC theme application, before first paint. Default theme light.
+		<!-- No-FOUC theme application, before first paint: an explicit choice wins,
+		     otherwise the operating system decides. This mirrors the resolution in
+		     src/lib/theme.svelte.ts and has to run here, before anything paints,
+		     or a dark-OS reader gets a full-viewport white flash on first load.
 		     Kept in the head on purpose: SvelteKit hash-mode CSP allows head inline
 		     scripts, whereas a script placed after the body placeholder is blocked.
 
@@ -22,8 +25,11 @@
 		     the page from screen readers, and make the fastest decoder feel slow. -->
 		<script>
 			try {
-				if (localStorage.getItem('pki-toolbox-theme') === 'dark')
-					document.documentElement.classList.add('dark');
+				var saved = localStorage.getItem('pki-toolbox-theme');
+				var dark =
+					saved === 'dark' ||
+					(saved !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+				if (dark) document.documentElement.classList.add('dark');
 			} catch (e) {}
 		</script>
 		%sveltekit.head%

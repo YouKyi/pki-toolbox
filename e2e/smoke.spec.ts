@@ -65,10 +65,25 @@ test('S2 navigate home → tool → home, then a second full document load', asy
 	await expect(page.getByLabel('PKI artefact input')).toBeVisible();
 });
 
-test('S3 theme toggle persists across reload (pre-paint head script)', async ({ page }) => {
+test('S3 theme follows the OS until the reader chooses', async ({ page }) => {
+	// An unset preference follows the operating system, so the test has to state
+	// which system it is standing in rather than assume light.
+	await page.emulateMedia({ colorScheme: 'dark' });
+	await page.goto('/');
+	await expect(page.locator('html')).toHaveClass(/dark/);
+	expect(await page.evaluate(() => localStorage.getItem('pki-toolbox-theme'))).toBeNull();
+
+	// The OS changing mid-session moves the page with it, while no explicit
+	// choice exists.
+	await page.emulateMedia({ colorScheme: 'light' });
+	await expect(page.locator('html')).not.toHaveClass(/dark/);
+});
+
+test('S3b an explicit choice outranks the OS and survives a reload', async ({ page }) => {
+	await page.emulateMedia({ colorScheme: 'light' });
 	await page.goto('/');
 
-	// Light by default (no .dark on <html>).
+	// Light, because the OS says so and nothing was chosen yet.
 	await expect(page.locator('html')).not.toHaveClass(/dark/);
 	const toggle = page.getByRole('button', { name: /Switch to (dark|light) theme/ });
 	await expect(page.getByRole('button', { name: 'Switch to dark theme' })).toBeVisible();
@@ -81,5 +96,9 @@ test('S3 theme toggle persists across reload (pre-paint head script)', async ({ 
 
 	// The head pre-script re-applies .dark before hydration on reload.
 	await page.reload();
+	await expect(page.locator('html')).toHaveClass(/dark/);
+
+	// And the OS flipping the other way no longer overrides that choice.
+	await page.emulateMedia({ colorScheme: 'light' });
 	await expect(page.locator('html')).toHaveClass(/dark/);
 });
