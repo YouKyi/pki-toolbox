@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { revealResult } from '$lib/reveal';
 	import { requireTool } from '$lib/tools';
 	import { convertArtefact, buildPkcs7, type ConvertedItem } from '$lib/pki/convert';
 	import { hexWithColons } from '$lib/pki/format';
@@ -40,7 +41,7 @@
 			items = convertArtefact(input.trim());
 			collapsed = true;
 			await tick();
-			resultRegion?.focus();
+			revealResult(resultRegion);
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 			collapsed = false;

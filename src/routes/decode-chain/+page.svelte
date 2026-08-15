@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { revealResult } from '$lib/reveal';
 	import { requireTool } from '$lib/tools';
 	import { decodeChain, type DecodedChain } from '$lib/pki/chain';
 	import { TEST_CHAIN } from '$lib/samples';
@@ -28,7 +29,7 @@
 			result = await decodeChain(input.trim());
 			collapsed = true;
 			await tick();
-			resultRegion?.focus();
+			revealResult(resultRegion);
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 			collapsed = false;

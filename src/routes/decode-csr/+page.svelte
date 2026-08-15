@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { revealResult } from '$lib/reveal';
 	import { requireTool } from '$lib/tools';
 	import { decodeCsr, type DecodedCsr } from '$lib/pki/parse';
 	import { TEST_CSR } from '$lib/samples';
@@ -27,7 +28,7 @@
 			result = await decodeCsr(input.trim());
 			collapsed = true;
 			await tick();
-			resultRegion?.focus();
+			revealResult(resultRegion);
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 			collapsed = false;

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { revealResult } from '$lib/reveal';
 	import { requireTool } from '$lib/tools';
 	import { decodePkcs12, type DecodedPkcs12 } from '$lib/pki/pkcs12';
 	import { TEST_PKCS12, TEST_PKCS12_PASSWORD } from '$lib/samples';
@@ -29,7 +30,7 @@
 			result = await decodePkcs12(input.trim(), password);
 			collapsed = true;
 			await tick();
-			resultRegion?.focus();
+			revealResult(resultRegion);
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 			collapsed = false;

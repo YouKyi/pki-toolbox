@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { revealResult } from '$lib/reveal';
 	import { requireTool } from '$lib/tools';
 	import { decodeCertificate, type DecodedCertificate } from '$lib/pki/parse';
 	import { ISRG_ROOT_X1 } from '$lib/samples';
@@ -34,7 +35,7 @@
 			// The answer is useless if the reader is still parked on their own
 			// base64: hand the keyboard and the viewport to the result.
 			await tick();
-			resultRegion?.focus();
+			revealResult(resultRegion);
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 			collapsed = false;
