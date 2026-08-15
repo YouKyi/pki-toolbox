@@ -45,10 +45,16 @@
 					>{row.value}</span
 				>
 				{#if row.copy && row.value}
+					<!-- The 44px hit box is bled into the row's own padding with a negative
+					     margin: without it the button is a 44px flex item next to a 20px
+					     line, so it both pushes the row 23px taller than its neighbours and
+					     drops the glyph 12px below the value it copies. The outer size ends
+					     up equal to the line height, so a row with a copy button is exactly
+					     as tall as one without. -->
 					<button
 						type="button"
 						onclick={() => copyValue(row)}
-						class="yk-hit shrink-0 rounded p-1 text-slate-500 transition hover:bg-slate-100 hover:text-teal-700 dark:hover:bg-slate-800 dark:hover:text-teal-400"
+						class="yk-hit -my-3 shrink-0 rounded p-1 text-slate-500 transition hover:bg-slate-100 hover:text-teal-700 dark:hover:bg-slate-800 dark:hover:text-teal-400"
 						aria-label="Copy {row.label}"
 						title="Copy"
 					>
