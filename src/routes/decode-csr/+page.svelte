@@ -132,7 +132,7 @@
 								</p>
 								<div class="flex flex-wrap gap-1.5">
 									{#each result.subjectAltNames as san (san.type + san.value)}
-										<Badge tone="accent">{san.type}: {san.value}</Badge>
+										<Badge tone="neutral">{san.type}: {san.value}</Badge>
 									{/each}
 								</div>
 							</div>

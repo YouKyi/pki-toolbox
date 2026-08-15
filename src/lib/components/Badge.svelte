@@ -59,10 +59,15 @@
 		: 'text-slate-600 dark:text-slate-300'}"
 >
 	{#if dot}
+		<!-- The two markers differ in SHAPE, not only in hue: a filled disc for
+		     "proven", a hollow ring for "needs attention". Their lightness is
+		     deliberately close (the compliance green is tuned to the accent), so in
+		     greyscale — or for a red-green colour deficiency — the fill is what
+		     tells them apart. The label still carries the meaning on its own. -->
 		<span
-			class="h-1.5 w-1.5 shrink-0 rounded-full {dot === 'ok'
+			class="h-2 w-2 shrink-0 rounded-full {dot === 'ok'
 				? 'bg-[color:var(--yk-ok)]'
-				: 'bg-[color:var(--yk-accent)]'}"
+				: 'border-[1.5px] border-[color:var(--yk-accent)]'}"
 			aria-hidden="true"
 		></span>
 	{/if}

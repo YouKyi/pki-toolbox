@@ -149,7 +149,7 @@
 						</p>
 						{@render chips(
 							cert.subjectAltNames.map((s) => `${s.type}: ${s.value}`),
-							'accent'
+							'neutral'
 						)}
 					</div>
 				{/if}

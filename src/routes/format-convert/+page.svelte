@@ -119,7 +119,7 @@
 				class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 			>
 				<header class="flex flex-wrap items-center gap-2 px-5 py-3">
-					<Badge tone="accent">{item.label}</Badge>
+					<Badge tone="neutral">{item.label}</Badge>
 					<span class="text-xs text-ink-3">{item.der.length} bytes</span>
 					<div class="ml-auto flex gap-2">
 						<button
