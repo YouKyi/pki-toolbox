@@ -21,8 +21,15 @@
 		 * Folds the editor into a one-line recap. A decoded artefact is worth more
 		 * screen than the base64 the user just pasted, so the caller sets this on a
 		 * successful decode and the answer takes the viewport back.
+		 *
+		 * This used to default to `false`, which meant a page that said nothing kept
+		 * the old full-height editor — and that is exactly how the conversion page
+		 * drifted for a week without anyone noticing. The default is the shared
+		 * behaviour; a page that wants the editor to stay open has to say so.
 		 */
 		collapsed?: boolean;
+		/** Opts a page out of folding entirely, for an input with no result of its own. */
+		neverFolds?: boolean;
 		/** What the recap names, e.g. the decoded subject. Falls back to a count. */
 		summary?: string;
 		/** True while the page holds a decoding error for this input. */
@@ -41,6 +48,7 @@
 		decodeLabel = 'Decode',
 		example,
 		collapsed = $bindable(false),
+		neverFolds = false,
 		summary,
 		invalid = false,
 		errorId,
@@ -116,7 +124,7 @@
 </script>
 
 <div class="space-y-3">
-	{#if collapsed}
+	{#if collapsed && !neverFolds}
 		<!-- The decoded artefact owns the viewport now; the source stays one click
 		     away. Recap on the raised plane so it reads as a folded editor, not as
 		     a result. -->
@@ -193,7 +201,7 @@
 
 	<!-- Folded, the recap carries its own two controls; a second action row would
 	     offer to decode what is already decoded. -->
-	<div class="flex flex-wrap items-center gap-2" class:hidden={collapsed}>
+	<div class="flex flex-wrap items-center gap-2" class:hidden={collapsed && !neverFolds}>
 		{#if ondecode}
 			<button
 				type="button"
