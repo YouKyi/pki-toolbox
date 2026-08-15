@@ -9,14 +9,14 @@ import { test, expect, type Page, type Locator } from '@playwright/test';
  * Result scoping — IMPORTANT: getByText defaults to a case-insensitive SUBSTRING
  * match, so bare text like "Public key" or "PKCS#10 signing request" also hits
  * the ToolHeader description paragraph, causing strict-mode violations. Every
- * tool page wraps its output in a single `<div aria-live="polite">`; content
+ * tool page wraps its output in a single `<div id="result">`; content
  * assertions are scoped to that region via `region()` so they never collide with
  * the page's own prose.
  */
 
-/** The per-page `aria-live="polite"` output region every tool renders into. */
+/** The per-page `#result` output region every tool renders into. */
 function region(page: Page): Locator {
-	return page.locator('[aria-live="polite"]');
+	return page.locator('#result');
 }
 
 /** Collects any request whose origin is not the local preview server. */

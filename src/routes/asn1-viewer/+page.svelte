@@ -5,6 +5,7 @@
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import Asn1Tree from '$lib/components/Asn1Tree.svelte';
 
 	const tool = requireTool('asn1-viewer');
@@ -22,6 +23,14 @@
 			error = e instanceof Error ? e.message : String(e);
 		}
 	}
+
+	/** One sentence for assistive technology; the tree carries the detail. */
+	/** Ties the failure message to the field that caused it. */
+	const errorId = $props.id();
+
+	const status = $derived(
+		error ? `Parsing failed: ${error}` : result ? 'ASN.1 structure parsed' : ''
+	);
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -30,15 +39,18 @@
 
 <PemInput
 	bind:value={input}
+	invalid={Boolean(error)}
+	{errorId}
 	ondecode={decode}
 	decodeLabel="Parse"
 	example={ISRG_ROOT_X2}
 	placeholder="Paste a PEM or DER artefact (certificate, CSR, key, CRL…)…"
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
+<div id="result" class="mt-6 space-y-4">
+	<StatusLine message={status} />
 	{#if error}
-		<Alert variant="error" title="Parsing failed">{error}</Alert>
+		<Alert id={errorId} variant="error" title="Parsing failed">{error}</Alert>
 	{/if}
 	{#if result}
 		<div

@@ -33,9 +33,16 @@
 		meta?: string;
 		/** Status badges, pinned to the right of the band. */
 		badges?: Snippet;
+		/**
+		 * Id put on the heading so the enclosing card can name itself after it:
+		 * without an accessible name, a screen reader announces "article" and the
+		 * reader has to go hunting for what it holds.
+		 */
+		headingId?: string;
 	};
 
-	let { icon, title, index, lead, value, datetime, note, meta, badges }: Props = $props();
+	let { icon, title, index, lead, value, datetime, note, meta, badges, headingId }: Props =
+		$props();
 </script>
 
 <header class="border-b border-slate-200 bg-surface-2 px-5 py-5 dark:border-slate-800">
@@ -50,6 +57,7 @@
 		     their own line instead. -->
 		<div class="min-w-[10rem] flex-1">
 			<h2
+				id={headingId}
 				class="font-head text-xl leading-tight font-bold tracking-tight [overflow-wrap:anywhere] text-ink"
 			>
 				<!-- The separator lives inside the span: a newline between the index and

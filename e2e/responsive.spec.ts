@@ -41,7 +41,7 @@ for (const [path, action] of PAGES) {
 		await page.getByRole('button', { name: action }).click();
 
 		// Wait for the tool to actually render something before measuring.
-		await expect(page.locator('[aria-live="polite"]')).not.toBeEmpty({ timeout: 20000 });
+		await expect(page.locator('#result')).not.toBeEmpty({ timeout: 20000 });
 
 		const report = await page.evaluate(() => {
 			const doc = document.documentElement;

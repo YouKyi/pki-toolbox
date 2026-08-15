@@ -9,6 +9,7 @@
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import CertCard from '$lib/components/CertCard.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import PemOutput from '$lib/components/PemOutput.svelte';
 
@@ -56,6 +57,15 @@
 			loading = false;
 		}
 	}
+
+	/** One sentence for assistive technology; the card carries the detail. */
+	const status = $derived(
+		error
+			? `Generation failed: ${error}`
+			: result
+				? `Certificate generated for ${commonName}, private key shown once below`
+				: ''
+	);
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -127,7 +137,8 @@
 	</p>
 </div>
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
+<div id="result" class="mt-6 space-y-4">
+	<StatusLine message={status} />
 	{#if error}
 		<Alert variant="error" title="Generation failed">{error}</Alert>
 	{/if}

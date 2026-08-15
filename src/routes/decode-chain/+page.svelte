@@ -8,6 +8,7 @@
 	import PemInput from '$lib/components/PemInput.svelte';
 	import CertCard from '$lib/components/CertCard.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import VerdictBand from '$lib/components/VerdictBand.svelte';
@@ -20,6 +21,8 @@
 	let loading = $state(false);
 	let collapsed = $state(false);
 	let resultRegion: HTMLDivElement | undefined = $state();
+	/** Ties the failure message to the field that caused it. */
+	const errorId = $props.id();
 
 	async function decode() {
 		loading = true;
@@ -52,6 +55,15 @@
 			result?.links[0]?.certificate.subject ??
 			'Certificate chain'
 	);
+
+	/** One sentence for assistive technology; the card carries the detail. */
+	const status = $derived(
+		error
+			? `Decoding failed: ${error}`
+			: result
+				? `Chain decoded: ${length}, ${result.complete ? 'every signature verified' : 'a link could not be verified'}`
+				: ''
+	);
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -60,6 +72,8 @@
 
 <PemInput
 	bind:value={input}
+	invalid={Boolean(error)}
+	{errorId}
 	bind:collapsed
 	summary={result ? `${leafName} · chain of ${length}` : ''}
 	{loading}
@@ -69,15 +83,10 @@
 	placeholder="Paste several concatenated PEM certificates here (leaf → … → root)…"
 />
 
-<div
-	bind:this={resultRegion}
-	tabindex="-1"
-	class="mt-6 space-y-4 outline-none"
-	aria-live="polite"
-	aria-atomic="false"
->
+<div bind:this={resultRegion} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={status} />
 	{#if error}
-		<Alert variant="error" title="Decoding failed">{error}</Alert>
+		<Alert id={errorId} variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 
 	{#if result}

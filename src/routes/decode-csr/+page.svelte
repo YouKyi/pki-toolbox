@@ -7,6 +7,7 @@
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import RowList from '$lib/components/RowList.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import VerdictBand from '$lib/components/VerdictBand.svelte';
@@ -19,6 +20,8 @@
 	let loading = $state(false);
 	let collapsed = $state(false);
 	let resultRegion: HTMLDivElement | undefined = $state();
+	/** Ties the failure message to the field that caused it. */
+	const errorId = $props.id();
 
 	async function decode() {
 		loading = true;
@@ -56,6 +59,11 @@
 					.join(' · ')
 			: ''
 	);
+
+	/** One sentence for assistive technology; the card carries the detail. */
+	const status = $derived(
+		error ? `Decoding failed: ${error}` : result ? `Signing request decoded: ${commonName}` : ''
+	);
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -64,6 +72,8 @@
 
 <PemInput
 	bind:value={input}
+	invalid={Boolean(error)}
+	{errorId}
 	bind:collapsed
 	summary={commonName ? `${commonName} · signing request` : ''}
 	{loading}
@@ -73,15 +83,10 @@
 	placeholder="Paste a PKCS#10 request here (-----BEGIN CERTIFICATE REQUEST-----)…"
 />
 
-<div
-	bind:this={resultRegion}
-	tabindex="-1"
-	class="mt-6 space-y-4 outline-none"
-	aria-live="polite"
-	aria-atomic="false"
->
+<div bind:this={resultRegion} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={status} />
 	{#if error}
-		<Alert variant="error" title="Decoding failed">{error}</Alert>
+		<Alert id={errorId} variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 
 	{#if result}

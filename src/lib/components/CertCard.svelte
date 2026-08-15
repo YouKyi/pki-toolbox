@@ -11,6 +11,9 @@
 	let { cert, role, index }: { cert: DecodedCertificate; role?: ChainRole; index?: number } =
 		$props();
 
+	/** Ties the card to its heading for assistive technology. */
+	const headingId = $props.id();
+
 	const ROLE_LABEL: Record<ChainRole, string> = {
 		leaf: 'Leaf certificate',
 		intermediate: 'Intermediate CA',
@@ -99,7 +102,10 @@
 	</div>
 {/snippet}
 
+<!-- Named after its own heading: an unnamed `article` is announced as "article"
+     and the reader has to walk into it to learn which certificate it holds. -->
 <article
+	aria-labelledby={headingId}
 	class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 >
 	<!-- Three questions bring a user to a certificate decoder — what is it, when
@@ -114,6 +120,7 @@
 	<VerdictBand
 		icon="certificate"
 		title={commonName}
+		{headingId}
 		{index}
 		lead={verdict.lead}
 		value={verdict.date}

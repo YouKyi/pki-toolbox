@@ -10,6 +10,7 @@
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 
@@ -22,6 +23,8 @@
 	/** Folded once converted: the outputs are the point, the source is not. */
 	let collapsed = $state(false);
 	let resultRegion: HTMLDivElement | undefined = $state();
+	/** Ties the failure message to the field that caused it. */
+	const errorId = $props.id();
 
 	const certItems = $derived(items.filter((i) => i.label.endsWith('CERTIFICATE')));
 
@@ -69,6 +72,11 @@
 			'application/x-pkcs7-certificates'
 		);
 	}
+
+	/** One sentence for assistive technology; the card carries the detail. */
+	const status = $derived(
+		error ? `Conversion failed: ${error}` : items.length ? `Converted: ${summary}` : ''
+	);
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -77,6 +85,8 @@
 
 <PemInput
 	bind:value={input}
+	invalid={Boolean(error)}
+	{errorId}
 	bind:collapsed
 	{summary}
 	ondecode={decode}
@@ -85,15 +95,10 @@
 	placeholder="Paste a PEM/DER certificate or a PKCS#7 bundle, or import a file…"
 />
 
-<div
-	bind:this={resultRegion}
-	tabindex="-1"
-	class="mt-6 space-y-4 outline-none"
-	aria-live="polite"
-	aria-atomic="false"
->
+<div bind:this={resultRegion} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={status} />
 	{#if error}
-		<Alert variant="error" title="Conversion failed">{error}</Alert>
+		<Alert id={errorId} variant="error" title="Conversion failed">{error}</Alert>
 	{/if}
 
 	{#if items.length}

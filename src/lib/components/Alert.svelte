@@ -37,11 +37,13 @@
 	let {
 		variant = 'info',
 		title,
+		id,
 		children
-	}: { variant?: AlertVariant; title?: string; children?: Snippet } = $props();
+	}: { variant?: AlertVariant; title?: string; id?: string; children?: Snippet } = $props();
 </script>
 
 <div
+	{id}
 	class="relative flex gap-3 overflow-hidden rounded-xl bg-slate-100 px-4 py-3 pl-5 text-sm text-slate-700 ring-1 ring-slate-200 ring-inset dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-800"
 >
 	<span class="absolute top-0 bottom-0 left-0 w-[3px] {STYLES[variant].marker}" aria-hidden="true"

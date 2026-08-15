@@ -25,6 +25,10 @@
 		collapsed?: boolean;
 		/** What the recap names, e.g. the decoded subject. Falls back to a count. */
 		summary?: string;
+		/** True while the page holds a decoding error for this input. */
+		invalid?: boolean;
+		/** Id of the element explaining that error, tied to the field. */
+		errorId?: string;
 		ondecode?: () => void;
 	};
 
@@ -38,6 +42,8 @@
 		example,
 		collapsed = $bindable(false),
 		summary,
+		invalid = false,
+		errorId,
 		ondecode
 	}: Props = $props();
 
@@ -45,6 +51,9 @@
 	let fileError = $state('');
 	let fileInput: HTMLInputElement | undefined = $state();
 	let textarea: HTMLTextAreaElement | undefined = $state();
+
+	/** Local id so the file error can be tied to the field it describes. */
+	const fileErrorId = $props.id();
 
 	const blockCount = $derived((value.match(/-----BEGIN /g) ?? []).length);
 	const byteSize = $derived(new TextEncoder().encode(value).length);
@@ -157,6 +166,10 @@
 				required
 				aria-required="true"
 				spellcheck="false"
+				aria-invalid={invalid || Boolean(fileError) || undefined}
+				aria-describedby={[fileError ? fileErrorId : '', invalid ? errorId : '']
+					.filter(Boolean)
+					.join(' ') || undefined}
 				autocomplete="off"
 				onkeydown={onKeydown}
 				class="block h-64 w-full resize-y rounded-xl bg-transparent p-4 font-mono text-[13px] leading-relaxed text-slate-900 focus:ring-2 focus:ring-teal-500/40 focus:outline-none dark:text-slate-100"
@@ -172,7 +185,10 @@
 	{/if}
 
 	{#if fileError}
-		<p class="text-sm text-red-600 dark:text-red-400">{fileError}</p>
+		<!-- `role="alert"` because this message replaces nothing on screen and is
+		     the only feedback a dropped file gets: without it, an oversized file is
+		     silent for a screen reader. -->
+		<p id={fileErrorId} role="alert" class="text-sm text-red-600 dark:text-red-400">{fileError}</p>
 	{/if}
 
 	<!-- Folded, the recap carries its own two controls; a second action row would

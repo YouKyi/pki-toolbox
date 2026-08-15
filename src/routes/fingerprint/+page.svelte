@@ -8,6 +8,7 @@
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import RowList from '$lib/components/RowList.svelte';
 	import VerdictBand from '$lib/components/VerdictBand.svelte';
 
@@ -19,6 +20,8 @@
 	let loading = $state(false);
 	let collapsed = $state(false);
 	let resultRegion: HTMLDivElement | undefined = $state();
+	/** Ties the failure message to the field that caused it. */
+	const errorId = $props.id();
 
 	async function decode() {
 		loading = true;
@@ -65,6 +68,11 @@
 				]
 			: []
 	);
+
+	/** One sentence for assistive technology; the card carries the detail. */
+	const status = $derived(
+		error ? `Decoding failed: ${error}` : result ? `Fingerprints computed for ${commonName}` : ''
+	);
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -73,6 +81,8 @@
 
 <PemInput
 	bind:value={input}
+	invalid={Boolean(error)}
+	{errorId}
 	bind:collapsed
 	summary={commonName ? `${commonName} · certificate` : ''}
 	{loading}
@@ -81,15 +91,10 @@
 	example={ISRG_ROOT_X1}
 />
 
-<div
-	bind:this={resultRegion}
-	tabindex="-1"
-	class="mt-6 space-y-4 outline-none"
-	aria-live="polite"
-	aria-atomic="false"
->
+<div bind:this={resultRegion} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={status} />
 	{#if error}
-		<Alert variant="error" title="Decoding failed">{error}</Alert>
+		<Alert id={errorId} variant="error" title="Decoding failed">{error}</Alert>
 	{/if}
 
 	{#if result}
