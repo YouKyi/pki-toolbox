@@ -22,45 +22,35 @@
 		{@render children()}
 	</main>
 
-	<!-- Footer DA youkyi (condensé) : filet neutre interrompu par une entaille
-	     oblique orange (le geste signature), baseline, mentions légales en mono. -->
+	<!-- Footer DA youkyi : filet neutre interrompu par l'entaille oblique orange,
+	     le geste signature — frontière entre deux masses, l'un des trois emplois
+	     que la charte v2 laisse à la pente.
+
+	     La pente est TENUE, pas dessinée puis étirée : les deux filets sont des
+	     éléments souples, l'entaille est un SVG de taille fixe entre eux. Avec un
+	     seul SVG en `preserveAspectRatio="none"` la diagonale se couchait avec la
+	     fenêtre — ≈4° à 1280px, ≈13° à 390px — et la seule signature dessinée du
+	     site l'était donc fausse à toutes les largeurs. Ici dy/dx = 15,3/40 =
+	     0,382, soit 1/Φ² ≈ 21°, quelle que soit la largeur. -->
 	<footer class="relative text-slate-500 dark:text-slate-400">
-		<svg
-			class="pointer-events-none absolute top-0 left-0 block text-slate-200 dark:text-slate-800"
-			viewBox="0 0 1200 8"
-			width="100%"
-			height="8"
-			preserveAspectRatio="none"
+		<div
+			class="pointer-events-none absolute inset-x-0 top-0 flex items-start text-slate-200 dark:text-slate-800"
 			aria-hidden="true"
 		>
-			<line
-				x1="0"
-				y1="4"
-				x2="470"
-				y2="4"
-				stroke="currentColor"
-				stroke-width="1"
-				vector-effect="non-scaling-stroke"
-			/>
-			<line
-				x1="470"
-				y1="4"
-				x2="510"
-				y2="1"
-				stroke="var(--yk-accent)"
-				stroke-width="2"
-				vector-effect="non-scaling-stroke"
-			/>
-			<line
-				x1="510"
-				y1="1"
-				x2="1200"
-				y2="1"
-				stroke="currentColor"
-				stroke-width="1"
-				vector-effect="non-scaling-stroke"
-			/>
-		</svg>
+			<span class="mt-[17.5px] h-px flex-1 bg-current"></span>
+			<svg width="40" height="20" viewBox="0 0 40 20" fill="none" class="block shrink-0">
+				<line
+					x1="0"
+					y1="17.5"
+					x2="40"
+					y2="2.2"
+					stroke="var(--yk-accent)"
+					stroke-width="2"
+					stroke-linecap="square"
+				/>
+			</svg>
+			<span class="mt-[2.2px] h-px flex-1 bg-current"></span>
+		</div>
 		<div
 			class="mx-auto flex w-full max-w-6xl flex-wrap items-end justify-between gap-4 px-4 pt-9 pb-8 sm:px-6 lg:px-8"
 		>
