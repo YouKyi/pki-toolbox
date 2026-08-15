@@ -103,18 +103,12 @@
 			/>
 
 			<section class="px-5 py-4">
-				<h3
-					class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
-				>
-					Identity
-				</h3>
+				<h3 class="mb-2 text-xs font-semibold tracking-wide text-ink-3 uppercase">Identity</h3>
 				<RowList rows={[{ label: 'Subject', value: result.subject || '-', mono: true }]} />
 			</section>
 
 			<section class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
-				<h3
-					class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
-				>
+				<h3 class="mb-2 text-xs font-semibold tracking-wide text-ink-3 uppercase">
 					Key & signature
 				</h3>
 				<RowList
@@ -127,9 +121,7 @@
 
 			{#if result.subjectAltNames.length || result.extendedKeyUsage.length || result.basicConstraints}
 				<section class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
-					<h3
-						class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
-					>
+					<h3 class="mb-2 text-xs font-semibold tracking-wide text-ink-3 uppercase">
 						Requested extensions
 					</h3>
 					<div class="space-y-3">

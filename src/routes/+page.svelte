@@ -33,7 +33,7 @@
 	{@const list = toolsByCategory(category.id)}
 	{#if list.length}
 		<section class="mb-8">
-			<h2 class="yk-kicker mb-3 text-slate-500 dark:text-slate-500">
+			<h2 class="yk-kicker mb-3 text-ink-3">
 				{category.label}
 			</h2>
 			<div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

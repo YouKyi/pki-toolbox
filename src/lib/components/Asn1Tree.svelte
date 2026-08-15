@@ -42,7 +42,7 @@
 					class="shrink-0 transition-transform {open ? '' : '-rotate-90'}"
 				/>
 				<span class="font-semibold {tagColor(node)}">{node.tag}</span>
-				<span class="text-xs text-slate-500 dark:text-slate-500">
+				<span class="text-xs text-ink-3">
 					{node.children.length} element{node.children.length > 1 ? 's' : ''}
 				</span>
 			</button>

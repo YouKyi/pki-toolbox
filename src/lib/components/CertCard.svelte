@@ -84,9 +84,7 @@
 
 {#snippet section(title: string, body: Snippet)}
 	<section class="border-t border-slate-200 px-5 py-4 first:border-t-0 dark:border-slate-800">
-		<h3
-			class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
-		>
+		<h3 class="mb-2 text-xs font-semibold tracking-wide text-ink-3 uppercase">
 			{title}
 		</h3>
 		{@render body()}

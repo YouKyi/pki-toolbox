@@ -67,7 +67,12 @@
 				href="/"
 				class="yk-wordmark flex shrink-0 items-center gap-2.5 text-[17px] text-slate-900 dark:text-slate-100"
 			>
-				<span class="yk-chip grid h-9 w-9 place-items-center bg-ink-solid text-on-ink">
+				<!-- `ink` and `page` swap with the theme, so the plate inverts on its own:
+				     dark plate on paper in light, paper plate on ink in dark. The locked
+				     `--yk-ink-solid` used before sat at roughly 1.1:1 against the night
+				     ground, so the plate vanished in the theme the charter calls its
+				     signature. -->
+				<span class="yk-chip grid h-9 w-9 place-items-center bg-ink text-page">
 					<Icon name="shield" size={20} />
 				</span>
 				<span>pki-toolbox<u>_</u></span>
@@ -206,7 +211,7 @@
 				{#each categories as category (category.id)}
 					{@const list = toolsByCategory(category.id)}
 					{#if list.length}
-						<p class="yk-kicker mt-3 mb-1 px-1 text-slate-500 first:mt-0 dark:text-slate-500">
+						<p class="yk-kicker mt-3 mb-1 px-1 text-ink-3 first:mt-0">
 							{category.label}
 						</p>
 						<ul class="space-y-0.5">

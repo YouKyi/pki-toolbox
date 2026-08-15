@@ -122,7 +122,7 @@
 		<Icon name={loading ? 'clock' : 'sparkles'} size={16} />
 		{loading ? 'Generating…' : 'Generate the certificate'}
 	</button>
-	<p class="mt-2 text-xs text-slate-400 dark:text-slate-500">
+	<p class="mt-2 text-xs text-ink-3">
 		The key pair is generated locally via WebCrypto, the private key never leaves this page.
 	</p>
 </div>

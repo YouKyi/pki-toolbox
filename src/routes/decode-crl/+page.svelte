@@ -129,7 +129,7 @@
 			>
 				<table class="w-full text-left text-sm">
 					<thead
-						class="border-b border-slate-200 text-xs tracking-wide text-slate-500 uppercase dark:border-slate-800 dark:text-slate-500"
+						class="border-b border-slate-200 text-xs tracking-wide text-ink-3 uppercase dark:border-slate-800"
 					>
 						<tr>
 							<th class="px-5 py-2.5 font-semibold">Serial number</th>

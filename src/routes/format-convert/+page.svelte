@@ -120,7 +120,7 @@
 			>
 				<header class="flex flex-wrap items-center gap-2 px-5 py-3">
 					<Badge tone="accent">{item.label}</Badge>
-					<span class="text-xs text-slate-500 dark:text-slate-500">{item.der.length} bytes</span>
+					<span class="text-xs text-ink-3">{item.der.length} bytes</span>
 					<div class="ml-auto flex gap-2">
 						<button
 							type="button"
@@ -147,9 +147,7 @@
 				{#snippet block(title: string, value: string, blockId: string)}
 					<div class="border-t border-slate-200 px-5 py-3 dark:border-slate-800">
 						<div class="mb-1.5 flex items-center justify-between">
-							<span
-								class="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
-							>
+							<span class="text-xs font-semibold tracking-wide text-ink-3 uppercase">
 								{title}
 							</span>
 							<button

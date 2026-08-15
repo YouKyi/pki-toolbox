@@ -126,11 +126,7 @@
 			<div
 				class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
 			>
-				<h3
-					class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
-				>
-					Private keys
-				</h3>
+				<h3 class="mb-2 text-xs font-semibold tracking-wide text-ink-3 uppercase">Private keys</h3>
 				<ul class="space-y-2">
 					{#each result.keys as key, i (i)}
 						<li class="flex flex-wrap items-center gap-2 text-sm">
@@ -143,9 +139,7 @@
 						</li>
 					{/each}
 				</ul>
-				<p class="mt-2 text-xs text-slate-500 dark:text-slate-500">
-					Private key material is never displayed.
-				</p>
+				<p class="mt-2 text-xs text-ink-3">Private key material is never displayed.</p>
 			</div>
 		{/if}
 

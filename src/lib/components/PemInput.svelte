@@ -159,7 +159,7 @@
 				spellcheck="false"
 				autocomplete="off"
 				onkeydown={onKeydown}
-				class="block h-64 w-full resize-y rounded-xl bg-transparent p-4 font-mono text-[13px] leading-relaxed text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-teal-500/40 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-600"
+				class="block h-64 w-full resize-y rounded-xl bg-transparent p-4 font-mono text-[13px] leading-relaxed text-slate-900 focus:ring-2 focus:ring-teal-500/40 focus:outline-none dark:text-slate-100"
 			></textarea>
 			{#if dragOver}
 				<div
@@ -231,7 +231,7 @@
 			tabindex="-1"
 		/>
 	</div>
-	<p class="text-xs text-slate-500 dark:text-slate-500">
+	<p class="text-xs text-ink-3">
 		Everything is decoded locally in your browser, no data is sent.
 		{#if ondecode}
 			<span class="hidden sm:inline">Tip: Ctrl/⌘ + Enter to decode.</span>

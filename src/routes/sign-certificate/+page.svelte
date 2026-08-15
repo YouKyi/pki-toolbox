@@ -250,7 +250,7 @@
 		{signing ? 'Signing…' : 'Sign the certificate'}
 	</button>
 	{#if !ca}
-		<p class="mt-2 text-xs text-slate-400 dark:text-slate-500">Load the CA first (step 1).</p>
+		<p class="mt-2 text-xs text-ink-3">Load the CA first (step 1).</p>
 	{/if}
 </section>
 
