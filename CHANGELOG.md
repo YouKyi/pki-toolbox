@@ -9,6 +9,22 @@ are not listed individually here.
 
 ## [Unreleased]
 
+### Removed
+
+- The first-load splash screen. The site is a prerendered static build with
+  self-hosted fonts and no network calls, so it paints on the first frame; the
+  loader was holding that budget for up to 1.6 s, hiding the page from screen
+  readers, and reappearing in every new tab.
+
+### Added
+
+- A verdict band at the top of a decoded certificate: the subject as a heading,
+  then the expiry answered with an **absolute date** (the relative day count
+  trails as context), the issuer, and the alternative-name count — above the
+  detail rows rather than below them. On a successful decode the input folds
+  into a one-line recap, so the answer takes back the viewport the pasted PEM
+  was holding, and the result region takes focus.
+
 ### Changed
 
 - Realigned the interface on the **youkyi DA v2** (brand master 1.0.0). The

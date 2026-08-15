@@ -48,10 +48,19 @@ test('S4 decode certificate example (ISRG Root X1)', async ({ page }) => {
 
 	const result = region(page);
 
-	// Card header: CN (repeated in Subject/Issuer rows, hence .first()) + badges.
-	await expect(result.getByText('ISRG Root X1').first()).toBeVisible();
+	// Verdict band: the certificate is named as a heading, and the expiry is
+	// answered with an absolute date before any of the detail rows.
+	await expect(result.getByRole('heading', { name: 'ISRG Root X1', level: 2 })).toBeVisible();
+	await expect(result.getByText(/Expires\s+2035-06-04/)).toBeVisible();
 	await expect(result.getByText('Valid', { exact: true })).toBeVisible();
-	await expect(result.getByText('Self-signed')).toBeVisible();
+	await expect(result.getByText('Self-signed').first()).toBeVisible();
+
+	// The editor folds into its recap so the answer owns the viewport; the
+	// source is still one click away.
+	await expect(page.getByLabel('PKI artefact input')).toBeHidden();
+	await expect(page.getByRole('button', { name: 'Edit input' })).toBeVisible();
+	await page.getByRole('button', { name: 'Edit input' }).click();
+	await expect(page.getByLabel('PKI artefact input')).toBeVisible();
 
 	// Structural CertCard sections (h3).
 	await expect(result.getByRole('heading', { name: 'Identity' })).toBeVisible();

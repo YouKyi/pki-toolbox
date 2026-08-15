@@ -27,12 +27,32 @@
 		cert.subjectParts.find((p) => p.key === 'CN')?.value ?? cert.subject ?? '(no subject)'
 	);
 
-	const validityNote = $derived(
+	const issuerName = $derived(
+		cert.issuerParts.find((p) => p.key === 'CN')?.value ?? cert.issuer ?? '(no issuer)'
+	);
+
+	/** Days read as a count, not as a wall of digits: 3214 → "3,214". */
+	const days = $derived(new Intl.NumberFormat('en').format(Math.abs(cert.daysUntilExpiry)));
+
+	/**
+	 * The verdict line answers the question that brought the user here, and it
+	 * answers it with an ABSOLUTE date — a relative day count is a number nobody
+	 * plans against. The relative form trails as context, not as the answer.
+	 */
+	const verdict = $derived(
 		cert.validity === 'valid'
-			? `expires in ${cert.daysUntilExpiry} day(s)`
+			? { lead: 'Expires', date: formatDate(cert.notAfter), note: `in ${days} days` }
 			: cert.validity === 'expired'
-				? `expired ${Math.abs(cert.daysUntilExpiry)} day(s) ago`
-				: 'the start date is in the future'
+				? { lead: 'Expired', date: formatDate(cert.notAfter), note: `${days} days ago` }
+				: { lead: 'Starts', date: formatDate(cert.notBefore), note: 'not valid yet' }
+	);
+
+	const coverage = $derived(
+		cert.subjectAltNames.length === 1
+			? '1 alternative name'
+			: cert.subjectAltNames.length > 1
+				? `${cert.subjectAltNames.length} alternative names`
+				: ''
 	);
 
 	const identity: Row[] = $derived([
@@ -79,27 +99,51 @@
 <article
 	class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 >
-	<header class="flex flex-wrap items-center gap-3 px-5 py-4">
-		<span
-			class="yk-chip grid h-9 w-9 shrink-0 place-items-center bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-		>
-			<Icon name="certificate" size={20} />
-		</span>
-		<!-- A floor (not min-w-0) so the title/expiry block cannot be squeezed to a
-		     few pixels by the badges: below it, the wrapping header drops the badges
-		     to their own line instead. -->
-		<div class="min-w-[10rem] flex-1">
-			<p class="truncate font-semibold text-slate-900 dark:text-slate-100" title={commonName}>
-				{#if index !== undefined}<span class="text-slate-500">#{index + 1}</span>
-				{/if}{commonName}
-			</p>
-			<p class="text-xs text-slate-500 dark:text-slate-500">{validityNote}</p>
-		</div>
-		<div class="flex flex-wrap items-center gap-1.5">
-			{#if role}<Badge tone={role}>{ROLE_LABEL[role]}</Badge>{/if}
-			{#if cert.isCA && !role}<Badge tone="info">CA</Badge>{/if}
-			{#if cert.isSelfSigned}<Badge tone="neutral">Self-signed</Badge>{/if}
-			<Badge tone={VALIDITY[cert.validity].tone}>{VALIDITY[cert.validity].label}</Badge>
+	<!-- The verdict band. Three questions bring a user to a certificate decoder —
+	     what is it, when does it expire, who signed it — and they are answered
+	     here, above the fifteen rows that answer everything else. It sits one
+	     plane above the card so the eye lands on it first, without a second
+	     accent colour doing the work. -->
+	<header class="border-b border-slate-200 bg-surface-2 px-5 py-5 dark:border-slate-800">
+		<div class="flex flex-wrap items-start gap-3">
+			<span
+				class="yk-chip grid h-9 w-9 shrink-0 place-items-center bg-slate-200 text-ink-2 dark:bg-slate-700"
+			>
+				<Icon name="certificate" size={20} />
+			</span>
+			<!-- A floor (not min-w-0) so the title block cannot be squeezed to a few
+			     pixels by the badges: below it, the wrapping header drops the badges
+			     to their own line instead. -->
+			<div class="min-w-[10rem] flex-1">
+				<h2
+					class="font-head text-xl leading-tight font-bold tracking-tight [overflow-wrap:anywhere] text-ink"
+				>
+					{#if index !== undefined}<span class="text-ink-3">#{index + 1}</span>
+					{/if}{commonName}
+				</h2>
+				<!-- Parentheses rather than a separator: when the line wraps on a phone,
+				     a leading middot reads as a stray bullet. -->
+				<p class="mt-2 text-[15px] text-ink">
+					{verdict.lead}
+					<time datetime={cert.notAfter.toISOString()} class="font-mono">{verdict.date}</time>
+					<span class="text-ink-3">({verdict.note})</span>
+				</p>
+				<!-- Self-signed is already stated by its badge; repeating it here would
+				     spend the only other line on nothing. -->
+				{#if !cert.isSelfSigned || coverage}
+					<p class="mt-1 text-sm text-ink-3">
+						{#if !cert.isSelfSigned}Issued by {issuerName}{/if}{#if coverage}<span
+								class="whitespace-nowrap">{cert.isSelfSigned ? '' : ' · '}{coverage}</span
+							>{/if}
+					</p>
+				{/if}
+			</div>
+			<div class="flex flex-wrap items-center gap-1.5">
+				{#if role}<Badge tone={role}>{ROLE_LABEL[role]}</Badge>{/if}
+				{#if cert.isCA && !role}<Badge tone="info">CA</Badge>{/if}
+				{#if cert.isSelfSigned}<Badge tone="neutral">Self-signed</Badge>{/if}
+				<Badge tone={VALIDITY[cert.validity].tone}>{VALIDITY[cert.validity].label}</Badge>
+			</div>
 		</div>
 	</header>
 
