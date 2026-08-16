@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { requireTool } from '$lib/tools';
+	import { revealResult } from '$lib/reveal';
 	import { importCa, issueCertificate, type CaContext } from '$lib/pki/sign';
 	import { KEY_ALGORITHM_LABELS, type KeyAlgorithmChoice } from '$lib/pki/generate';
 	import { decodeCsr } from '$lib/pki/parse';
@@ -8,6 +10,7 @@
 	import PemInput from '$lib/components/PemInput.svelte';
 	import PemOutput from '$lib/components/PemOutput.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 
 	const tool = requireTool('sign-certificate');
@@ -22,14 +25,25 @@
 	let ca = $state<CaContext | null>(null);
 	let caError = $state('');
 	let caLoading = $state(false);
+	/**
+	 * The two CA fields are one input: a certificate without its key proves
+	 * nothing here, and a single button validates the pair. So they fold and
+	 * unfold together, on the same flag, once the pair has been accepted.
+	 */
+	let caFolded = $state(false);
+
+	/** The CA's CN if the DN carries one; the alert below still shows the whole DN. */
+	const caName = (c: CaContext) => /CN=([^,]+)/.exec(c.cert.subject)?.[1]?.trim() ?? c.cert.subject;
 
 	async function loadCa() {
 		caLoading = true;
 		caError = '';
 		try {
 			ca = await importCa(caCertPem, caKeyPem);
+			caFolded = true;
 		} catch (e) {
 			caError = e instanceof Error ? e.message : String(e);
+			caFolded = false;
 		} finally {
 			caLoading = false;
 		}
@@ -39,6 +53,8 @@
 	let mode = $state<'generate' | 'csr'>('generate');
 	let csrPem = $state('');
 	let csrError = $state('');
+	let csrFolded = $state(false);
+	let csrName = $state('');
 	let commonName = $state('service.internal');
 	let organization = $state('');
 	let country = $state('');
@@ -51,6 +67,7 @@
 		csrError = '';
 		try {
 			const csr = await decodeCsr(csrPem);
+			csrFolded = true;
 			const part = (key: string) => csr.subjectParts.find((p) => p.key === key)?.value ?? '';
 			commonName = part('CN');
 			organization = part('O');
@@ -59,8 +76,10 @@
 				.filter((s) => s.type.toLowerCase().includes('dns'))
 				.map((s) => s.value)
 				.join(', ');
+			csrName = commonName;
 		} catch (e) {
 			csrError = e instanceof Error ? e.message : String(e);
+			csrFolded = false;
 		}
 	}
 
@@ -68,6 +87,16 @@
 	let result = $state<IssuedCertificate | null>(null);
 	let signError = $state('');
 	let signing = $state(false);
+	let resultRegion: HTMLDivElement | undefined = $state();
+
+	/** One sentence for assistive technology; the blocks below carry the detail. */
+	const status = $derived(
+		signError
+			? `Signing failed: ${signError}`
+			: result
+				? `Certificate issued for ${commonName}, signed by the loaded CA`
+				: ''
+	);
 
 	// Editing the CA material invalidates the previously loaded CA and any
 	// previously issued result, which was signed by the old CA.
@@ -95,6 +124,8 @@
 				isCa,
 				subject: mode === 'csr' ? { kind: 'csr', csrPem } : { kind: 'generate', keyAlgorithm }
 			});
+			await tick();
+			revealResult(resultRegion);
 		} catch (e) {
 			signError = e instanceof Error ? e.message : String(e);
 		} finally {
@@ -117,13 +148,29 @@
 	<div class="grid gap-4 lg:grid-cols-2">
 		<div>
 			<p class="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">CA certificate</p>
-			<PemInput bind:value={caCertPem} derLabel="CERTIFICATE" accept=".pem,.crt,.cer,.der" />
+			<PemInput
+				bind:value={caCertPem}
+				bind:collapsed={caFolded}
+				summary={ca ? caName(ca) : ''}
+				derLabel="CERTIFICATE"
+				accept=".pem,.crt,.cer,.der"
+			/>
 		</div>
 		<div>
 			<p class="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">
 				CA private key (unencrypted PKCS#8)
 			</p>
-			<PemInput bind:value={caKeyPem} derLabel="PRIVATE KEY" accept=".pem,.key,.der" />
+			<!-- The recap names the field and nothing else. A private key is the one
+			     artefact whose content must never be read back to the screen, so the
+			     summary is a constant; the size shown beside it comes from the input
+			     itself, not from anything parsed out of the key. -->
+			<PemInput
+				bind:value={caKeyPem}
+				bind:collapsed={caFolded}
+				summary="CA private key"
+				derLabel="PRIVATE KEY"
+				accept=".pem,.key,.der"
+			/>
 		</div>
 	</div>
 
@@ -185,6 +232,8 @@
 			</p>
 			<PemInput
 				bind:value={csrPem}
+				bind:collapsed={csrFolded}
+				summary={csrName ? `${csrName} · signing request` : ''}
 				derLabel="CERTIFICATE REQUEST"
 				accept=".pem,.csr,.req,.der"
 				decodeLabel="Read the CSR"
@@ -255,7 +304,8 @@
 </section>
 
 <!-- Results -->
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
+<div bind:this={resultRegion} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={status} />
 	{#if signError}
 		<Alert variant="error" title="Signing failed">{signError}</Alert>
 	{/if}

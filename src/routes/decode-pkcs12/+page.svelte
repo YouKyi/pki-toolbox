@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { tick } from 'svelte';
-	import { revealResult } from '$lib/reveal';
 	import { requireTool } from '$lib/tools';
+	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
 	import { decodePkcs12, type DecodedPkcs12 } from '$lib/pki/pkcs12';
 	import { TEST_PKCS12, TEST_PKCS12_PASSWORD } from '$lib/samples';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
@@ -15,54 +14,27 @@
 
 	const tool = requireTool('decode-pkcs12');
 
-	let input = $state('');
+	/** Kept out of the flow: the keystore needs a second input the flow knows nothing about. */
 	let password = $state('');
-	let result = $state<DecodedPkcs12 | null>(null);
-	let error = $state('');
-	let loading = $state(false);
-	let collapsed = $state(false);
-	let resultRegion: HTMLDivElement | undefined = $state();
-	/** Ties the failure message to the field that caused it. */
-	const errorId = $props.id();
-
-	async function decode() {
-		loading = true;
-		error = '';
-		result = null;
-		try {
-			result = await decodePkcs12(input.trim(), password);
-			collapsed = true;
-			await tick();
-			revealResult(resultRegion);
-		} catch (e) {
-			error = e instanceof Error ? e.message : String(e);
-			collapsed = false;
-		} finally {
-			loading = false;
-		}
-	}
 
 	/** A keystore is opened to find out what came out of it. */
-	const contents = $derived(
-		result
-			? [
-					result.certificateCount === 1
-						? '1 certificate'
-						: `${result.certificateCount} certificates`,
-					result.keyCount === 1 ? '1 private key' : `${result.keyCount} private keys`
-				].join(', ')
-			: ''
-	);
+	const contents = (k: DecodedPkcs12) =>
+		[
+			k.certificateCount === 1 ? '1 certificate' : `${k.certificateCount} certificates`,
+			k.keyCount === 1 ? '1 private key' : `${k.keyCount} private keys`
+		].join(', ');
+
+	const flow = createDecodeFlow({
+		run: (input) => decodePkcs12(input, password),
+		summary: (k) => `PKCS#12 keystore · ${contents(k)}`,
+		announce: (k) => `Keystore decrypted: ${contents(k)}`,
+		failureLabel: 'Decryption failed'
+	});
 
 	function loadExample() {
-		input = TEST_PKCS12;
+		flow.input = TEST_PKCS12;
 		password = TEST_PKCS12_PASSWORD;
 	}
-
-	/** One sentence for assistive technology; the card carries the detail. */
-	const status = $derived(
-		error ? `Decryption failed: ${error}` : result ? `Keystore decrypted: ${contents}` : ''
-	);
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -90,51 +62,52 @@
 </div>
 
 <PemInput
-	bind:value={input}
-	invalid={Boolean(error)}
-	{errorId}
-	bind:collapsed
-	summary={result ? `PKCS#12 keystore · ${contents}` : ''}
-	{loading}
-	ondecode={decode}
+	bind:value={flow.input}
+	bind:collapsed={flow.collapsed}
+	invalid={Boolean(flow.error)}
+	errorId={flow.errorId}
+	summary={flow.summary}
+	loading={flow.loading}
+	ondecode={() => flow.decode()}
 	decodeLabel="Decrypt"
 	derLabel="PKCS12"
 	placeholder="Import a .p12 / .pfx file, or paste its base64 content…"
 />
 
-<div bind:this={resultRegion} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
-	<StatusLine message={status} />
-	{#if error}
-		<Alert id={errorId} variant="error" title="Decryption failed">{error}</Alert>
+<div bind:this={flow.region} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={flow.status} />
+	{#if flow.error}
+		<Alert id={flow.errorId} variant="error" title={flow.failureLabel}>{flow.error}</Alert>
 	{/if}
 
-	{#if result}
+	{#if flow.result}
+		{@const store = flow.result}
 		<article
 			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 		>
 			{#snippet p12Badges()}
-				{#if result?.integrityVerified}<Badge tone="valid">MAC verified</Badge>
+				{#if store.integrityVerified}<Badge tone="valid">MAC verified</Badge>
 				{:else}<Badge tone="warn">No integrity MAC</Badge>{/if}
 			{/snippet}
 			<VerdictBand
 				icon="lock"
 				title="PKCS#12 keystore"
 				lead="Contains"
-				value={contents}
-				meta={result.integrityVerified
+				value={contents(store)}
+				meta={store.integrityVerified
 					? 'Password correct, MAC integrity verified'
 					: 'Content decrypted; this file carries no integrity MAC'}
 				badges={p12Badges}
 			/>
 		</article>
 
-		{#if result.keys.length}
+		{#if store.keys.length}
 			<div
 				class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
 			>
 				<h3 class="mb-2 text-xs font-semibold tracking-wide text-ink-3 uppercase">Private keys</h3>
 				<ul class="space-y-2">
-					{#each result.keys as key, i (i)}
+					{#each store.keys as key, i (i)}
 						<li class="flex flex-wrap items-center gap-2 text-sm">
 							<Icon name="lock" size={16} class="text-slate-500" />
 							<span class="font-medium text-slate-900 dark:text-slate-200">
@@ -149,7 +122,7 @@
 			</div>
 		{/if}
 
-		{#each result.certificates as cert, i (i)}
+		{#each store.certificates as cert, i (i)}
 			<CertCard {cert} index={i} />
 		{/each}
 	{/if}

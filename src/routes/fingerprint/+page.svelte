@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { tick } from 'svelte';
-	import { revealResult } from '$lib/reveal';
 	import { requireTool } from '$lib/tools';
+	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
 	import { decodeCertificate, type DecodedCertificate } from '$lib/pki/parse';
 	import { hexWithColons } from '$lib/pki/format';
 	import { ISRG_ROOT_X1 } from '$lib/samples';
@@ -14,65 +13,20 @@
 
 	const tool = requireTool('fingerprint');
 
-	let input = $state('');
-	let result = $state<DecodedCertificate | null>(null);
-	let error = $state('');
-	let loading = $state(false);
-	let collapsed = $state(false);
-	let resultRegion: HTMLDivElement | undefined = $state();
-	/** Ties the failure message to the field that caused it. */
-	const errorId = $props.id();
+	const cn = (c: DecodedCertificate) =>
+		c.subjectParts.find((p) => p.key === 'CN')?.value ?? c.subject;
 
-	async function decode() {
-		loading = true;
-		error = '';
-		result = null;
-		try {
-			result = await decodeCertificate(input.trim());
-			collapsed = true;
-			await tick();
-			revealResult(resultRegion);
-		} catch (e) {
-			error = e instanceof Error ? e.message : String(e);
-			collapsed = false;
-		} finally {
-			loading = false;
-		}
-	}
+	const fingerprintRows = (c: DecodedCertificate) => [
+		{ label: 'SHA-1', value: hexWithColons(c.fingerprints.sha1), mono: true, copy: true },
+		{ label: 'SHA-256', value: hexWithColons(c.fingerprints.sha256), mono: true, copy: true },
+		{ label: 'SHA-512', value: hexWithColons(c.fingerprints.sha512), mono: true, copy: true }
+	];
 
-	const commonName = $derived(
-		result?.subjectParts.find((p) => p.key === 'CN')?.value ?? result?.subject ?? ''
-	);
-
-	const fingerprintRows = $derived(
-		result
-			? [
-					{
-						label: 'SHA-1',
-						value: hexWithColons(result.fingerprints.sha1),
-						mono: true,
-						copy: true
-					},
-					{
-						label: 'SHA-256',
-						value: hexWithColons(result.fingerprints.sha256),
-						mono: true,
-						copy: true
-					},
-					{
-						label: 'SHA-512',
-						value: hexWithColons(result.fingerprints.sha512),
-						mono: true,
-						copy: true
-					}
-				]
-			: []
-	);
-
-	/** One sentence for assistive technology; the card carries the detail. */
-	const status = $derived(
-		error ? `Decoding failed: ${error}` : result ? `Fingerprints computed for ${commonName}` : ''
-	);
+	const flow = createDecodeFlow({
+		run: (input) => decodeCertificate(input),
+		summary: (c) => `${cn(c)} · certificate`,
+		announce: (c) => `Fingerprints computed for ${cn(c)}`
+	});
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -80,24 +34,25 @@
 <ToolHeader {tool} />
 
 <PemInput
-	bind:value={input}
-	invalid={Boolean(error)}
-	{errorId}
-	bind:collapsed
-	summary={commonName ? `${commonName} · certificate` : ''}
-	{loading}
-	ondecode={decode}
+	bind:value={flow.input}
+	bind:collapsed={flow.collapsed}
+	invalid={Boolean(flow.error)}
+	errorId={flow.errorId}
+	summary={flow.summary}
+	loading={flow.loading}
+	ondecode={() => flow.decode()}
 	decodeLabel="Compute fingerprints"
 	example={ISRG_ROOT_X1}
 />
 
-<div bind:this={resultRegion} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
-	<StatusLine message={status} />
-	{#if error}
-		<Alert id={errorId} variant="error" title="Decoding failed">{error}</Alert>
+<div bind:this={flow.region} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={flow.status} />
+	{#if flow.error}
+		<Alert id={flow.errorId} variant="error" title={flow.failureLabel}>{flow.error}</Alert>
 	{/if}
 
-	{#if result}
+	{#if flow.result}
+		{@const cert = flow.result}
 		<article
 			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 		>
@@ -105,14 +60,14 @@
 			     the band names what was hashed and over how much. -->
 			<VerdictBand
 				icon="fingerprint"
-				title={commonName}
+				title={cn(cert)}
 				lead="Computed over"
-				value={`${result.der.length} bytes`}
+				value={`${cert.der.length} bytes`}
 				note="the certificate's complete DER"
-				meta={result.subject}
+				meta={cert.subject}
 			/>
 			<div class="px-5 py-4">
-				<RowList rows={fingerprintRows} />
+				<RowList rows={fingerprintRows(cert)} />
 			</div>
 		</article>
 		<Alert variant="info">
