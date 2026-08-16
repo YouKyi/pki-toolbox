@@ -2,8 +2,8 @@
 	/**
 	 * The answer layer of a result card.
 	 *
-	 * Every decoder is opened with one question in mind — when does this expire,
-	 * is this CRL still current, what is in this keystore — and the detail rows
+	 * Every decoder is opened with one question in mind (when does this expire,
+	 * is this CRL still current, what is in this keystore) and the detail rows
 	 * answer it only after a scroll. This band answers it first: the artefact
 	 * names itself as a heading, then one line of ink carries the answer, then a
 	 * muted line carries the context. It sits one plane above the card, so the

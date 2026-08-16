@@ -23,13 +23,13 @@
 	</main>
 
 	<!-- Footer DA youkyi : filet neutre interrompu par l'entaille oblique orange,
-	     le geste signature — frontière entre deux masses, l'un des trois emplois
+	     le geste signature, frontière entre deux masses, l'un des trois emplois
 	     que la charte v2 laisse à la pente.
 
 	     La pente est TENUE, pas dessinée puis étirée : les deux filets sont des
 	     éléments souples, l'entaille est un SVG de taille fixe entre eux. Avec un
 	     seul SVG en `preserveAspectRatio="none"` la diagonale se couchait avec la
-	     fenêtre — ≈4° à 1280px, ≈13° à 390px — et la seule signature dessinée du
+	     fenêtre (≈4° à 1280px, ≈13° à 390px) et la seule signature dessinée du
 	     site l'était donc fausse à toutes les largeurs. Ici dy/dx = 15,3/40 =
 	     0,382, soit 1/Φ² ≈ 21°, quelle que soit la largeur. -->
 	<footer class="relative text-slate-500 dark:text-slate-400">

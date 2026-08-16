@@ -6,7 +6,7 @@
 	 * the charter renders in glass, over a full-width hairline.
 	 *
 	 * A11y: this is a disclosure pattern (button toggling a group of links), not a
-	 * menubar — so it deliberately does NOT claim role="menu"/"menuitem", which
+	 * menubar, so it deliberately does NOT claim role="menu"/"menuitem", which
 	 * would promise arrow-key navigation we do not implement. Escape closes the
 	 * open folder and returns focus to its trigger; the current page is marked
 	 * with aria-current, not colour alone.
@@ -145,7 +145,7 @@
 								</svg>
 								{#if isActive}
 									<!-- Soulignement orange plein : emploi 3 du territoire de l'accent.
-									     La terminaison oblique de la v1 est retirée — en v2 la pente ne
+									     La terminaison oblique de la v1 est retirée : en v2 la pente ne
 									     s'applique plus à un contrôle. -->
 									<span
 										class="absolute right-0 -bottom-[7px] left-0 h-[2.5px] rounded-full bg-[color:var(--yk-accent)]"
@@ -197,7 +197,7 @@
 
 			<div class="ml-auto flex shrink-0 items-center gap-2">
 				<!-- Three modes, not a two-state flip: "follows the system" is an answer
-				     in its own right, and a toggle cannot express it — it can only leave
+				     in its own right, and a toggle cannot express it: it can only leave
 				     the reader guessing which of the two states means "I did not
 				     choose". The control states the mode, never the resolved colour. -->
 				<div class="relative">

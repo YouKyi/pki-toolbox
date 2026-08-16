@@ -143,7 +143,7 @@
 		{/if}
 		{#if ca}
 			<Alert variant="info" title="CA loaded">
-				{ca.cert.subject} — valid until {ca.cert.notAfter.toISOString().slice(0, 10)}
+				{ca.cert.subject}, valid until {ca.cert.notAfter.toISOString().slice(0, 10)}
 			</Alert>
 			{#each ca.warnings as warning (warning)}
 				<Alert variant="warn" title="Warning">{warning}</Alert>
@@ -181,7 +181,7 @@
 	{#if mode === 'csr'}
 		<div class="mb-4">
 			<p class="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-				PKCS#10 request — its subject and DNS SANs pre-fill the form below; the form wins.
+				PKCS#10 request: its subject and DNS SANs pre-fill the form below; the form wins.
 			</p>
 			<PemInput
 				bind:value={csrPem}

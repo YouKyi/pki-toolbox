@@ -29,7 +29,7 @@
 	const certItems = $derived(items.filter((i) => i.label.endsWith('CERTIFICATE')));
 
 	/**
-	 * One entry per artefact found in the input, each rendered in every format —
+	 * One entry per artefact found in the input, each rendered in every format,
 	 * so the recap counts artefacts, and names the single one when there is only
 	 * one.
 	 */

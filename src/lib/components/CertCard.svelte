@@ -39,7 +39,7 @@
 
 	/**
 	 * The verdict line answers the question that brought the user here, and it
-	 * answers it with an ABSOLUTE date — a relative day count is a number nobody
+	 * answers it with an ABSOLUTE date: a relative day count is a number nobody
 	 * plans against. The relative form trails as context, not as the answer.
 	 */
 	const verdict = $derived(
@@ -108,8 +108,8 @@
 	aria-labelledby={headingId}
 	class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 >
-	<!-- Three questions bring a user to a certificate decoder — what is it, when
-	     does it expire, who signed it — and the band answers all three above the
+	<!-- Three questions bring a user to a certificate decoder (what is it, when
+	     does it expire, who signed it) and the band answers all three above the
 	     fifteen rows that answer everything else. -->
 	{#snippet certBadges()}
 		{#if role}<Badge tone={role}>{ROLE_LABEL[role]}</Badge>{/if}

@@ -1,5 +1,5 @@
 /*
- * youkyi · DA v2 — https://git.youkyi.net/youkyi-brand (brand.md 1.0.0)
+ * youkyi · DA v2, https://git.youkyi.net/youkyi-brand (brand.md 1.0.0)
  * Neutres mats + orange unique. Le RAYON est la forme par défaut ; la pente
  * 1/Φ² ≈ 21° n'est plus qu'une signature (wordmark, frontière de masses,
  * semis de fond) et ne gouverne plus aucun contrôle.
@@ -321,7 +321,7 @@
 html {
 	color-scheme: light dark;
 	/* The navigation bar is sticky chrome 64px tall, so anything scrolled into
-	   view — an anchor, or the result region taking focus after a decode — would
+	   view (an anchor, or the result region taking focus after a decode) would
 	   land underneath it. Reserve the bar plus a breath. */
 	scroll-padding-top: 5rem;
 }
@@ -424,12 +424,12 @@ textarea::placeholder {
    La boîte est agrandie pour de vrai, le glyphe reste petit et centré. Une
    variante en pseudo-élément débordant a été essayée puis abandonnée : ce que
    l'élément peint hors de sa boîte compte dans le `scrollWidth` du parent, donc
-   la garde responsive à 390px le signalait — à juste titre — comme du contenu
+   la garde responsive à 390px le signalait, à juste titre, comme du contenu
    qui déborde. Une cible qu'on ne peut pas mesurer est une cible qu'on ne peut
    pas garantir.
 
    Déclarée dans la couche `components` : elle pose un `display`, et une règle
-   ordinaire écrite après l'import écraserait `lg:hidden` à spécificité égale —
+   ordinaire écrite après l'import écraserait `lg:hidden` à spécificité égale :
    c'est ce qui a fait réapparaître le bouton de menu mobile sur grand écran.
    Dans cette couche, tout utilitaire reprend la main. */
 @layer components {
@@ -526,7 +526,7 @@ textarea::placeholder {
 	scrollbar-width: thin;
 }
 
-/* Tailwind v4 removed the default pointer cursor on buttons — restore it so
+/* Tailwind v4 removed the default pointer cursor on buttons. Restore it so
    interactive controls read as clickable. */
 button:not(:disabled),
 [role='button']:not([aria-disabled='true']),

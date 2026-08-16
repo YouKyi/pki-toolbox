@@ -6,7 +6,7 @@
  * a statement about the palette, not an instruction to ignore the reader: a
  * user whose machine is set to dark at 2am should not be handed a full-viewport
  * white flash before they can reach a control. So the default mode is `auto`,
- * and choosing is always possible — the mode itself is the state, not the
+ * and choosing is always possible. The mode itself is the state, not the
  * resolved colour, so "follows the system" survives a reload like any other
  * answer.
  *
@@ -64,7 +64,7 @@ function apply() {
 
 	// The browser's own chrome is part of the page. The two `theme-color` tags
 	// are media-scoped, so an explicit choice would leave the chrome following
-	// the OS while the page followed the reader — a visible seam at the top of
+	// the OS while the page followed the reader, a visible seam at the top of
 	// the window. Under an explicit choice both tags carry the chosen ground;
 	// back on auto, each returns to its own.
 	for (const meta of document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')) {

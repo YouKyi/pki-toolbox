@@ -5,7 +5,7 @@
 	 *
 	 * DA v2 · c'est du code : il est rendu en BLOC TERMINAL, la signature
 	 * technique de la charte. Palette verrouillée, toujours sombre même sur
-	 * page claire (façon capture) — spec brand/terminal-block.md.
+	 * page claire (façon capture), spec brand/terminal-block.md.
 	 */
 	import Icon from './Icon.svelte';
 	import { writeToClipboard } from '$lib/clipboard';

@@ -7,7 +7,7 @@ const CHROME = 80;
  *
  * The focus move is unconditional: it is what lets a keyboard user carry on
  * from the answer instead of from the top of the page, and what gives a screen
- * reader somewhere to land. The scroll is not — a plain `focus()` scrolls every
+ * reader somewhere to land. The scroll is not: a plain `focus()` scrolls every
  * time, which yanks the page even when the result was already on screen.
  *
  * The visibility test is written by hand rather than delegated to

@@ -23,7 +23,7 @@
 		 * successful decode and the answer takes the viewport back.
 		 *
 		 * This used to default to `false`, which meant a page that said nothing kept
-		 * the old full-height editor — and that is exactly how the conversion page
+		 * the old full-height editor, and that is exactly how the conversion page
 		 * drifted for a week without anyone noticing. The default is the shared
 		 * behaviour; a page that wants the editor to stay open has to say so.
 		 */

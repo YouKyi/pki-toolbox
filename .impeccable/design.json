@@ -266,13 +266,13 @@
 	],
 	"narrative": {
 		"northStar": "The Sealed Workshop",
-		"overview": "A workshop with the door closed. Every surface is matte and mixed by hand — paper, slate, ink — and nothing in the room is polished for show. Tools are laid out where a working hand expects them, the measurements are legible from across the bench, and what enters the room does not leave it. That last part is not a metaphor the interface merely evokes: the product parses every artefact in the page and declares connect-src 'none', and the visual world is built so that nothing looks like it phones anywhere either. No gloss, no glow, no gradient, no borrowed shine.\n\nThe system runs on one orange and nothing else. A single accent, rationed to five sanctioned uses, is the only colour in a world of matte neutrals. Its scarcity is the mechanism: when orange appears, something is happening — focus, a primary action, an active section, a status. Depth is carried by the value of a surface, not by ornament, so planes separate the way stacked paper separates. The 1/Φ² slope (≈ 21°) that gives the brand its silhouette is a signature, not a grammar: it appears in the wordmark, on the threshold hatch, and on the boundary between two masses — never on a button, a field, or a badge.\n\nLight is the default and dark is the signature: both are matte, neither is a washed tint of the other, and the terminal block stays dark on a light page like a screenshot pinned to a paper wall. This world defines itself against the gradient-and-glass SaaS register, the neon hacker terminal, the corporate enterprise blue, and the undesigned raw tool that the online PKI decoder category usually settles for.",
+		"overview": "A workshop with the door closed. Every surface is matte and mixed by hand (paper, slate, ink), and nothing in the room is polished for show. Tools are laid out where a working hand expects them, the measurements are legible from across the bench, and what enters the room does not leave it. That last part is not a metaphor the interface merely evokes: the product parses every artefact in the page and declares connect-src 'none', and the visual world is built so that nothing looks like it phones anywhere either. No gloss, no glow, no gradient, no borrowed shine.\n\nThe system runs on one orange and nothing else. A single accent, rationed to five sanctioned uses, is the only colour in a world of matte neutrals. Its scarcity is the mechanism: when orange appears, something is happening: focus, a primary action, an active section, a status. Depth is carried by the value of a surface, not by ornament, so planes separate the way stacked paper separates. The 1/Φ² slope (≈ 21°) that gives the brand its silhouette is a signature, not a grammar: it appears in the wordmark, on the threshold hatch, and on the boundary between two masses, never on a button, a field, or a badge.\n\nLight is the default and dark is the signature: both are matte, neither is a washed tint of the other, and the terminal block stays dark on a light page like a screenshot pinned to a paper wall. This world defines itself against the gradient-and-glass SaaS register, the neon hacker terminal, the corporate enterprise blue, and the undesigned raw tool that the online PKI decoder category usually settles for.",
 		"keyCharacteristics": [
 			"One accent, five uses, and nothing else coloured",
 			"Matte neutrals in both themes; zero gradient, zero halo, zero glow",
 			"Elevation by value: at rest, a hairline or a shadow, never both",
 			"Radius as the default shape (≈ 0.30 × control height); the slope is a signature",
-			"Glass is reserved for floating chrome — the nav bar and its panels",
+			"Glass is reserved for floating chrome: the nav bar and its panels",
 			"Mono carries data, commands and measures; it never dresses a paragraph",
 			"Colour is never the only carrier of meaning"
 		],
@@ -284,7 +284,7 @@
 			},
 			{
 				"name": "The No Red Rule",
-				"body": "There is no red outside the terminal block. An error is signalled by the orange and its wording — never by hue alone, and never by a second warning colour, because an amber would read as a second orange.",
+				"body": "There is no red outside the terminal block. An error is signalled by the orange and its wording, never by hue alone, and never by a second warning colour, because an amber would read as a second orange.",
 				"section": "colors"
 			},
 			{
@@ -304,7 +304,7 @@
 			},
 			{
 				"name": "The Value-Separates Rule",
-				"body": "Elevation is declared once: a hairline or a shadow, never both on the same edge — at rest. A surface that leaves the page keeps its hairline and gains a shadow: a card on hover, and the floating chrome. Nothing that sits still carries both.",
+				"body": "Elevation is declared once: a hairline or a shadow, never both on the same edge, at rest. A surface that leaves the page keeps its hairline and gains a shadow: a card on hover, and the floating chrome. Nothing that sits still carries both.",
 				"section": "elevation"
 			},
 			{
@@ -314,7 +314,7 @@
 			},
 			{
 				"name": "The Floating Chrome Rule",
-				"body": "Glass — a translucent ground plus a 20px backdrop blur — belongs to the navigation bar and to panels that float above the content. Never a card, never a field, never a section background. A panel is denser than a bar: what floats over the page ground may be translucent, what sits on text may not.",
+				"body": "Glass, a translucent ground plus a 20px backdrop blur, belongs to the navigation bar and to panels that float above the content. Never a card, never a field, never a section background. A panel is denser than a bar: what floats over the page ground may be translucent, what sits on text may not.",
 				"section": "elevation"
 			},
 			{
@@ -324,7 +324,7 @@
 			},
 			{
 				"name": "The Threshold Rule",
-				"body": "The hatch is localised and faded — it marks the shift from one zone to another and dissolves before it occupies a surface. One per page, at the top of the content, never a full background.",
+				"body": "The hatch is localised and faded: it marks the shift from one zone to another and dissolves before it occupies a surface. One per page, at the top of the content, never a full background.",
 				"section": "shapes"
 			}
 		],
@@ -332,23 +332,23 @@
 			"Do keep exactly one orange fill per screen, and spend the accent only on its five sanctioned uses.",
 			"Do separate planes with the value ramp (#FFFFFF → #F2EFE9 → #EAE6DE, night #211E1B → #282522 → #2E2A26), adding a hairline only where two planes of the same value touch.",
 			"Do pick the radius from the scale by control height (6 / 8 / 9 / 12 / 14 / 16 / 24px), and reserve the pill for shapes that are round by nature.",
-			"Do double every colour signal with an icon, a dot and a label — status must survive greyscale.",
+			"Do double every colour signal with an icon, a dot and a label: status must survive greyscale.",
 			"Do render code as the dark terminal block, whatever the page theme.",
 			"Do keep hairlines relative in the dark theme (rgb(255 255 255 / .11) and /.22) so they track the surface they border.",
 			"Do give every shadow a vertical offset and a wide blur.",
 			"Do keep the threshold hatch localised and faded, one per page."
 		],
 		"donts": [
-			"Don't cut a control at the slope — no cut button, field, badge, or clipped card corner. The slope belongs to the wordmark, the threshold hatch, and a boundary between masses.",
+			"Don't cut a control at the slope: no cut button, field, badge, or clipped card corner. The slope belongs to the wordmark, the threshold hatch, and a boundary between masses.",
 			"Don't introduce a second accent, an amber warning, or any red outside the terminal block; an error is orange plus its wording.",
 			"Don't tint an icon by default, or fill a badge, alert, or section background with the accent.",
-			"Don't use glass anywhere but the floating chrome — not on a card, a field, or a section.",
+			"Don't use glass anywhere but the floating chrome: not on a card, a field, or a section.",
 			"Don't ship a gradient, a glow, or a shadow without offset.",
 			"Don't set running text in the monospace face, or a paragraph in the compliance green.",
 			"Don't load a font, a script, or an image from a third-party origin; every asset is served from this origin, which the CSP enforces.",
-			"Don't let any element render content wider than its box at 390px — the end-to-end suite fails the pipeline for it.",
+			"Don't let any element render content wider than its box at 390px: the end-to-end suite fails the pipeline for it.",
 			"Don't let a hit area be the painted area: enlarge the box for the thumb, keep the paint at the glyph's size.",
-			"Don't write a rule that sets display outside the components layer — an ordinary rule after the Tailwind import outranks lg:hidden by source order alone."
+			"Don't write a rule that sets display outside the components layer: an ordinary rule after the Tailwind import outranks lg:hidden by source order alone."
 		]
 	}
 }

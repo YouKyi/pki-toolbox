@@ -1,7 +1,7 @@
 /**
  * The state every decode tool repeats, in one place.
  *
- * Each page used to carry the same twenty-five lines — input, result, error,
+ * Each page used to carry the same twenty-five lines: input, result, error,
  * loading, collapsed, the result element, and a `decode()` differing only in
  * the single call to the PKI layer. That duplication is why the behaviour
  * drifted: the conversion page simply never gained the fold, and nothing in
@@ -27,8 +27,8 @@ export type DecodeFlowOptions<T> = {
 
 /**
  * `$props.id()` is only available inside a component, so the flow numbers its
- * own. The count runs in the same order on the server and on the client — one
- * flow per page — so the id a prerendered page ships is the id hydration finds.
+ * own. The count runs in the same order on the server and on the client (one
+ * flow per page), so the id a prerendered page ships is the id hydration finds.
  */
 let sequence = 0;
 

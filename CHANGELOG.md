@@ -30,9 +30,9 @@ are not listed individually here.
 ### Changed
 
 - Realigned the interface on the **youkyi DA v2** (brand master 1.0.0). The
-  radius is now the default shape — the v1 "radius: 0" rule is gone and the
+  radius is now the default shape: the v1 "radius: 0" rule is gone and the
   charter's scale (9/12/14/16/24px, tied to control height) drives every
-  control — while the 1/Φ² slope goes back to being a signature: it is no
+  control, while the 1/Φ² slope goes back to being a signature: it is no
   longer applied to a single button, field or badge. Elevation is carried by
   value (a three-plane surface ramp plus a two-step text ramp) with real
   drop shadows, and dark-mode hairlines became translucent veils that
@@ -42,8 +42,8 @@ are not listed individually here.
 - The orange accent is restricted to its five sanctioned uses. Icon chips,
   badges and alerts lost their tinted fills: they are neutral tokens whose
   meaning is carried by a 6px status dot, an icon and their label. There is
-  no red outside the terminal any more — an error is signalled by the orange
-  and its wording — and the compliance green is the oklch tone tuned to the
+  no red outside the terminal any more: an error is signalled by the orange
+  and its wording, and the compliance green is the oklch tone tuned to the
   same lightness as the accent.
 - PEM output is rendered as the charter's **terminal block** (locked palette,
   dark even on a light page), and the favicon was redrawn without the v1 cut
@@ -61,11 +61,11 @@ are not listed individually here.
 
 - **Sign from a CA**, a new generation tool (`/sign-certificate`): paste a CA
   certificate and its unencrypted PKCS#8 private key, and issue a certificate
-  signed by that CA — entirely in the browser, the CA key is imported
+  signed by that CA, entirely in the browser: the CA key is imported
   non-extractable into WebCrypto and never leaves the page. Two modes: generate
   a new key pair, or sign a pasted PKCS#10 CSR (its subject and DNS SANs
   pre-fill the form, the form wins; the CSR signature is verified before
-  issuance — proof of possession). The issued certificate can itself be an
+  issuance, proof of possession). The issued certificate can itself be an
   intermediate CA, enabling full root → intermediate → leaf hierarchies. Issued
   certificates carry Subject Key Identifier and Authority Key Identifier
   extensions, and a ready-to-serve fullchain (certificate + CA) is offered
@@ -91,7 +91,7 @@ leaves the browser.
 ### Added
 
 - The youkyi design system: matte neutrals with a single orange accent, fonts
-  self-hosted (Poppins, Inter, IBM Plex Mono, Space Grotesk — no third-party
+  self-hosted (Poppins, Inter, IBM Plex Mono, Space Grotesk; no third-party
   request), sharp corners, and the signature oblique cuts.
 - A first-load loader (shown once per session) and a branded footer linking to
   <https://youkyi.fr> and the source repository.
@@ -106,7 +106,7 @@ leaves the browser.
 ### Changed
 
 - **Navigation**: the sidebar is replaced by a navbar whose four category
-  dropdowns free the full content width for the tools — PEM blocks, ASN.1 trees
+  dropdowns free the full content width for the tools: PEM blocks, ASN.1 trees
   and CRL tables are wide.
 - **Light is now the default theme**; dark remains the signature one. The
   choice is persisted and applied before the first paint, so the theme no
@@ -124,7 +124,7 @@ leaves the browser.
 - Long values (hex fingerprints, distinguished names, serial numbers) were
   **silently clipped and unreadable on phones**: a `1fr` grid track and a
   grid/flex item both resolve `min-width` to `auto`, so an unbreakable value
-  could not shrink — and since the certificate card is `overflow-hidden`, the
+  could not shrink, and since the certificate card is `overflow-hidden`, the
   overflow was clipped rather than scrollable.
 - Navbar accessibility: the current page is marked with `aria-current` instead
   of colour alone, the misleading `menu`/`menuitem` roles are gone (they

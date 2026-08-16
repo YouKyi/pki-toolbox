@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
 	<!-- youkyi DA v2 : masse d'encre (verrouillée sombre dans tous les thèmes),
-	     rayon de l'échelle au lieu du coin taillé de la v1 — la pente n'est plus
+	     rayon de l'échelle au lieu du coin taillé de la v1 : la pente n'est plus
 	     un vocabulaire de forme. Accent orange sombre, posé sur l'encre. -->
 	<rect width="32" height="32" rx="8" fill="#1a1816" />
 	<path

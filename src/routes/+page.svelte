@@ -14,13 +14,13 @@
 	<!-- The heading used to read "PKI toolbox", restating the wordmark sitting 40px
 	     above it: the largest type on the page for no information. It carries the
 	     promise now, and the claim that used to sit above it as an eyebrow is part
-	     of the sentence that follows — where it is read rather than decorated. -->
+	     of the sentence that follows, where it is read rather than decorated. -->
 	<h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-slate-50">
 		Decode a certificate without uploading it
 	</h1>
 	<p class="mt-3 max-w-2xl text-ink-2">
-		X.509 certificates, signing requests, chains, revocation lists, keystores and raw ASN.1 — read
-		in your browser, on your machine. Nothing you paste leaves the page.
+		X.509 certificates, signing requests, chains, revocation lists, keystores and raw ASN.1, read in
+		your browser, on your machine. Nothing you paste leaves the page.
 	</p>
 </section>
 

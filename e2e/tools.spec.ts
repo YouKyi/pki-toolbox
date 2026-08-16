@@ -2,11 +2,11 @@ import { test, expect, type Page, type Locator } from '@playwright/test';
 
 /**
  * Tool feature suite for pki-toolbox, run against the REAL static build served
- * by `pnpm preview` (adapter-static, prerender=true) — see playwright.config.ts.
+ * by `pnpm preview` (adapter-static, prerender=true), see playwright.config.ts.
  * Everything is decoded client-side (WebCrypto / @peculiar/x509 / pkijs); the CSP
  * `connect-src 'none'` forbids any outbound request, which S4 asserts explicitly.
  *
- * Result scoping — IMPORTANT: getByText defaults to a case-insensitive SUBSTRING
+ * Result scoping. IMPORTANT: getByText defaults to a case-insensitive SUBSTRING
  * match, so bare text like "Public key" or "PKCS#10 signing request" also hits
  * the ToolHeader description paragraph, causing strict-mode violations. Every
  * tool page wraps its output in a single `<div id="result">`; content
@@ -36,7 +36,7 @@ function watchExternalRequests(page: Page): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// S4 — Certificate decoder via "Load an example" (ISRG_ROOT_X1) + no-network
+// S4: Certificate decoder via "Load an example" (ISRG_ROOT_X1) + no-network
 // ---------------------------------------------------------------------------
 test('S4 decode certificate example (ISRG Root X1)', async ({ page }) => {
 	const external = watchExternalRequests(page);
@@ -81,7 +81,7 @@ test('S4 decode certificate example (ISRG Root X1)', async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
-// S5 — CSR decoder via "Load an example" (TEST_CSR)
+// S5: CSR decoder via "Load an example" (TEST_CSR)
 // ---------------------------------------------------------------------------
 test('S5 decode CSR example', async ({ page }) => {
 	await page.goto('/decode-csr');
@@ -90,7 +90,7 @@ test('S5 decode CSR example', async ({ page }) => {
 
 	const result = region(page);
 
-	// Structural labels only — the CN of the test CSR is not asserted (not
+	// Structural labels only: the CN of the test CSR is not asserted (not
 	// guaranteed stable). Scoped to the result region so "Public key" /
 	// "Signature algorithm" don't collide with the ToolHeader prose above.
 	// The verdict band names the request and answers what key it asks for.
@@ -111,7 +111,7 @@ test('S5 decode CSR example', async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
-// S6 — Chain decoder via "Load an example" (TEST_CHAIN: leaf+intermediate+root)
+// S6: Chain decoder via "Load an example" (TEST_CHAIN: leaf+intermediate+root)
 // ---------------------------------------------------------------------------
 test('S6 decode chain example (ordered, verified)', async ({ page }) => {
 	await page.goto('/decode-chain');
@@ -137,12 +137,12 @@ test('S6 decode chain example (ordered, verified)', async ({ page }) => {
 	// At least one cryptographically verified issuer link.
 	await expect(result.getByText(/Signature verified/).first()).toBeVisible();
 
-	// One "Identity" section per certificate — validates the multi-card render.
+	// One "Identity" section per certificate, validates the multi-card render.
 	await expect(result.getByRole('heading', { name: 'Identity' })).toHaveCount(3);
 });
 
 // ---------------------------------------------------------------------------
-// S7 — Fingerprints via "Load an example" (ISRG_ROOT_X1)
+// S7: Fingerprints via "Load an example" (ISRG_ROOT_X1)
 // ---------------------------------------------------------------------------
 test('S7 compute fingerprints example', async ({ page }) => {
 	await page.goto('/fingerprint');
@@ -166,7 +166,7 @@ test('S7 compute fingerprints example', async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
-// S8 — Format conversion via "Load an example" (ISRG_ROOT_X2, not X1)
+// S8: Format conversion via "Load an example" (ISRG_ROOT_X2, not X1)
 // ---------------------------------------------------------------------------
 test('S8 format conversion example (ISRG Root X2)', async ({ page }) => {
 	await page.goto('/format-convert');
@@ -192,7 +192,7 @@ test('S8 format conversion example (ISRG Root X2)', async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
-// S9 — Self-signed generation: fill form -> generate -> cert + private key
+// S9: Self-signed generation: fill form -> generate -> cert + private key
 // ---------------------------------------------------------------------------
 test('S9 generate self-signed certificate', async ({ page }) => {
 	await page.goto('/generate-selfsigned');
@@ -209,7 +209,7 @@ test('S9 generate self-signed certificate', async ({ page }) => {
 	await expect(result.getByText('e2e.test.local').first()).toBeVisible({ timeout: 20000 });
 
 	// Certificate PEM output. NOTE: the block title is a <span>, not a heading,
-	// so this must be getByText — a getByRole('heading') lookup would find nothing.
+	// so this must be getByText: a getByRole('heading') lookup would find nothing.
 	await expect(result.getByText('Certificate (PEM)')).toBeVisible();
 	await expect(
 		result.locator('pre').filter({ hasText: 'BEGIN CERTIFICATE' }).first()

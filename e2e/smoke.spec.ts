@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Smoke suite for pki-toolbox — fast health check of the REAL static build
+ * Smoke suite for pki-toolbox: fast health check of the REAL static build
  * served by `pnpm preview` (adapter-static, prerender=true; see
  * playwright.config.ts). Covers the shell: home render, navigation, and theme
  * persistence. Feature coverage lives in tools.spec.ts.
