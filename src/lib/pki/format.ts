@@ -18,17 +18,17 @@ export function hexWithColons(hex: string): string {
 	return (padded.match(/.{2}/g) ?? []).join(':').toUpperCase();
 }
 
-/** Format a certificate serial number (peculiar returns it as a hex string). */
+/**
+ * Format a certificate serial number (peculiar returns it as a hex string).
+ *
+ * Hex, and only hex. The decimal form used to trail it in the same cell, up to
+ * forty digits of it, which doubled the height of the row and the width of the
+ * CRL table's first column. Nobody reads a serial in decimal: it is compared
+ * against `openssl x509 -serial`, a CA's index file or a CRL entry, and all
+ * three speak hex.
+ */
 export function formatSerial(serial: string): string {
-	const dec = (() => {
-		try {
-			return BigInt('0x' + serial).toString(10);
-		} catch {
-			return null;
-		}
-	})();
-	const hex = hexWithColons(serial);
-	return dec ? `${hex}  (${dec})` : hex;
+	return hexWithColons(serial);
 }
 
 /** Structured description of a public-key algorithm. */

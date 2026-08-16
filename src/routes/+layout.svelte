@@ -3,7 +3,44 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 
 	let { children } = $props();
+
+	/**
+	 * `/` puts the caret in the input, the way every tool a system administrator
+	 * already lives in does. Ctrl/Cmd+Enter to decode was the product's only
+	 * accelerator; this is the other half of the same gesture, and it works from
+	 * anywhere on the page.
+	 *
+	 * A page with several inputs, the signing page, hands it to the first one:
+	 * the reader is heading for the top of the form either way.
+	 */
+	function onKeydown(event: KeyboardEvent) {
+		if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
+		const active = document.activeElement as HTMLElement | null;
+		// A slash typed inside a field is a slash, not a shortcut.
+		if (
+			active instanceof HTMLInputElement ||
+			active instanceof HTMLTextAreaElement ||
+			active instanceof HTMLSelectElement ||
+			active?.isContentEditable
+		) {
+			return;
+		}
+		const field = document.querySelector<HTMLTextAreaElement>('textarea[aria-label]');
+		if (field) {
+			event.preventDefault();
+			field.focus();
+			return;
+		}
+		// Decoded already: the editor is folded into its recap, so reopen it. The
+		// input takes the caret itself once it is back on screen.
+		const reopen = document.querySelector<HTMLButtonElement>('[data-yk-edit]');
+		if (!reopen) return;
+		event.preventDefault();
+		reopen.click();
+	}
 </script>
+
+<svelte:window onkeydown={onKeydown} />
 
 <div class="flex min-h-screen flex-col">
 	<!-- `not-sr-only` resets padding to 0, so the revealed link has to restate its

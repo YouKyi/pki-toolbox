@@ -7,6 +7,7 @@
 	import PemInput from '$lib/components/PemInput.svelte';
 	import CertCard from '$lib/components/CertCard.svelte';
 	import DecodeError from '$lib/components/DecodeError.svelte';
+	import CarryTo from '$lib/components/CarryTo.svelte';
 	import StatusLine from '$lib/components/StatusLine.svelte';
 
 	const tool = requireTool('decode-certificate');
@@ -49,5 +50,7 @@
 	{/if}
 	{#if flow.result}
 		<CertCard cert={flow.result} />
+		<!-- The answer first, then what else can be asked of the same artefact. -->
+		<CarryTo artefact={flow.input} current={tool.slug} />
 	{/if}
 </div>

@@ -65,6 +65,33 @@ const BY_LABEL: Record<string, ArtefactKind> = {
 };
 
 /**
+ * The other tools that read the same artefact, in the order a reader is likely
+ * to want them. Only tools that will actually parse it: sending a CRL to the
+ * fingerprint tool, which decodes certificates, would trade one dead end for
+ * another. The ASN.1 viewer takes anything, so it closes every list.
+ */
+export const RELATED: Record<ArtefactKind, string[]> = {
+	certificate: [
+		'decode-certificate',
+		'fingerprint',
+		'format-convert',
+		'decode-chain',
+		'asn1-viewer'
+	],
+	chain: ['decode-chain', 'decode-certificate', 'asn1-viewer'],
+	csr: ['decode-csr', 'asn1-viewer'],
+	crl: ['decode-crl', 'asn1-viewer'],
+	pkcs7: ['decode-pkcs7', 'format-convert', 'asn1-viewer'],
+	pkcs12: ['decode-pkcs12', 'asn1-viewer'],
+	// A key goes nowhere, on purpose: no tool reads one, and the box that holds
+	// one covers it rather than offering it a trip.
+	'private-key': [],
+	'encrypted-private-key': [],
+	'public-key': ['asn1-viewer'],
+	der: ['asn1-viewer']
+};
+
+/**
  * A PKCS#12 file is a `SEQUENCE { INTEGER 3, … }`, and nothing else this
  * product handles starts that way. Cheap enough to run on every drop, which is
  * the point: a `.p12` dropped on the certificate decoder used to be armoured

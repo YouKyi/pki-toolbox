@@ -4,6 +4,7 @@
 	 * accepts drag-and-dropped or browsed files. Binary DER files are wrapped
 	 * into a PEM block (`derLabel`) so the textarea always shows armoured text.
 	 */
+	import { tick } from 'svelte';
 	import Icon from './Icon.svelte';
 	import Alert from './Alert.svelte';
 	import NoNetworkProof from './NoNetworkProof.svelte';
@@ -131,10 +132,15 @@
 		if (!pastedKey) revealed = false;
 	});
 
-	/** Reopening the editor puts the caret back where the user left off. */
-	function edit() {
+	/**
+	 * Reopening the editor puts the caret back where the reader left off. The
+	 * focus waits for `tick()`: at microtask time the textarea does not exist
+	 * yet, since Svelte has not applied the update that renders it.
+	 */
+	async function edit() {
 		collapsed = false;
-		queueMicrotask(() => textarea?.focus());
+		await tick();
+		textarea?.focus();
 	}
 
 	function clear() {
@@ -212,6 +218,7 @@
 				<button
 					type="button"
 					onclick={edit}
+					data-yk-edit
 					class="yk-pressable inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-surface-2 max-sm:min-h-11 dark:border-slate-700 dark:text-slate-200"
 				>
 					<Icon name="file-text" size={13} /> Edit input
@@ -388,6 +395,9 @@
 		/>
 	</div>
 	{#if ondecode}
-		<p class="hidden text-xs text-ink-3 sm:block">Tip: Ctrl/⌘ + Enter to decode.</p>
+		<p class="hidden text-xs text-ink-3 sm:block">
+			Tip: <kbd class="font-mono">/</kbd> to jump here, <kbd class="font-mono">Ctrl/⌘ + Enter</kbd> to
+			decode.
+		</p>
 	{/if}
 </div>
