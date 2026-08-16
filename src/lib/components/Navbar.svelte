@@ -29,6 +29,13 @@
 
 	onMount(initTheme);
 
+	/**
+	 * A folder opens on hover and on click, and never closes on the trigger
+	 * itself: moving the pointer to a trigger already opened the folder, so a
+	 * toggle would shut what the hover had just raised, and a click would look
+	 * like it did nothing. Leaving the folder closes it, and so do Escape, a
+	 * click outside the bar and any navigation.
+	 */
 	let openCat = $state<ToolCategory | null>(null);
 	let mobileOpen = $state(false);
 	let themeOpen = $state(false);
@@ -110,6 +117,8 @@
 					{#if list.length}
 						{@const isActive = activeCat === category.id}
 						{@const isOpen = openCat === category.id}
+						<!-- Opens on hover, and so does the theme control beside it: one gesture
+						     for every folder in the bar. -->
 						<div
 							class="relative flex"
 							role="none"
@@ -121,7 +130,7 @@
 								bind:this={triggers[category.id]}
 								aria-haspopup="true"
 								aria-expanded={isOpen}
-								onclick={() => (openCat = isOpen ? null : category.id)}
+								onclick={() => (openCat = category.id)}
 								class="relative inline-flex items-center gap-1.5 py-2 text-sm font-medium transition-colors {isActive ||
 								isOpen
 									? 'text-slate-900 dark:text-slate-100'
@@ -200,11 +209,19 @@
 				     in its own right, and a toggle cannot express it: it can only leave
 				     the reader guessing which of the two states means "I did not
 				     choose". The control states the mode, never the resolved colour. -->
-				<div class="relative">
+				<!-- The same gesture as the folders beside it: the bar behaves one way,
+				     whichever of its controls the pointer meets. The click toggle stays
+				     for the keyboard and for touch, where a tap is what raises it. -->
+				<div
+					class="relative"
+					role="none"
+					onmouseenter={() => (themeOpen = true)}
+					onmouseleave={() => (themeOpen = false)}
+				>
 					<button
 						type="button"
 						bind:this={themeTrigger}
-						onclick={() => (themeOpen = !themeOpen)}
+						onclick={() => (themeOpen = true)}
 						aria-haspopup="true"
 						aria-expanded={themeOpen}
 						aria-label={themeLabel}
@@ -231,29 +248,36 @@
 					</button>
 
 					{#if themeOpen}
-						<div
-							class="yk-chrome yk-chrome--panel absolute top-full right-0 z-40 mt-2 min-w-[180px] overflow-hidden rounded-xl border py-1.5 shadow-md"
-							role="menu"
-							aria-label="Theme"
-						>
-							{#each THEME_MODES as mode (mode)}
-								{@const on = theme.mode === mode}
-								<button
-									type="button"
-									role="menuitemradio"
-									aria-checked={on}
-									onclick={() => chooseTheme(mode)}
-									class="flex min-h-11 w-full items-center gap-2.5 px-4 text-sm transition-colors hover:bg-surface-2 {on
-										? 'font-medium text-slate-900 dark:text-slate-100'
-										: 'text-slate-600 dark:text-slate-300'}"
-								>
-									<Icon name={THEME_ICON[mode]} size={16} class="shrink-0 text-ink-3" />
-									<span class="flex-1 text-left">{THEME_LABEL[mode]}</span>
-									{#if on}
-										<Icon name="check" size={15} class="shrink-0 text-[color:var(--yk-accent)]" />
-									{/if}
-								</button>
-							{/each}
+						<!-- The 8px stand-off is padding INSIDE the panel's box, not a margin
+						     outside it, exactly as the category folders do it. As a margin it
+						     was dead space: crossing it on the way down left the control, the
+						     pointer left the group, and the menu shut before it could be
+						     reached. The gap looks the same and the hit region is continuous. -->
+						<div class="absolute top-full right-0 z-40 pt-2">
+							<div
+								class="yk-chrome yk-chrome--panel min-w-[180px] overflow-hidden rounded-xl border py-1.5 shadow-md"
+								role="menu"
+								aria-label="Theme"
+							>
+								{#each THEME_MODES as mode (mode)}
+									{@const on = theme.mode === mode}
+									<button
+										type="button"
+										role="menuitemradio"
+										aria-checked={on}
+										onclick={() => chooseTheme(mode)}
+										class="flex min-h-11 w-full items-center gap-2.5 px-4 text-sm transition-colors hover:bg-surface-2 {on
+											? 'font-medium text-slate-900 dark:text-slate-100'
+											: 'text-slate-600 dark:text-slate-300'}"
+									>
+										<Icon name={THEME_ICON[mode]} size={16} class="shrink-0 text-ink-3" />
+										<span class="flex-1 text-left">{THEME_LABEL[mode]}</span>
+										{#if on}
+											<Icon name="check" size={15} class="shrink-0 text-[color:var(--yk-accent)]" />
+										{/if}
+									</button>
+								{/each}
+							</div>
 						</div>
 					{/if}
 				</div>
