@@ -443,6 +443,10 @@ primary action, an active section, a status.
   message, and it holds the same rule the keystore decoder already states. Where
   a key is asked for, the signing page's CA field, the veil stays but drops the
   accent: it is a discretion, not an alarm.
+- **Shortcut:** `/` puts the caret in the input from anywhere on the page, and
+  reopens the folded editor first if the artefact is already decoded. With
+  `Ctrl/⌘ + Enter` to decode, those are the product's two accelerators, and both
+  are stated under the box rather than left to be discovered.
 - **Folded state:** once the artefact is decoded the editor becomes a one-line
   recap on the raised plane, naming what was read and its size, with **Edit
   input** and **Clear**. The answer is worth more screen than the base64 the
@@ -497,6 +501,15 @@ primary action, an active section, a status.
   and an inner span carries everything **painted**: a 44px hover surface would
   reach into the rows above and below.
 
+### Carry line
+
+- **Style:** one quiet line of tertiary ink under the result, "Same artefact
+  in" followed by the tools that read it, as underlined text buttons.
+- **Character:** the list comes from what the artefact **is**, never from the
+  page it sits on, so a revocation list is never offered a tool that decodes
+  certificates. The artefact travels in memory, never in a query string: a PKI
+  artefact in a URL is one in a history file, a proxy log and a bookmark sync.
+
 ### Status line (invisible component)
 
 One short sentence per result, for assistive technology only: _"Certificate
@@ -516,6 +529,11 @@ carries three 9px dots (two neutral, one orange "live"), then the artefact
 title, then the block's own actions in outlined mono buttons. The bar wraps on
 narrow viewports rather than truncating the title, because that title is the
 only thing naming the artefact.
+
+**Folded**, a block is its bar and nothing under it: a closed terminal window.
+Copy and download stay in that bar, because a form a reader takes away without
+reading (the DER behind a PEM) still has to be one click from the clipboard.
+Only a secondary form folds; the artefact a page exists to produce never does.
 
 ## Do's and Don'ts
 

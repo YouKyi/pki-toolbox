@@ -180,9 +180,13 @@ test('S8 format conversion example (ISRG Root X2)', async ({ page }) => {
 	await expect(result.getByText('DER (base64)')).toBeVisible();
 	await expect(result.getByText('DER (hexadecimal)')).toBeVisible();
 
-	// Item label badge + byte-size hint.
-	await expect(result.getByText('CERTIFICATE', { exact: true })).toBeVisible();
-	await expect(result.getByText(/bytes/)).toBeVisible();
+	// The answer layer, same as every decoder: the artefact names itself and its
+	// measure is stated before the encodings.
+	await expect(result.getByRole('heading', { name: 'Certificate', level: 2 })).toBeVisible();
+	await expect(result.getByText(/^\d+ bytes$/)).toBeVisible();
+	// Copy and download ride on the terminal bar of each encoding, three of each.
+	await expect(result.getByRole('button', { name: 'Copy' })).toHaveCount(3);
+	await expect(result.getByRole('button', { name: 'Download', exact: true })).toHaveCount(3);
 
 	// At least one certificate => PKCS#7 bundle download offered.
 	await expect(result.getByRole('button', { name: /Download as PKCS#7/ })).toBeVisible();
@@ -294,6 +298,39 @@ test('S11 the no-network claim carries its proof', async ({ page }) => {
 	await expect(page.getByText('0 requests able to carry data out since you pasted.')).toBeVisible();
 
 	expect(external).toEqual([]);
+});
+
+// ---------------------------------------------------------------------------
+// S14: what a reader does with the answer once they have it
+// ---------------------------------------------------------------------------
+test('S14 copy, carry and the slash shortcut', async ({ page }) => {
+	await page.goto('/decode-certificate');
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	await page.getByRole('button', { name: 'Decode' }).click();
+
+	const result = region(page);
+
+	// The two strings that get pasted into an incident ticket, and the whole
+	// card for the ticket that wants all of it.
+	await expect(result.getByRole('button', { name: 'Copy Subject' })).toBeVisible();
+	await expect(result.getByRole('button', { name: 'Copy Issuer' })).toBeVisible();
+	await expect(result.getByRole('button', { name: 'Copy every field' })).toBeVisible();
+
+	// The serial is hex, and only hex: the decimal form used to trail it in the
+	// same cell and double the height of the row.
+	// (the fingerprints are colon hex too, hence .first())
+	await expect(result.getByText(/^[0-9A-F]{2}(:[0-9A-F]{2})+$/).first()).toBeVisible();
+	await expect(result.getByText(/\(\d{10,}\)/)).toHaveCount(0);
+
+	// `/` reopens the folded editor and lands the caret in it.
+	await page.keyboard.press('/');
+	await expect(page.getByLabel('PKI artefact input')).toBeFocused();
+
+	// One artefact, several questions, and no re-paste between them.
+	await result.getByRole('button', { name: 'ASN.1 viewer' }).click();
+	await expect(page).toHaveURL(/\/asn1-viewer$/);
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue(/BEGIN CERTIFICATE/);
+	expect(new URL(page.url()).search).toBe('');
 });
 
 // ---------------------------------------------------------------------------
