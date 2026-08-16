@@ -12,9 +12,11 @@
 	<title>PKI-Toolbox, self-hosted PKI decoder</title>
 </svelte:head>
 
-<section class="mb-10">
+<!-- Seuil : le semis à la pente 1/Φ² marque la bascule du chrome vers le
+     contenu. Localisé et fondu, jamais un fond plein (DA v2). -->
+<section class="yk-semis relative mb-10">
 	<div
-		class="yk-kicker yk-cut-sm inline-flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 text-teal-700 dark:bg-slate-800 dark:text-teal-300"
+		class="yk-kicker inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-3 py-1.5 text-teal-700 dark:bg-slate-800 dark:text-teal-300"
 	>
 		<Icon name="lock" size={13} /> 100% client-side, no data sent
 	</div>
@@ -38,14 +40,14 @@
 				{#each list as tool (tool.slug)}
 					<a
 						href="/{tool.slug}"
-						class="group flex flex-col border border-slate-200 bg-white p-4 transition-colors hover:border-teal-600 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-400 {tool.status ===
+						class="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 transition hover:border-teal-600 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-400 {tool.status ===
 						'planned'
 							? 'opacity-75'
 							: ''}"
 					>
 						<div class="flex items-center gap-3">
 							<span
-								class="yk-chip grid h-10 w-10 shrink-0 place-items-center bg-teal-50 text-teal-600 transition group-hover:bg-teal-100 dark:bg-teal-500/10 dark:text-teal-400 dark:group-hover:bg-teal-500/20"
+								class="yk-chip grid h-10 w-10 shrink-0 place-items-center bg-slate-100 text-slate-600 transition group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:group-hover:bg-slate-700"
 							>
 								<Icon name={tool.icon} size={20} />
 							</span>

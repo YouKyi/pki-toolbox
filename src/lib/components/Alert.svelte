@@ -1,22 +1,31 @@
 <script module lang="ts">
 	export type AlertVariant = 'error' | 'warn' | 'info' | 'success';
 
-	const STYLES: Record<AlertVariant, { box: string; icon: string }> = {
+	/**
+	 * DA v2 · l'encadré est un plan NEUTRE ; le sens se lit à son filet de
+	 * marge, à son icône et à son libellé. Pas de fond teinté, pas de rouge
+	 * hors terminal : une erreur se signale par l'orange ET son texte.
+	 */
+	const STYLES: Record<AlertVariant, { marker: string; icon: string; iconColor: string }> = {
 		error: {
-			box: 'bg-red-50 text-red-800 ring-red-200 dark:bg-red-500/10 dark:text-red-200 dark:ring-red-500/30',
-			icon: 'alert-triangle'
+			marker: 'bg-[color:var(--yk-accent)]',
+			icon: 'alert-triangle',
+			iconColor: 'text-[color:var(--yk-accent-txt)]'
 		},
 		warn: {
-			box: 'bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-200 dark:ring-amber-500/30',
-			icon: 'alert-triangle'
+			marker: 'bg-[color:var(--yk-accent)]',
+			icon: 'alert-triangle',
+			iconColor: 'text-[color:var(--yk-accent-txt)]'
 		},
 		info: {
-			box: 'bg-cyan-50 text-cyan-800 ring-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-200 dark:ring-cyan-500/30',
-			icon: 'info'
+			marker: 'bg-slate-300 dark:bg-slate-700',
+			icon: 'info',
+			iconColor: 'text-slate-500 dark:text-slate-400'
 		},
 		success: {
-			box: 'bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-500/30',
-			icon: 'check'
+			marker: 'bg-[color:var(--yk-ok)]',
+			icon: 'check',
+			iconColor: 'text-[color:var(--yk-ok)]'
 		}
 	};
 </script>
@@ -32,10 +41,14 @@
 	}: { variant?: AlertVariant; title?: string; children?: Snippet } = $props();
 </script>
 
-<div class="flex gap-3 rounded-lg px-4 py-3 text-sm ring-1 ring-inset {STYLES[variant].box}">
-	<Icon name={STYLES[variant].icon} size={18} class="mt-0.5 shrink-0" />
+<div
+	class="relative flex gap-3 overflow-hidden rounded-xl bg-slate-100 px-4 py-3 pl-5 text-sm text-slate-700 ring-1 ring-slate-200 ring-inset dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-800"
+>
+	<span class="absolute top-0 bottom-0 left-0 w-[3px] {STYLES[variant].marker}" aria-hidden="true"
+	></span>
+	<Icon name={STYLES[variant].icon} size={18} class="mt-0.5 shrink-0 {STYLES[variant].iconColor}" />
 	<div class="min-w-0">
-		{#if title}<p class="font-semibold">{title}</p>{/if}
+		{#if title}<p class="font-semibold text-slate-900 dark:text-slate-100">{title}</p>{/if}
 		{#if children}<div class="break-words {title ? 'mt-0.5' : ''}">{@render children()}</div>{/if}
 	</div>
 </div>

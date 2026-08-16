@@ -1,6 +1,9 @@
 /*
- * youkyi · DA oblique — https://git.youkyi.net/youkyi-brand
- * Neutres mats + orange unique, angles vifs (radius 0), pente 1/Φ² ≈ 21°.
+ * youkyi · DA v2 — https://git.youkyi.net/youkyi-brand (brand.md 1.0.0)
+ * Neutres mats + orange unique. Le RAYON est la forme par défaut ; la pente
+ * 1/Φ² ≈ 21° n'est plus qu'une signature (wordmark, frontière de masses,
+ * semis de fond) et ne gouverne plus aucun contrôle.
+ * L'élévation se joue à la VALEUR (rampe de surfaces), pas au motif.
  * Les rampes Tailwind slate/teal/… sont remappées sur les tokens de la charte,
  * si bien que les pages outils héritent de la DA sans modification.
  */
@@ -77,59 +80,75 @@
 	--font-head: 'Poppins', system-ui, sans-serif;
 	--font-display: 'Space Grotesk', system-ui, sans-serif;
 
-	/* ---- neutres mats (rampe slate → papier/encre youkyi) ---- */
-	--color-slate-50: #f8f7f4; /* --yk-bg clair */
-	--color-slate-100: #efece6; /* --yk-slat */
-	--color-slate-200: #e2ded6; /* --yk-line */
-	--color-slate-300: #c9c3b8; /* --yk-line-strong */
+	/* ---- neutres mats (rampe slate → papier/encre youkyi) ----
+	   Une seule rampe sert les deux thèmes : les crans bas portent le clair,
+	   les crans hauts le sombre, via les variantes `dark:` du markup. */
+	--color-slate-50: #f8f7f4; /* --yk-bg clair · fond de page */
+	--color-slate-100: #f2efe9; /* --yk-surf-2 clair · plan au-dessus, survol */
+	--color-slate-200: #e2ded6; /* --yk-line · filet clair */
+	--color-slate-300: #c9c3b8; /* --yk-line-strong · filet fort clair */
 	--color-slate-400: #98938b; /* --yk-muted sombre */
 	--color-slate-500: #6e6a63; /* --yk-muted clair */
-	--color-slate-600: #57534c;
-	--color-slate-700: #3a342e; /* --yk-line-strong sombre */
-	--color-slate-800: #2a2622; /* --yk-line sombre */
-	--color-slate-900: #1a1816; /* --yk-ink */
+	--color-slate-600: #57534c; /* --yk-ink-2 clair · texte secondaire */
+	--color-slate-700: #3a342e; /* texte appuyé clair · filet fort sombre */
+	/* v2 · EN SOMBRE LE FILET EST RELATIF, PAS ABSOLU : un voile blanc
+	   translucide se recalcule sur la surface qu'il borde, et les deux échelles
+	   (filets / élévation) ne peuvent plus se désynchroniser. Ce cran ne sert
+	   qu'en mode sombre (`dark:border-slate-800`, `dark:bg-slate-800`). */
+	--color-slate-800: rgb(255 255 255 / 0.11);
+	--color-slate-900: #211e1b; /* --yk-surf-1 sombre · encre en texte clair */
 	--color-slate-950: #131211; /* --yk-bg sombre */
 
-	/* ---- l'orange unique (rampe teal → accent youkyi) ---- */
-	--color-teal-50: #f7e9e0;
-	--color-teal-100: #f2dccc;
-	--color-teal-200: #e9c5ac;
+	/* ---- l'orange unique (rampe teal → accent youkyi) ----
+	   v2 · territoire réduit à cinq emplois. Les crans bas ne sont donc PLUS
+	   des teintes orangées : un aplat orange pâle (pastille d'icône, fond de
+	   badge) est refusé par la charte. Ils retombent sur la rampe de surfaces. */
+	--color-teal-50: #f2efe9; /* neutralisé → --yk-surf-2 */
+	--color-teal-100: #eae6de; /* neutralisé → --yk-surf-3 */
+	--color-teal-200: #e2ded6; /* neutralisé → --yk-line */
 	--color-teal-300: #ff8f5c; /* accent-texte sombre (AAA sur #131211) */
 	--color-teal-400: #ff6a2e; /* accent sombre */
-	--color-teal-500: #b4380a; /* --yk-accent-deep · survol = orange assombri */
-	--color-teal-600: #d6470d; /* --yk-accent · CTA, libellé blanc gras */
-	--color-teal-700: #af3a0b; /* --yk-accent-txt · texte AA sur clair */
+	--color-teal-500: #b4380a; /* --yk-accent-deep · remplissage de bouton (AA) */
+	--color-teal-600: #d6470d; /* --yk-accent · arête, focus, soulignement */
+	--color-teal-700: #af3a0b; /* --yk-accent-txt · texte AA sur clair (5,7:1) */
 	--color-teal-800: #8f2f09;
 	--color-teal-900: #6f2507;
 
-	/* ---- statuts techniques (badges, terminal) — ok / danger de la charte ---- */
-	--color-emerald-50: #edf2e4;
-	--color-emerald-100: #dfe9cf;
-	--color-emerald-200: #c9daaf;
-	--color-emerald-300: #8fb86b; /* ok sombre */
-	--color-emerald-400: #8fb86b;
-	--color-emerald-500: #6b9440;
-	--color-emerald-600: #4a7d1c;
-	--color-emerald-700: #3b6d11; /* ok clair */
-	--color-emerald-800: #2e5510;
-	--color-red-50: #f6eae8;
-	--color-red-100: #efd9d6;
-	--color-red-200: #e5c2be;
-	--color-red-300: #f0857a; /* danger sombre */
-	--color-red-400: #f0857a;
-	--color-red-500: #c0453d;
-	--color-red-600: #a32d2d; /* danger clair */
-	--color-red-700: #8e2727;
-	--color-red-800: #7c2323;
+	/* ---- vert de conformité (rampe emerald) ----
+	   v2 · défini en oklch à la MÊME clarté que l'orange, chroma un cran en
+	   dessous pour que l'orange reste le signal le plus fort. Emploi « conforme,
+	   vérifié, prouvé » en remplissage de pastille, jamais en texte courant :
+	   les crans bas sont donc neutres. */
+	--color-emerald-50: #f2efe9;
+	--color-emerald-100: #eae6de;
+	--color-emerald-200: #e2ded6;
+	--color-emerald-300: oklch(0.703 0.16 149); /* ok sombre */
+	--color-emerald-400: oklch(0.703 0.16 149);
+	--color-emerald-500: oklch(0.597 0.15 149);
+	--color-emerald-600: oklch(0.597 0.15 149); /* ok clair */
+	--color-emerald-700: oklch(0.597 0.15 149);
+	--color-emerald-800: oklch(0.52 0.13 149);
 
-	/* ---- warn/beta : neutralisés aussi. L'amber Tailwind (#b45309) est quasi
+	/* ---- v2 · IL N'EXISTE PAS DE ROUGE HORS TERMINAL ----
+	   Une erreur se signale par l'orange ET son libellé (jamais la couleur
+	   seule). La rampe red est donc rabattue sur l'accent et les surfaces. */
+	--color-red-50: #f2efe9;
+	--color-red-100: #eae6de;
+	--color-red-200: #e2ded6;
+	--color-red-300: #ff8f5c;
+	--color-red-400: #ff6a2e;
+	--color-red-500: #b4380a;
+	--color-red-600: #b4380a;
+	--color-red-700: #af3a0b;
+	--color-red-800: #8f2f09;
+
+	/* ---- warn/beta : neutralisés. L'amber Tailwind (#b45309) est quasi
 	   indistinguable de --yk-accent-txt (#af3a0b) : ce serait un SECOND orange,
-	   contre la règle « orange unique ». On garde la distinction beta / coming-soon
-	   par la force de l'encre (amber = neutre appuyé, slate = neutre atténué), le
-	   libellé portant le sens — la couleur n'est jamais le seul vecteur d'info. ---- */
-	--color-amber-50: #efece6;
-	--color-amber-100: #e2ded6;
-	--color-amber-200: #c9c3b8;
+	   contre la règle « orange unique ». On garde la distinction beta /
+	   coming-soon par la force de l'encre, le libellé portant le sens. ---- */
+	--color-amber-50: #f2efe9;
+	--color-amber-100: #eae6de;
+	--color-amber-200: #e2ded6;
 	--color-amber-300: #c9c3b8;
 	--color-amber-400: #98938b;
 	--color-amber-500: #6e6a63;
@@ -138,46 +157,163 @@
 	--color-amber-800: #1a1816;
 
 	/* ---- hors palette : info/chaîne re-neutralisés (un seul accent orange) ---- */
-	--color-cyan-50: #efece6;
-	--color-cyan-200: #d8d3c9;
+	--color-cyan-50: #f2efe9;
+	--color-cyan-200: #e2ded6;
 	--color-cyan-300: #c9c3b8;
 	--color-cyan-500: #6e6a63;
-	--color-cyan-700: #55514b;
+	--color-cyan-700: #57534c;
 	--color-cyan-800: #3a342e;
-	--color-sky-50: #efece6;
-	--color-sky-200: #d8d3c9;
+	--color-sky-50: #f2efe9;
+	--color-sky-200: #e2ded6;
 	--color-sky-300: #c9c3b8;
 	--color-sky-400: #98938b;
 	--color-sky-500: #6e6a63;
-	--color-sky-600: #55514b;
-	--color-sky-700: #55514b;
-	--color-violet-50: #efece6;
-	--color-violet-200: #d8d3c9;
+	--color-sky-600: #57534c;
+	--color-sky-700: #57534c;
+	--color-violet-50: #f2efe9;
+	--color-violet-200: #e2ded6;
 	--color-violet-300: #c9c3b8;
 	--color-violet-400: #98938b;
 	--color-violet-500: #6e6a63;
-	--color-violet-600: #55514b;
-	--color-violet-700: #55514b;
+	--color-violet-600: #57534c;
+	--color-violet-700: #57534c;
 
-	/* ---- élévation = masse + arête, jamais d'ombre ---- */
-	--shadow-2xs: 0 0 #0000;
-	--shadow-xs: 0 0 #0000;
-	--shadow-sm: 0 0 #0000;
-	--shadow-md: 0 0 #0000;
-	--shadow-lg: 0 0 #0000;
-	--shadow-xl: 0 0 #0000;
+	/* ---- couleurs sémantiques adossées aux tokens runtime ----
+	   Elles suivent le thème toutes seules (pas de variante `dark:` à écrire) :
+	   à préférer dans tout code neuf. `bg-surface-1`, `text-ink-2`, `border-line`… */
+	--color-page: var(--yk-bg);
+	--color-surface-1: var(--yk-surf-1);
+	--color-surface-2: var(--yk-surf-2);
+	--color-surface-3: var(--yk-surf-3);
+	--color-ink: var(--yk-ink);
+	--color-ink-2: var(--yk-ink-2);
+	--color-ink-3: var(--yk-ink-3);
+	--color-line: var(--yk-line);
+	--color-line-strong: var(--yk-line-strong);
+	--color-accent: var(--yk-accent);
+	--color-accent-txt: var(--yk-accent-txt);
+	--color-ok: var(--yk-ok);
+	--color-ink-solid: var(--yk-ink-solid);
+	--color-on-ink: var(--yk-on-ink);
+
+	/* ---- v2 · LE RAYON EST LA FORME PAR DÉFAUT ----
+	   Il suit la hauteur (~0,30 × h) pour que la courbure paraisse constante
+	   d'un contrôle à l'autre. La pilule est RÉSERVÉE aux formes rondes par
+	   nature (piste de switch, progression, pastille). Un rayon hors de cette
+	   échelle est un bug. Correspondance avec l'échelle de la charte :
+	   xs = --r-check · sm = --r-xs · md = --r-control-sm · lg = --r-control ·
+	   xl = --r-card · 2xl+ = --r-plan. */
+	--radius-xs: 6px;
+	--radius-sm: 8px;
+	--radius-md: 9px;
+	--radius-lg: 12px;
+	--radius-xl: 16px;
+	--radius-2xl: 24px;
+	--radius-3xl: 24px;
+	--radius-4xl: 24px;
+
+	/* ---- v2 · l'ombre revient, mais TOUJOURS avec un décalage vertical ----
+	   Une ombre sans décalage est un halo, donc une décoration : interdite.
+	   Les valeurs pointent sur les tokens runtime, donc elles suivent le thème. */
+	--shadow-2xs: var(--yk-shadow-1);
+	--shadow-xs: var(--yk-shadow-1);
+	--shadow-sm: var(--yk-shadow-1);
+	--shadow-md: var(--yk-shadow-2);
+	--shadow-lg: var(--yk-shadow-2);
+	--shadow-xl: var(--yk-shadow-2);
 }
 
-/* Tokens runtime de la charte, thémables (utilisés par les helpers ci-dessous). */
+/* Tokens runtime de la charte, thémables. Source : design-system/tokens/. */
 :root {
+	--yk-bg: #f8f7f4;
+	--yk-ink: #1a1816;
+	--yk-ink-2: #57534c;
+	--yk-ink-3: #666259;
+	--yk-line: #e2ded6;
+	--yk-line-strong: #c9c3b8;
+
+	/* rampe d'élévation · c'est la VALEUR qui sépare les plans, pas l'ombre.
+	   Un filet 1px seulement quand deux plans de même valeur se touchent :
+	   filet OU ombre, jamais les deux. */
+	--yk-surf-1: #ffffff; /* plan posé sur la page */
+	--yk-surf-2: #f2efe9; /* plan au-dessus du précédent */
+	--yk-surf-3: #eae6de; /* creux : champ pressé, piste */
+
 	--yk-accent: #d6470d;
+	--yk-accent-deep: #b4380a; /* remplissage sous libellé blanc < 16px */
 	--yk-accent-txt: #af3a0b;
 	--yk-on-accent: #ffffff;
+
+	--yk-ok: oklch(0.597 0.15 149);
+	--yk-on-ok: #ffffff;
+
+	/* chrome flottant : LA seule surface en verre (barre de nav, panneau
+	   au-dessus du contenu). Jamais une carte, jamais un champ, jamais un
+	   fond de section. */
+	--yk-chrome: rgb(255 255 255 / 0.62);
+	--yk-chrome-line: rgb(26 24 22 / 0.08);
+	--yk-chrome-blur: 20px;
+
+	--yk-shadow-1: 0 1px 2px rgb(26 24 22 / 0.05), 0 10px 24px -14px rgb(26 24 22 / 0.18);
+	--yk-shadow-2: 0 2px 4px rgb(26 24 22 / 0.06), 0 18px 40px -22px rgb(26 24 22 / 0.22);
+
+	/* encre matérielle · VERROUILLÉE : une masse d'encre reste sombre dans tous
+	   les thèmes, comme le terminal. */
+	--yk-ink-solid: #1a1816;
+	--yk-on-ink: #f8f7f4;
+	--yk-on-ink-muted: rgb(248 247 244 / 0.62);
+	--yk-on-ink-accent: #ff8f5c;
+
+	/* rayons de la charte, pour le CSS hors utilitaires Tailwind */
+	--r-control-sm: 9px;
+	--r-control: 12px;
+	--r-field: 14px;
+	--r-card: 16px;
+	--r-plan: 24px;
+	--r-xs: 8px;
+	--r-check: 6px;
+	--r-pill: 999px;
+
+	/* la pente : signature, plus jamais un contrôle */
+	--phi: 0.382;
+	--phi-angle: 20.9deg;
+
+	/* retour à l'appui (v2) */
+	--dur-press: 90ms;
+	--press-scale: 0.985;
 }
+
 .dark {
+	--yk-bg: #131211;
+	--yk-ink: #f2f0ec;
+	--yk-ink-2: #b5afa6; /* 6,8:1 sur --yk-surf-3 */
+	--yk-ink-3: #9a938a; /* 4,9:1 sur --yk-surf-3 */
+	/* filets relatifs : un hex fixe tomberait dans la plage des surfaces dès
+	   qu'on touche à la rampe d'élévation, et le filet disparaîtrait. */
+	--yk-line: rgb(255 255 255 / 0.11);
+	--yk-line-strong: rgb(255 255 255 / 0.22);
+
+	/* surf-1 doit rester AU-DESSUS de --yk-ink-solid (#1a1816, verrouillé),
+	   sinon la masse encre se confond avec un simple plan. */
+	--yk-surf-1: #211e1b;
+	--yk-surf-2: #282522;
+	--yk-surf-3: #2e2a26;
+
 	--yk-accent: #ff6a2e;
+	--yk-accent-deep: #ff6a2e; /* en sombre le remplissage reprend l'orange */
 	--yk-accent-txt: #ff8f5c;
 	--yk-on-accent: #1d0e04;
+
+	--yk-ok: oklch(0.703 0.16 149);
+	--yk-on-ok: #08150a;
+
+	--yk-chrome: rgb(26 25 23 / 0.58);
+	--yk-chrome-line: rgb(255 255 255 / 0.12);
+
+	/* en sombre l'ombre ne se lit presque pas : elle sert de profondeur, pas de
+	   séparation (la séparation, c'est la valeur). */
+	--yk-shadow-1: 0 1px 2px rgb(0 0 0 / 0.45), 0 10px 26px -14px rgb(0 0 0 / 0.65);
+	--yk-shadow-2: 0 2px 4px rgb(0 0 0 / 0.5), 0 18px 44px -22px rgb(0 0 0 / 0.75);
 }
 
 html {
@@ -204,57 +340,69 @@ h6 {
 	letter-spacing: -0.2px;
 }
 
-/* Rayon = TOUJOURS 0 (angles vifs, jamais d'arrondi) — règle non-layered,
-   elle prime sur les utilitaires rounded-* sans devoir les retirer un à un. */
-*,
-*::before,
-*::after {
-	border-radius: 0;
+/* ---- rayons par défaut des contrôles natifs ----
+   La v1 imposait `border-radius: 0` à tout ; la v2 abandonne cette règle. Les
+   contrôles qui ne portent pas d'utilitaire `rounded-*` prennent ici leur cran
+   de l'échelle, pour qu'un champ et un bouton restent de la même famille. */
+input:not([type='checkbox']):not([type='radio']):not([type='range']),
+textarea,
+select {
+	border-radius: var(--r-field);
+}
+input[type='checkbox'],
+input[type='radio'] {
+	border-radius: var(--r-check);
+}
+input[type='radio'],
+progress,
+input[type='range'] {
+	border-radius: var(--r-pill);
 }
 
-/* Exception DA assumée : les pastilles d'icônes restent arrondies (le glyphe
-   respire mieux dans un carré doux). Non-layered pour battre le reset ci-dessus. */
+/* Pastille d'icône : cran contrôle de l'échelle (le glyphe respire dans un
+   carré doux, sans jamais devenir une pilule). */
 .yk-chip {
-	border-radius: 0.625rem;
+	border-radius: var(--r-control);
 }
 
-/* ---- helpers de coupe (pente 1/Φ² ≈ 21°) ---- */
-/* Coupe raide (contrôles) : coin bas-droit tranché, dx = 0,382 × dy. */
-.yk-cut {
-	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 4.6px) 100%, 0 100%);
+/* ---- v2 · chrome flottant en verre ----
+   Réservé à la barre de navigation et aux panneaux posés au-dessus du contenu.
+   Repli opaque si le navigateur ne sait pas flouter l'arrière-plan. */
+.yk-chrome {
+	background: var(--yk-surf-1);
+	border-color: var(--yk-chrome-line);
 }
-.yk-cut-sm {
-	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 2.3px) 100%, 0 100%);
-}
-/* Coupe douce (plans : carte, hero) : arête haut-droite, dy = 0,382 × dx. */
-.yk-bevel {
-	clip-path: polygon(0 0, calc(100% - 42px) 0, 100% 16px, 100% 100%, 0 100%);
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+	.yk-chrome {
+		background: var(--yk-chrome);
+		-webkit-backdrop-filter: blur(var(--yk-chrome-blur)) saturate(140%);
+		backdrop-filter: blur(var(--yk-chrome-blur)) saturate(140%);
+	}
 }
 
-/* Coupe raide dont la bordure SUIT la coupe (clip-path seul supprime la bordure
-   sur la diagonale). Couche de fond = couleur bordure ; ::before inséré de 1px =
-   remplissage ; le clip de l'élément contient les deux. Thémable via les vars. */
-.yk-cut-bordered {
-	--yk-cut-bg: #ffffff;
-	--yk-cut-border: #c9c3b8;
-	position: relative;
-	background: var(--yk-cut-border);
-	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 4.6px) 100%, 0 100%);
-}
-.yk-cut-bordered::before {
+/* ---- v2 · semis de seuil ----
+   Signature à la pente 1/Φ², LOCALISÉE et FONDUE : elle marque la bascule
+   d'une zone à une autre et se dissout avant d'occuper la surface. Jamais un
+   fond plein. Asset : static/taille-pattern.svg (design-system/assets). */
+.yk-semis::before {
 	content: '';
 	position: absolute;
-	inset: 1px;
-	background: var(--yk-cut-bg);
-	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 11px), calc(100% - 4.2px) 100%, 0 100%);
+	inset: 0;
+	pointer-events: none;
+	background-image: url('/taille-pattern.svg');
+	background-size: 64px 44px;
+	opacity: 0.5;
+	mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
+	-webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
 }
-.yk-cut-bordered > * {
-	position: relative;
-	z-index: 1;
+
+/* ---- v2 · tout élément pressable répond à l'appui ----
+   Le retour est instantané et se joue à la pression, pas au relâchement. */
+.yk-pressable {
+	transition: transform var(--dur-press) cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-:where(.dark) .yk-cut-bordered {
-	--yk-cut-bg: #1a1816;
-	--yk-cut-border: #3a342e;
+.yk-pressable:active {
+	transform: scale(var(--press-scale));
 }
 
 /* Kicker mono en capitales : signature youkyi. */
@@ -265,7 +413,7 @@ h6 {
 	text-transform: uppercase;
 }
 
-/* Wordmark « pki-toolbox_ » : Space Grotesk, underscore orange. */
+/* Wordmark « pki-toolbox_ » : Space Grotesk, underscore orange (emploi 5). */
 .yk-wordmark {
 	font-family: var(--font-display);
 	font-weight: 700;
@@ -274,6 +422,53 @@ h6 {
 .yk-wordmark u {
 	text-decoration: none;
 	color: var(--yk-accent);
+}
+
+/* ---- bloc terminal (signature technique de la charte) ----
+   Palette VERROUILLÉE : toujours sombre, même sur page claire, comme une
+   capture. Spec : brand/terminal-block.md. */
+.ykterm {
+	background: #131211;
+	border: 1px solid #3a342e;
+	border-radius: var(--r-card);
+	overflow: hidden;
+	font-family: var(--font-mono);
+}
+.ykterm__bar {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 7px;
+	background: #211e1b;
+	border-bottom: 1px solid #3a342e;
+	padding: 8px 12px;
+}
+.ykterm__dot {
+	width: 9px;
+	height: 9px;
+	border-radius: var(--r-pill);
+	background: #3a352f;
+	flex: none;
+}
+.ykterm__dot.live {
+	background: #ff6a2e;
+}
+/* Le titre s'enroule plutôt que de se tronquer : sur mobile, une ellipse
+   masquerait le seul libellé qui dit de quel artefact il s'agit. */
+.ykterm__title {
+	color: #98938b;
+	font-size: 12px;
+	margin-left: 6px;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.ykterm__body {
+	color: #f2f0ec;
+	overflow: auto;
+	white-space: pre;
+	font-size: 12px;
+	line-height: 1.75;
+	padding: 14px 16px;
 }
 
 ::selection {
@@ -303,19 +498,11 @@ progress {
 	accent-color: var(--yk-accent);
 }
 
-/* Always-visible keyboard focus indicator (WCAG 2.4.7) — liseré orange net. */
+/* Anneau de focus : 2px décalé de 2px, jamais un halo diffus (emploi 2 de
+   l'orange). WCAG 2.4.7. */
 :focus-visible {
 	outline: 2px solid var(--yk-accent);
 	outline-offset: 2px;
-}
-
-/* Un clip-path rogne TOUT ce que peint l'élément — outline et ring extérieur
-   compris. Les contrôles taillés prennent donc un liseré de focus INTERNE, peint
-   à l'intérieur de la forme, qui survit à la coupe (WCAG 2.4.7). */
-.yk-cut:focus-visible,
-.yk-cut-sm:focus-visible {
-	outline: none;
-	box-shadow: inset 0 0 0 2.5px var(--yk-on-accent);
 }
 
 /* Respect users who ask for reduced motion (WCAG 2.3.3). */

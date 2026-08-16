@@ -2,6 +2,10 @@
 	/**
 	 * PEM result block with copy and download actions, shared by the
 	 * generation tools.
+	 *
+	 * DA v2 · c'est du code : il est rendu en BLOC TERMINAL, la signature
+	 * technique de la charte. Palette verrouillée, toujours sombre même sur
+	 * page claire (façon capture) — spec brand/terminal-block.md.
 	 */
 	import Icon from './Icon.svelte';
 	import { writeToClipboard } from '$lib/clipboard';
@@ -20,16 +24,17 @@
 	}
 </script>
 
-<article
-	class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
->
-	<header class="flex items-center justify-between px-5 py-3">
-		<span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</span>
-		<div class="flex gap-2">
+<article class="ykterm">
+	<header class="ykterm__bar">
+		<span class="ykterm__dot"></span>
+		<span class="ykterm__dot"></span>
+		<span class="ykterm__dot live"></span>
+		<span class="ykterm__title">{title}</span>
+		<div class="ml-auto flex shrink-0 gap-2">
 			<button
 				type="button"
 				onclick={copy}
-				class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+				class="yk-pressable inline-flex items-center gap-1.5 rounded-md border border-[#3a342e] px-2.5 py-1 font-mono text-xs font-medium text-[#f2f0ec] transition hover:bg-[#2a2622]"
 			>
 				<Icon name={copied ? 'check' : 'copy'} size={13} />
 				{copied ? 'Copied' : 'Copy'}
@@ -37,12 +42,11 @@
 			<button
 				type="button"
 				onclick={() => downloadText(filename, value, 'application/x-pem-file')}
-				class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+				class="yk-pressable inline-flex items-center gap-1.5 rounded-md border border-[#3a342e] px-2.5 py-1 font-mono text-xs font-medium text-[#f2f0ec] transition hover:bg-[#2a2622]"
 			>
 				<Icon name="upload" size={13} class="rotate-180" /> Download
 			</button>
 		</div>
 	</header>
-	<pre
-		class="max-h-56 overflow-auto border-t border-slate-200 bg-slate-50 p-4 font-mono text-[12px] leading-relaxed text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">{value}</pre>
+	<pre class="ykterm__body max-h-56">{value}</pre>
 </article>

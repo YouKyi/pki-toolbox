@@ -9,6 +9,34 @@ are not listed individually here.
 
 ## [Unreleased]
 
+### Changed
+
+- Realigned the interface on the **youkyi DA v2** (brand master 1.0.0). The
+  radius is now the default shape — the v1 "radius: 0" rule is gone and the
+  charter's scale (9/12/14/16/24px, tied to control height) drives every
+  control — while the 1/Φ² slope goes back to being a signature: it is no
+  longer applied to a single button, field or badge. Elevation is carried by
+  value (a three-plane surface ramp plus a two-step text ramp) with real
+  drop shadows, and dark-mode hairlines became translucent veils that
+  recompute against the surface they border instead of fixed hexes.
+- The navigation bar and its dropdown panels are the site's floating chrome,
+  the only surfaces the charter renders in glass.
+- The orange accent is restricted to its five sanctioned uses. Icon chips,
+  badges and alerts lost their tinted fills: they are neutral tokens whose
+  meaning is carried by a 6px status dot, an icon and their label. There is
+  no red outside the terminal any more — an error is signalled by the orange
+  and its wording — and the compliance green is the oklch tone tuned to the
+  same lightness as the accent.
+- PEM output is rendered as the charter's **terminal block** (locked palette,
+  dark even on a light page), and the favicon was redrawn without the v1 cut
+  corner.
+
+### Added
+
+- The threshold pattern (a localised, faded 1/Φ² hatch) marking the shift from
+  the chrome to the page content, and a press-feedback affordance on
+  interactive controls.
+
 ## [2.1.0] - 2026-07-11
 
 ### Added

@@ -97,7 +97,7 @@
 					{#each result.keys as key, i (i)}
 						<li class="flex flex-wrap items-center gap-2 text-sm">
 							<Icon name="lock" size={16} class="text-slate-500" />
-							<span class="font-medium text-slate-800 dark:text-slate-200">
+							<span class="font-medium text-slate-900 dark:text-slate-200">
 								{key.friendlyName ?? '(no name)'}
 							</span>
 							{#if key.algorithm}<Badge tone="info">{key.algorithm}</Badge>{/if}
