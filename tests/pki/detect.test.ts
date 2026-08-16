@@ -5,7 +5,7 @@
  * what a dropped `.p12` used to become, and a private key, which no tool reads.
  */
 import { describe, it, expect } from 'vitest';
-import { detectArtefact, detectBytes, isPkcs12 } from '$lib/pki/detect';
+import { detectArtefact, detectBytes, detectPrivateKey, isPkcs12 } from '$lib/pki/detect';
 import { base64ToBytes, derToPem } from '$lib/pki/pem';
 import {
 	ISRG_ROOT_X1,
@@ -51,6 +51,52 @@ describe('detectArtefact: PEM labels', () => {
 		const pem =
 			'-----BEGIN ENCRYPTED PRIVATE KEY-----\nMIIBVQIBADAN\n-----END ENCRYPTED PRIVATE KEY-----';
 		expect(detectArtefact(pem)).toMatchObject({ kind: 'encrypted-private-key', slug: null });
+	});
+});
+
+describe('detectArtefact: a key never decides the route', () => {
+	const KEY = '-----BEGIN PRIVATE KEY-----\nMIIBVQIBADAN\n-----END PRIVATE KEY-----';
+
+	it('routes a server bundle by its certificate, not by the key above it', () => {
+		// What `openssl` writes and what a reader pastes: the key first.
+		expect(detectArtefact(`${KEY}\n${ISRG_ROOT_X1}`)).toMatchObject({
+			kind: 'certificate',
+			slug: 'decode-certificate'
+		});
+	});
+
+	it('routes a key beside a signing request by the request', () => {
+		expect(detectArtefact(`${KEY}\n${TEST_CSR}`)).toMatchObject({
+			kind: 'csr',
+			slug: 'decode-csr'
+		});
+	});
+
+	it('still counts the certificates of a bundle, so a key plus a chain is a chain', () => {
+		expect(detectArtefact(`${KEY}\n${TEST_CHAIN}`)).toMatchObject({ kind: 'chain' });
+	});
+
+	it('answers with the key when the paste is nothing but keys', () => {
+		expect(detectArtefact(KEY)).toMatchObject({ kind: 'private-key', slug: null });
+	});
+});
+
+describe('detectPrivateKey', () => {
+	const KEY = '-----BEGIN PRIVATE KEY-----\nMIIBVQIBADAN\n-----END PRIVATE KEY-----';
+
+	it('finds the key inside a bundle whose certificate carries the route', () => {
+		// The box must keep covering it even though the paste routes elsewhere.
+		expect(detectPrivateKey(`${KEY}\n${ISRG_ROOT_X1}`)).toMatchObject({ kind: 'private-key' });
+	});
+
+	it('tells an encrypted key apart', () => {
+		const encrypted =
+			'-----BEGIN ENCRYPTED PRIVATE KEY-----\nMIIBVQIBADAN\n-----END ENCRYPTED PRIVATE KEY-----';
+		expect(detectPrivateKey(encrypted)).toMatchObject({ kind: 'encrypted-private-key' });
+	});
+
+	it('says nothing when no key is in the paste', () => {
+		expect(detectPrivateKey(ISRG_ROOT_X1)).toBeNull();
 	});
 });
 

@@ -9,6 +9,26 @@ import {
 	TEST_CSR
 } from '../fixtures/certs';
 
+describe('decodeCertificate, a server bundle', () => {
+	const KEY = '-----BEGIN PRIVATE KEY-----\nMIIBVQIBADAN\n-----END PRIVATE KEY-----';
+
+	it('reads the certificate out of a key-then-certificate paste', async () => {
+		// What `openssl` writes and what a reader pastes. Handing the whole text
+		// to the parser used to choke on the key.
+		const cert = await decodeCertificate(`${KEY}\n${ISRG_ROOT_X1}`);
+		expect(cert.subject).toContain('ISRG Root X1');
+	});
+
+	it('reads the first certificate of a concatenated pair', async () => {
+		const cert = await decodeCertificate(`${TEST_LEAF}\n${ISRG_ROOT_X1}`);
+		expect(cert.subject).toBe((await decodeCertificate(TEST_LEAF)).subject);
+	});
+
+	it('still rejects a paste that carries no certificate at all', async () => {
+		await expect(decodeCertificate(KEY)).rejects.toThrow(/does not look like an X.509 certificate/);
+	});
+});
+
 describe('decodeCertificate, RSA (ISRG Root X1)', () => {
 	it('extracts the identity fields', async () => {
 		const cert = await decodeCertificate(ISRG_ROOT_X1);

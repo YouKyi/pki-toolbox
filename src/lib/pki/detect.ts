@@ -123,16 +123,32 @@ export function detectArtefact(input: string): Detected | null {
 
 	const blocks = splitBlocks(text);
 	if (blocks.length) {
-		const kind = BY_LABEL[blocks[0].type.toUpperCase()];
-		if (!kind) return null;
-		// A keystore armoured as a certificate is what a dropped `.p12` used to
-		// become, so the bytes get the last word over the label.
+		const kinds = blocks
+			.map((block) => BY_LABEL[block.type.toUpperCase()])
+			.filter((kind): kind is ArtefactKind => Boolean(kind));
+		if (!kinds.length) return null;
+
+		/**
+		 * A server bundle is a private key followed by its certificate, and that
+		 * is what `openssl` writes and what a reader pastes. The key opens
+		 * nothing here, so it never decides where the paste goes: the artefact
+		 * beside it does. When the paste is nothing but keys, the key answers,
+		 * and the answer is that no tool reads it.
+		 */
+		const routable = kinds.filter((kind) => BY_KIND[kind].slug !== null);
+		if (!routable.length) return { kind: kinds[0], ...BY_KIND[kinds[0]] };
+
+		const kind = routable[0];
 		if (kind === 'certificate') {
-			const certificates = blocks.filter((b) => BY_LABEL[b.type.toUpperCase()] === 'certificate');
-			if (certificates.length > 1) return { kind: 'chain', ...BY_KIND.chain };
+			if (kinds.filter((k) => k === 'certificate').length > 1) {
+				return { kind: 'chain', ...BY_KIND.chain };
+			}
+			// A keystore armoured as a certificate is what a dropped `.p12` used to
+			// become, so the bytes get the last word over the label.
+			const first = blocks.find((block) => BY_LABEL[block.type.toUpperCase()] === 'certificate');
 			try {
 				const bytes = base64ToBytes(
-					blocks[0].pem.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '')
+					(first?.pem ?? '').replace(/-----[^-]+-----/g, '').replace(/\s+/g, '')
 				);
 				if (isPkcs12(bytes)) return { kind: 'pkcs12', ...BY_KIND.pkcs12 };
 			} catch {
@@ -147,4 +163,23 @@ export function detectArtefact(input: string): Detected | null {
 	} catch {
 		return null;
 	}
+}
+
+/**
+ * The private key in a paste, whatever else travels with it.
+ *
+ * Routing asks "where does this go", and a key never decides that. Covering
+ * key material asks a different question, "is one in this box", and the answer
+ * has to stay yes for a bundle whose certificate is what gets routed. One
+ * predicate each: the box would otherwise uncover a key the moment a
+ * certificate was pasted under it.
+ */
+export function detectPrivateKey(input: string): Detected | null {
+	for (const block of splitBlocks(input)) {
+		const kind = BY_LABEL[block.type.toUpperCase()];
+		if (kind === 'private-key' || kind === 'encrypted-private-key') {
+			return { kind, ...BY_KIND[kind] };
+		}
+	}
+	return null;
 }
