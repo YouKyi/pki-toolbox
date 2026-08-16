@@ -80,7 +80,9 @@ ready-to-serve fullchain).
 
 Private key material imported into WebCrypto is non-extractable and never
 leaves the page, a property to preserve in any future generation or signing
-feature.
+feature. The interface holds the matching rule: a private key that lands in any
+input is named and its content covered, and no tool reads one except the
+signing page, which asks for it and says so.
 
 ## Brand Commitments
 
@@ -102,10 +104,16 @@ feature.
 
 - Working software: all eleven tools ship and each page carries a real "Load an
   example" artefact.
-- The no-network claim is verifiable live in the browser's network tab, and is
-  additionally covered by an end-to-end test asserting the contract.
-- Test suite: 95 unit tests over the PKI layer, plus a Playwright suite run
-  against the real static build (smoke, per-tool decoding, responsive guard).
+- The no-network claim is verifiable live in the browser's network tab, and the
+  interface now shows it rather than asserting it: every input box states the
+  claim where the artefact is handed over, and opens onto the page's own
+  `connect-src` directive read back from the served policy, a count of the
+  requests able to carry data out since the paste, and a live attempt the
+  browser refuses. An end-to-end test asserts the contract and the three proofs.
+- Test suite: 120 unit tests over the PKI layer, plus a Playwright suite of 25
+  tests run against the real static build (smoke, per-tool decoding, responsive
+  guard at 390px, the no-network proofs, artefact routing, and the private key
+  treatment).
 - Public images on GHCR and Docker Hub; MIT licence; public demo.
 - **Not on hand, and not to be fabricated:** customer testimonials, user counts,
   download or adoption figures, third-party audits, benchmarks, security
