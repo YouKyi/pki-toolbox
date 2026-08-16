@@ -480,9 +480,13 @@ primary action, an active section, a status.
 
 ### Theme control
 
-- **Style:** a ghost button in the bar carrying the mode's glyph, its label and
-  a caret, opening a radio menu of three rows (**Auto**, **Light**, **Dark**),
-  the selected one taking the accent tick.
+- **Style:** a trigger in the bar carrying the mode's glyph, its label and a
+  caret, styled and sized like a category trigger, opening a radio menu of
+  three rows (**Auto**, **Light**, **Dark**). The rows are the folder's rows:
+  44px, the 2.5px accent rail scaled from nothing on hover and pinned on the
+  chosen mode, and the accent tick on the right stating the choice without
+  relying on colour. A menu in this bar behaves and measures like every other,
+  whichever control raised it.
 - **Character:** the control states the **mode**, never the colour it currently
   resolves to. A two-state toggle cannot express "follows the system"; it can
   only leave the reader guessing which of its two states means "I did not

@@ -131,7 +131,7 @@
 								aria-haspopup="true"
 								aria-expanded={isOpen}
 								onclick={() => (openCat = category.id)}
-								class="relative inline-flex items-center gap-1.5 py-2 text-sm font-medium transition-colors {isActive ||
+								class="relative inline-flex min-h-11 items-center gap-1.5 py-2 text-sm font-medium transition-colors {isActive ||
 								isOpen
 									? 'text-slate-900 dark:text-slate-100'
 									: 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'}"
@@ -176,7 +176,7 @@
 											<a
 												href="/{tool.slug}"
 												aria-current={isCurrent ? 'page' : undefined}
-												class="group/item relative flex items-center gap-2.5 py-2 pr-4 pl-4 text-sm transition-colors hover:bg-surface-2 {isCurrent
+												class="group/item relative flex min-h-11 items-center gap-2.5 py-2 pr-4 pl-4 text-sm transition-colors hover:bg-surface-2 {isCurrent
 													? 'font-medium text-slate-900 dark:text-slate-100'
 													: 'text-slate-600 dark:text-slate-300'}"
 											>
@@ -226,7 +226,9 @@
 						aria-expanded={themeOpen}
 						aria-label={themeLabel}
 						title={themeLabel}
-						class="yk-pressable inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-600 transition hover:bg-surface-2 dark:text-slate-300"
+						class="yk-pressable inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium transition-colors {themeOpen
+							? 'text-slate-900 dark:text-slate-100'
+							: 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'}"
 					>
 						<Icon name={THEME_ICON[theme.mode]} size={17} />
 						<span class="hidden sm:inline">{THEME_LABEL[theme.mode]}</span>
@@ -261,16 +263,28 @@
 							>
 								{#each THEME_MODES as mode (mode)}
 									{@const on = theme.mode === mode}
+									<!-- The same row as a tool in the folder beside it: the accent rail
+									     scaled from nothing on hover and pinned on the chosen mode, the
+									     glyph, the label, then the state. -->
 									<button
 										type="button"
 										role="menuitemradio"
 										aria-checked={on}
 										onclick={() => chooseTheme(mode)}
-										class="flex min-h-11 w-full items-center gap-2.5 px-4 text-sm transition-colors hover:bg-surface-2 {on
+										class="group/item relative flex min-h-11 w-full items-center gap-2.5 px-4 text-sm transition-colors hover:bg-surface-2 {on
 											? 'font-medium text-slate-900 dark:text-slate-100'
 											: 'text-slate-600 dark:text-slate-300'}"
 									>
-										<Icon name={THEME_ICON[mode]} size={16} class="shrink-0 text-ink-3" />
+										<span
+											class="absolute top-1 bottom-1 left-0 w-[2.5px] bg-[color:var(--yk-accent)] transition-transform group-hover/item:scale-y-100 {on
+												? 'scale-y-100'
+												: 'scale-y-0'}"
+										></span>
+										<Icon
+											name={THEME_ICON[mode]}
+											size={16}
+											class="shrink-0 text-slate-500 dark:text-slate-400"
+										/>
 										<span class="flex-1 text-left">{THEME_LABEL[mode]}</span>
 										{#if on}
 											<Icon name="check" size={15} class="shrink-0 text-[color:var(--yk-accent)]" />
@@ -319,13 +333,22 @@
 							{#each list as tool (tool.slug)}
 								{@const isCurrent = current === `/${tool.slug}`}
 								<li>
+									<!-- The same rail as the desktop folder and the theme menu, rather
+									     than a coloured border on the row: one marker for "you are
+									     here" across the whole bar, and not the one border-on-a-card
+									     that reads as generated. -->
 									<a
 										href="/{tool.slug}"
 										aria-current={isCurrent ? 'page' : undefined}
-										class="flex min-h-11 items-center gap-2.5 rounded-lg border-l-2 px-2.5 py-2 text-sm transition-colors {isCurrent
-											? 'border-[color:var(--yk-accent)] bg-surface-2 font-medium text-slate-900 dark:text-slate-100'
-											: 'border-transparent text-slate-600 hover:bg-surface-2 dark:text-slate-300'}"
+										class="group/item relative flex min-h-11 items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-2 text-sm transition-colors {isCurrent
+											? 'bg-surface-2 font-medium text-slate-900 dark:text-slate-100'
+											: 'text-slate-600 hover:bg-surface-2 dark:text-slate-300'}"
 									>
+										<span
+											class="absolute top-1 bottom-1 left-0 w-[2.5px] bg-[color:var(--yk-accent)] transition-transform group-hover/item:scale-y-100 {isCurrent
+												? 'scale-y-100'
+												: 'scale-y-0'}"
+										></span>
 										<Icon name={tool.icon} size={18} class="shrink-0" />
 										<span class="flex-1 truncate">{tool.name}</span>
 									</a>
