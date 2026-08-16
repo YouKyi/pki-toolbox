@@ -5,7 +5,7 @@
 	import { ISRG_ROOT_X2 } from '$lib/samples';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
-	import Alert from '$lib/components/Alert.svelte';
+	import DecodeError from '$lib/components/DecodeError.svelte';
 	import StatusLine from '$lib/components/StatusLine.svelte';
 	import Asn1Tree from '$lib/components/Asn1Tree.svelte';
 
@@ -48,7 +48,13 @@
 <div bind:this={flow.region} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
 	<StatusLine message={flow.status} />
 	{#if flow.error}
-		<Alert id={flow.errorId} variant="error" title={flow.failureLabel}>{flow.error}</Alert>
+		<DecodeError
+			id={flow.errorId}
+			title={flow.failureLabel}
+			message={flow.error}
+			input={flow.input}
+			current={tool.slug}
+		/>
 	{/if}
 	{#if flow.result}
 		<div

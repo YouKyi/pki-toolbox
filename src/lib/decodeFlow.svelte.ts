@@ -13,6 +13,7 @@
  */
 import { tick } from 'svelte';
 import { revealResult } from './reveal';
+import { takeCarried } from './handoff';
 
 export type DecodeFlowOptions<T> = {
 	/** The page's own decoder. May be sync or async; throwing produces the error. */
@@ -49,6 +50,10 @@ export class DecodeFlow<T> {
 
 	constructor(options: DecodeFlowOptions<T>) {
 		this.#options = options;
+		// A tool the reader was routed to opens on the artefact that sent them
+		// here, so the trip costs them no paste. Nothing carries on the server:
+		// the prerendered page ships empty and fills in on the client.
+		this.input = takeCarried();
 	}
 
 	get summary(): string {

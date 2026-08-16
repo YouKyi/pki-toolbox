@@ -295,3 +295,66 @@ test('S11 the no-network claim carries its proof', async ({ page }) => {
 
 	expect(external).toEqual([]);
 });
+
+// ---------------------------------------------------------------------------
+// S12: a mismatched artefact names itself and carries over to the right tool
+// ---------------------------------------------------------------------------
+test('S12 a CRL pasted in the certificate decoder routes to the CRL decoder', async ({ page }) => {
+	await page.goto('/decode-certificate');
+
+	// The body does not need to parse: what is on trial here is the label, and
+	// the failure that follows is exactly the case being fixed.
+	const crl =
+		'-----BEGIN X509 CRL-----\nMIIBrjCBlwIBATANBgkqhkiG9w0BAQsFADAa\n-----END X509 CRL-----';
+	await page.getByLabel('PKI artefact input').fill(crl);
+	await page.getByRole('button', { name: 'Decode' }).click();
+
+	// Led by what to do about it, with the raw parser message kept underneath.
+	await expect(page.getByText('This looks like a certificate revocation list')).toBeVisible();
+	await page.getByRole('button', { name: 'Open it there' }).click();
+
+	await expect(page).toHaveURL(/\/decode-crl$/);
+	// The artefact travelled in memory: it is in the box, and not in the URL.
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue(crl);
+	expect(new URL(page.url()).search).toBe('');
+});
+
+// ---------------------------------------------------------------------------
+// S13: the highest-consequence paste this product can receive
+// ---------------------------------------------------------------------------
+test('S13 a private key names itself the moment it lands', async ({ page }) => {
+	const key =
+		'-----BEGIN PRIVATE KEY-----\nMIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8w\n-----END PRIVATE KEY-----';
+
+	await page.goto('/decode-certificate');
+	await page.getByLabel('PKI artefact input').fill(key);
+
+	// No decode needed: the veil lands with the paste, covers the key material,
+	// states what is in the box and what did not happen to it.
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
+	await expect(page.getByText(/It has not left this page/)).toBeVisible();
+	await expect(page.getByText(/Its content stays hidden/)).toBeVisible();
+
+	// Reading it back is a legitimate need, so the veil lifts on demand.
+	await page.getByRole('button', { name: 'Show it anyway' }).click();
+	await expect(page.getByText('A private key is in this box.')).toHaveCount(0);
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue(key);
+
+	// Emptying the box restores the veil for whatever lands next.
+	await page.getByRole('button', { name: 'Clear', exact: true }).click();
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue('');
+	await page.getByLabel('PKI artefact input').fill(key);
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
+
+	await page.getByRole('button', { name: 'Clear it' }).click();
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue('');
+	await expect(page.getByText('A private key is in this box.')).toHaveCount(0);
+
+	// The signing page asks for a CA key on purpose. The veil still covers it,
+	// because key material is never displayed, but it stops scolding.
+	await page.goto('/sign-certificate');
+	await page.getByLabel('PKI artefact input').nth(1).fill(key);
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
+	await expect(page.getByText(/It is what this step needs/)).toBeVisible();
+	await expect(page.getByText(/nothing here needs it/)).toHaveCount(0);
+});

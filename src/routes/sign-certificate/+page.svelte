@@ -204,6 +204,7 @@
 			<PemInput
 				bind:value={caKeyPem}
 				bind:collapsed={caFolded}
+				acceptsPrivateKey
 				summary="CA private key"
 				derLabel="PRIVATE KEY"
 				accept=".pem,.key,.der"
