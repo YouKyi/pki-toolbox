@@ -37,7 +37,7 @@
 		     `overflow-wrap: anywhere` (not `break-word`, which does not shrink
 		     min-content, and not `break-all`, which would split "CN=" mid-token)
 		     lets a value break at its spaces and commas first, and only inside a
-		     token when there is no other choice — e.g. a colon-delimited hash. -->
+		     token when there is no other choice, e.g. a colon-delimited hash. -->
 		<!-- The last row drops its bottom padding: it would otherwise stack with the
 		     enclosing section's own, leaving 26px under the last value against 21px
 		     between values and 18px above the first. A list has to end on the same
@@ -46,8 +46,8 @@
 			<dt class="text-sm font-medium text-slate-500 dark:text-slate-400">{row.label}</dt>
 			<dd class="flex min-w-0 items-start gap-2 text-sm text-slate-900 dark:text-slate-100">
 				<!-- `leading-5` is what makes the rhythm a decision instead of an accident:
-				     without it the line box follows the font metrics — 18.57px for the
-				     13px mono, 20px for the 14px sans — so a row's height depended on
+				     without it the line box follows the font metrics (18.57px for the
+				     13px mono, 20px for the 14px sans), so a row's height depended on
 				     which face its value happened to use, and sub-pixel rounding pushed
 				     some to 41px and others to 40px. Every single-line row is now 40px,
 				     with or without a copy button, and a wrapping value grows by whole
@@ -68,7 +68,7 @@
 					     into the row's padding so it does not change the rhythm, and the
 					     inner span carries everything that is PAINTED. Hovering a 44px
 					     square would tint a surface that reaches into the rows above and
-					     below — the thumb needs the room, the eye must not see it. -->
+					     below: the thumb needs the room, the eye must not see it. -->
 					<button
 						type="button"
 						onclick={() => copyValue(row)}
@@ -77,7 +77,7 @@
 						title="Copy"
 					>
 						<span
-							class="grid place-items-center rounded-md p-1 transition group-hover/copy:bg-slate-100 group-hover/copy:text-teal-700 dark:group-hover/copy:bg-slate-800 dark:group-hover/copy:text-teal-400"
+							class="grid place-items-center rounded-md p-1 transition group-hover/copy:bg-surface-2 group-hover/copy:text-teal-700 dark:group-hover/copy:text-teal-400"
 						>
 							<Icon name={copied === row.label ? 'check' : 'copy'} size={15} />
 						</span>

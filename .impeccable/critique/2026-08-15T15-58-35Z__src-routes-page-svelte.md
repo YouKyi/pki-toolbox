@@ -12,7 +12,7 @@ slug: src-routes-page-svelte
 Method: dual-agent (A: design review, isolated · B: detector + browser measurement, isolated).
 Target: home page + representative tool page (`src/routes/+page.svelte`, `src/routes/decode-certificate/+page.svelte`). Mode: Operate.
 
-## Design Health Score — 26/40 (Acceptable)
+## Design Health Score: 26/40 (Acceptable)
 
 | #         | Heuristic                       | Score     | Key issue                                                                                  |
 | --------- | ------------------------------- | --------- | ------------------------------------------------------------------------------------------ |
@@ -40,11 +40,11 @@ Visual overlays: none available (no browser extension connected). All evidence f
 
 ## Overall impression
 
-Disciplined, honest work, well above its category — and it makes its user wait twice: behind a loading screen on a prerendered static page that has nothing to load, and again by placing the answer below the fold behind the base64 the user just pasted. Biggest opportunity: the product asserts what it could prove.
+Disciplined, honest work, well above its category, and it makes its user wait twice: behind a loading screen on a prerendered static page that has nothing to load, and again by placing the answer below the fold behind the base64 the user just pasted. Biggest opportunity: the product asserts what it could prove.
 
 ## What's working
 
-1. `Load an example` with a real artefact (ISRG Root X1) — a risk-free dry run for a user whose whole reason for being here is "I'm not allowed to upload this". Best UX decision in the product.
+1. `Load an example` with a real artefact (ISRG Root X1), a risk-free dry run for a user whose whole reason for being here is "I'm not allowed to upload this". Best UX decision in the product.
 2. Colour discipline pays off in the result: zero red-family colours measured on the whole result page in both themes. The card reads as data, not a traffic light, and scans faster than every online competitor.
 3. The 390px responsive guard holds on the hard cases (measured: scrollWidth == clientWidth == 390 on both routes, both themes, before and after decode). Focus visible on 36/36 focusables, ring at 3.99:1 light / 6.62:1 dark.
 
@@ -56,25 +56,25 @@ Disciplined, honest work, well above its category — and it makes its user wait
 
 ### [P0] No answer layer; the result sits below the fold
 
-At 1280x900, `Valid until` lands around y938 — off-screen — because the `h-64` textarea never collapses after a successful decode and holds ~330px of viewport showing base64 the user already has. The three questions that bring this user here all require scrolling past their own input. Fix: collapse the textarea to a two-line strip on success; promote a verdict band at the top of CertCard (CN, absolute expiry date + relative, issuer, SAN count); move focus to the result. Command: /impeccable layout
+At 1280x900, `Valid until` lands around y938, off-screen, because the `h-64` textarea never collapses after a successful decode and holds ~330px of viewport showing base64 the user already has. The three questions that bring this user here all require scrolling past their own input. Fix: collapse the textarea to a two-line strip on success; promote a verdict band at the top of CertCard (CN, absolute expiry date + relative, issuer, SAN count); move focus to the result. Command: /impeccable layout
 
 ### [P1] The dark theme fails contrast in six places, one root cause
 
-Measured: textarea placeholder 2.45:1, category kicker 3.48:1, helper text 3.48:1, mobile-panel kicker 3.36:1, and the five CertCard section headings at 3.08:1. Four of six share one cause: `dark:text-slate-500` resolves to `#6e6a63`, the light-theme muted step, on night surfaces. Plus the logo plate, `#1a1816` locked on a `#131211` ground — ~1.1:1, so the plate disappears in the theme the charter calls "signature". Fix: move those roles to the dark `--yk-ink-3` step (`#9a938a`); invert the plate in dark. Command: /impeccable audit then /impeccable polish
+Measured: textarea placeholder 2.45:1, category kicker 3.48:1, helper text 3.48:1, mobile-panel kicker 3.36:1, and the five CertCard section headings at 3.08:1. Four of six share one cause: `dark:text-slate-500` resolves to `#6e6a63`, the light-theme muted step, on night surfaces. Plus the logo plate, `#1a1816` locked on a `#131211` ground, ~1.1:1, so the plate disappears in the theme the charter calls "signature". Fix: move those roles to the dark `--yk-ink-3` step (`#9a938a`); invert the plate in dark. Command: /impeccable audit then /impeccable polish
 
 ### [P1] Accessibility wiring fails where it counts
 
-The live region wraps the entire CertCard: a successful decode recites ~40 rows including three hex fingerprints with no way to interrupt. `fileError` renders outside any live region with no `role="alert"` — an 8MB drop announces nothing. The textarea carries `required` but never `aria-invalid` or `aria-describedby` to the alert. Heading structure skips a level after decode (h1 -> h3, confirmed independently by both assessments) and the certificate CN is a `<p>`, so heading navigation never names the certificate. 25 touch targets under 44px at 390px, four copy buttons at 23x23. Command: /impeccable harden
+The live region wraps the entire CertCard: a successful decode recites ~40 rows including three hex fingerprints with no way to interrupt. `fileError` renders outside any live region with no `role="alert"`: an 8MB drop announces nothing. The textarea carries `required` but never `aria-invalid` or `aria-describedby` to the alert. Heading structure skips a level after decode (h1 -> h3, confirmed independently by both assessments) and the certificate CN is a `<p>`, so heading navigation never names the certificate. 25 touch targets under 44px at 390px, four copy buttons at 23x23. Command: /impeccable harden
 
-### [P1] The claim is asserted, never shown — and asserted after the risk
+### [P1] The claim is asserted, never shown, and asserted after the risk
 
 "Everything is decoded locally in your browser, no data is sent." sits at `text-xs text-slate-500`, the faintest ink on the page, below the action row, i.e. after commitment. At the actually sensitive moment the surface says nothing, and the control receiving the most critical artefact is a grey dashed rectangle. PRODUCT.md principle 1 requires every privacy claim to be verifiable in under a minute. Fix: move the claim into the drop zone's empty state at body size; add a `Verify: 0 requests` affordance citing `connect-src 'none'` and counting PerformanceObserver resource entries since decode. Command: /impeccable clarify
 
-Ranked just below, also P1: the home page is a directory where it should be an entry point — eleven equal cards, no search, no paste target, 2265px of scroll at 390px, while the PEM/DER auto-detect logic already exists in `PemInput.readFile`.
+Ranked just below, also P1: the home page is a directory where it should be an entry point: eleven equal cards, no search, no paste target, 2265px of scroll at 390px, while the PEM/DER auto-detect logic already exists in `PemInput.readFile`.
 
 ## Persona red flags
 
-**Alex (power user):** `Subject` and `Issuer` — the two strings pasted into the incident ticket — have no copy button; only `Serial number` does. No `/` or Cmd+K. No URL state, nothing shareable, and Clear destroys it. Decode a cert then want its ASN.1 tree: re-paste by hand.
+**Alex (power user):** `Subject` and `Issuer` (the two strings pasted into the incident ticket) have no copy button; only `Serial number` does. No `/` or Cmd+K. No URL state, nothing shareable, and Clear destroys it. Decode a cert then want its ASN.1 tree: re-paste by hand.
 
 **Sam (screen reader / keyboard):** see P1 above. Additionally the primary button ships disabled at `opacity-50`, compositing its white label to ~1.6:1 as the control's arrival state. The dropdown opens on `mouseenter` of a `div role="none"` (pointer-only behaviour). Badge rings vanish in dark, `ring-slate-800` being the same token as their own fill. Theme never reads `prefers-color-scheme`: a dark-OS user gets a near-white full-viewport flash before any control is reachable.
 
@@ -94,5 +94,5 @@ Ranked just below, also P1: the home page is a directory where it should be an e
 1. If nothing leaving the page is the product, why can't the page prove it?
 2. Why does a 100% offline, prerendered, statically served tool have a loading screen?
 3. What survives if the home grid becomes one paste box that detects and routes?
-4. `Valid` and `Expired` are two 6px dots of near-identical lightness — either the dot earns its place through shape, or it is the decoration the charter bans.
+4. `Valid` and `Expired` are two 6px dots of near-identical lightness: either the dot earns its place through shape, or it is the decoration the charter bans.
 5. If you had to delete ten of the fifteen card rows for the first screen, which five stay, and why isn't that the default?

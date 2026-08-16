@@ -19,7 +19,7 @@
 	 * 6px et à son libellé, jamais à un fond teinté. La charte ne connaît que
 	 * deux marqueurs colorés : l'orange (signal, alerte, mise en avant) et le
 	 * vert de conformité (« conforme, vérifié, prouvé »). Il n'existe pas de
-	 * rouge hors terminal, et la couleur n'est jamais le seul vecteur d'info —
+	 * rouge hors terminal, et la couleur n'est jamais le seul vecteur d'info :
 	 * le libellé porte toujours le sens à lui seul.
 	 */
 	type Dot = 'ok' | 'accent' | null;
@@ -54,7 +54,7 @@
 </script>
 
 <span
-	class="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-medium tracking-wide ring-1 ring-slate-200 ring-inset dark:bg-slate-800 dark:ring-slate-800 {muted
+	class="inline-flex items-center gap-1.5 rounded-md bg-surface-2 px-2 py-0.5 font-mono text-[11px] font-medium tracking-wide ring-1 ring-line ring-inset {muted
 		? 'text-slate-500 dark:text-slate-400'
 		: 'text-slate-600 dark:text-slate-300'}"
 >
@@ -62,7 +62,7 @@
 		<!-- The two markers differ in SHAPE, not only in hue: a filled disc for
 		     "proven", a hollow ring for "needs attention". Their lightness is
 		     deliberately close (the compliance green is tuned to the accent), so in
-		     greyscale — or for a red-green colour deficiency — the fill is what
+		     greyscale, or for a red-green colour deficiency, the fill is what
 		     tells them apart. The label still carries the meaning on its own. -->
 		<span
 			class="h-2 w-2 shrink-0 rounded-full {dot === 'ok'

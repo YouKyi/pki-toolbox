@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  * The tools print long unbreakable strings (hex fingerprints, DNs, serials,
  * base64). Two CSS defaults conspire to clip them: a `1fr` grid track and a
  * grid/flex item both resolve `min-width` to `auto`, so a long value cannot
- * shrink below its min-content and overflows — and because the certificate card
+ * shrink below its min-content and overflows, and because the certificate card
  * is `overflow-hidden`, the overflow is *clipped*, not scrollable, i.e. silently
  * unreadable. This spec fails if that ever comes back.
  *
@@ -31,7 +31,7 @@ const PAGES: [string, string][] = [
 ];
 
 for (const [path, action] of PAGES) {
-	test(`no clipped content at ${PHONE.width}px — ${path}`, async ({ page }) => {
+	test(`no clipped content at ${PHONE.width}px: ${path}`, async ({ page }) => {
 		await page.setViewportSize(PHONE);
 		await page.goto(path);
 
@@ -63,7 +63,7 @@ for (const [path, action] of PAGES) {
 				if (cls.includes('sr-only') || cls.includes('truncate')) continue; // clipped by design
 				clipped.push(
 					`<${el.tagName.toLowerCase()} class="${cls.slice(0, 60)}"> ` +
-						`${el.scrollWidth}px content in ${el.clientWidth}px box — ` +
+						`${el.scrollWidth}px content in ${el.clientWidth}px box: ` +
 						`"${(el.textContent || '').trim().slice(0, 40)}"`
 				);
 			}

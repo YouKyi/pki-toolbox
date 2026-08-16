@@ -12,7 +12,7 @@
 <header class="yk-semis relative mb-6">
 	<div class="flex items-center gap-3">
 		<span
-			class="yk-chip grid h-11 w-11 shrink-0 place-items-center bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+			class="yk-chip grid h-11 w-11 shrink-0 place-items-center bg-surface-2 text-slate-600 dark:text-slate-300"
 		>
 			<Icon name={tool.icon} size={24} />
 		</span>

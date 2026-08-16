@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { tick } from 'svelte';
-	import { revealResult } from '$lib/reveal';
 	import { requireTool } from '$lib/tools';
+	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
 	import { decodeCsr, type DecodedCsr } from '$lib/pki/parse';
 	import { TEST_CSR } from '$lib/samples';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
-	import Alert from '$lib/components/Alert.svelte';
+	import DecodeError from '$lib/components/DecodeError.svelte';
+	import CarryTo from '$lib/components/CarryTo.svelte';
 	import StatusLine from '$lib/components/StatusLine.svelte';
 	import RowList from '$lib/components/RowList.svelte';
 	import Badge from '$lib/components/Badge.svelte';
@@ -14,56 +14,26 @@
 
 	const tool = requireTool('decode-csr');
 
-	let input = $state('');
-	let result = $state<DecodedCsr | null>(null);
-	let error = $state('');
-	let loading = $state(false);
-	let collapsed = $state(false);
-	let resultRegion: HTMLDivElement | undefined = $state();
-	/** Ties the failure message to the field that caused it. */
-	const errorId = $props.id();
-
-	async function decode() {
-		loading = true;
-		error = '';
-		result = null;
-		try {
-			result = await decodeCsr(input.trim());
-			collapsed = true;
-			await tick();
-			revealResult(resultRegion);
-		} catch (e) {
-			error = e instanceof Error ? e.message : String(e);
-			collapsed = false;
-		} finally {
-			loading = false;
-		}
-	}
-
-	const commonName = $derived(
-		result?.subjectParts.find((p) => p.key === 'CN')?.value ?? result?.subject ?? ''
-	);
+	const cn = (c: DecodedCsr) => c.subjectParts.find((p) => p.key === 'CN')?.value ?? c.subject;
 
 	/** What the request asks for: the names it covers, and whether it wants a CA. */
-	const requested = $derived(
-		result
-			? [
-					result.subjectAltNames.length === 1
-						? '1 alternative name'
-						: result.subjectAltNames.length > 1
-							? `${result.subjectAltNames.length} alternative names`
-							: '',
-					result.basicConstraints?.ca ? 'requests a CA certificate' : ''
-				]
-					.filter(Boolean)
-					.join(' · ')
-			: ''
-	);
+	const requested = (c: DecodedCsr) =>
+		[
+			c.subjectAltNames.length === 1
+				? '1 alternative name'
+				: c.subjectAltNames.length > 1
+					? `${c.subjectAltNames.length} alternative names`
+					: '',
+			c.basicConstraints?.ca ? 'requests a CA certificate' : ''
+		]
+			.filter(Boolean)
+			.join(' · ');
 
-	/** One sentence for assistive technology; the card carries the detail. */
-	const status = $derived(
-		error ? `Decoding failed: ${error}` : result ? `Signing request decoded: ${commonName}` : ''
-	);
+	const flow = createDecodeFlow({
+		run: (input) => decodeCsr(input),
+		summary: (c) => `${cn(c)} · signing request`,
+		announce: (c) => `Signing request decoded: ${cn(c)}`
+	});
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -71,25 +41,32 @@
 <ToolHeader {tool} />
 
 <PemInput
-	bind:value={input}
-	invalid={Boolean(error)}
-	{errorId}
-	bind:collapsed
-	summary={commonName ? `${commonName} · signing request` : ''}
-	{loading}
-	ondecode={decode}
+	bind:value={flow.input}
+	bind:collapsed={flow.collapsed}
+	invalid={Boolean(flow.error)}
+	errorId={flow.errorId}
+	summary={flow.summary}
+	loading={flow.loading}
+	ondecode={() => flow.decode()}
 	derLabel="CERTIFICATE REQUEST"
 	example={TEST_CSR}
 	placeholder="Paste a PKCS#10 request here (-----BEGIN CERTIFICATE REQUEST-----)…"
 />
 
-<div bind:this={resultRegion} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
-	<StatusLine message={status} />
-	{#if error}
-		<Alert id={errorId} variant="error" title="Decoding failed">{error}</Alert>
+<div bind:this={flow.region} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={flow.status} />
+	{#if flow.error}
+		<DecodeError
+			id={flow.errorId}
+			title={flow.failureLabel}
+			message={flow.error}
+			input={flow.input}
+			current={tool.slug}
+		/>
 	{/if}
 
-	{#if result}
+	{#if flow.result}
+		{@const csr = flow.result}
 		<article
 			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 		>
@@ -100,17 +77,17 @@
 			     and which names it would cover. -->
 			<VerdictBand
 				icon="file-text"
-				title={commonName}
+				title={cn(csr)}
 				lead="Key"
-				value={result.publicKey.label}
-				note={`signed with ${result.signatureAlgorithm}`}
-				meta={requested || 'PKCS#10 signing request'}
+				value={csr.publicKey.label}
+				note={`signed with ${csr.signatureAlgorithm}`}
+				meta={requested(csr) || 'PKCS#10 signing request'}
 				badges={csrBadges}
 			/>
 
 			<section class="px-5 py-4">
 				<h3 class="mb-2 text-xs font-semibold tracking-wide text-ink-3 uppercase">Identity</h3>
-				<RowList rows={[{ label: 'Subject', value: result.subject || '-', mono: true }]} />
+				<RowList rows={[{ label: 'Subject', value: csr.subject || '-', mono: true }]} />
 			</section>
 
 			<section class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
@@ -119,49 +96,49 @@
 				</h3>
 				<RowList
 					rows={[
-						{ label: 'Public key', value: result.publicKey.label },
-						{ label: 'Signature algorithm', value: result.signatureAlgorithm }
+						{ label: 'Public key', value: csr.publicKey.label },
+						{ label: 'Signature algorithm', value: csr.signatureAlgorithm }
 					]}
 				/>
 			</section>
 
-			{#if result.subjectAltNames.length || result.extendedKeyUsage.length || result.basicConstraints}
+			{#if csr.subjectAltNames.length || csr.extendedKeyUsage.length || csr.basicConstraints}
 				<section class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
 					<h3 class="mb-2 text-xs font-semibold tracking-wide text-ink-3 uppercase">
 						Requested extensions
 					</h3>
 					<div class="space-y-3">
-						{#if result.subjectAltNames.length}
+						{#if csr.subjectAltNames.length}
 							<div>
 								<p class="mb-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
 									Subject Alternative Names
 								</p>
 								<div class="flex flex-wrap gap-1.5">
-									{#each result.subjectAltNames as san (san.type + san.value)}
+									{#each csr.subjectAltNames as san (san.type + san.value)}
 										<Badge tone="neutral">{san.type}: {san.value}</Badge>
 									{/each}
 								</div>
 							</div>
 						{/if}
-						{#if result.extendedKeyUsage.length}
+						{#if csr.extendedKeyUsage.length}
 							<div>
 								<p class="mb-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
 									Extended Key Usage
 								</p>
 								<div class="flex flex-wrap gap-1.5">
-									{#each result.extendedKeyUsage as eku (eku)}
+									{#each csr.extendedKeyUsage as eku (eku)}
 										<Badge tone="info">{eku}</Badge>
 									{/each}
 								</div>
 							</div>
 						{/if}
-						{#if result.basicConstraints}
+						{#if csr.basicConstraints}
 							<RowList
 								rows={[
 									{
 										label: 'Basic Constraints',
-										value: result.basicConstraints.ca
-											? `CA${result.basicConstraints.pathLength !== undefined ? `, path length ${result.basicConstraints.pathLength}` : ''}`
+										value: csr.basicConstraints.ca
+											? `CA${csr.basicConstraints.pathLength !== undefined ? `, path length ${csr.basicConstraints.pathLength}` : ''}`
 											: 'Non-CA'
 									}
 								]}
@@ -171,5 +148,10 @@
 				</section>
 			{/if}
 		</article>
+	{/if}
+
+	<!-- The answer first, then what else can be asked of the same artefact. -->
+	{#if flow.result}
+		<CarryTo artefact={flow.input} current={tool.slug} />
 	{/if}
 </div>

@@ -252,7 +252,7 @@ export async function issueCertificate(
 
 /**
  * Parse and verify a PKCS#10 request, returning its public key. `decodeCsr`
- * (parse.ts) does not check the signature, so it is verified here — a CSR
+ * (parse.ts) does not check the signature, so it is verified here: a CSR
  * whose proof-of-possession fails must not be certified.
  */
 async function csrPublicKey(csrPem: string, crypto: Crypto): Promise<PublicKeyType> {

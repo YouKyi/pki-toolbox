@@ -34,7 +34,7 @@
 				type="button"
 				onclick={() => (open = !open)}
 				aria-expanded={open}
-				class="flex items-baseline gap-1.5 rounded text-left hover:bg-slate-100 dark:hover:bg-slate-800"
+				class="flex items-baseline gap-1.5 rounded text-left hover:bg-surface-2"
 			>
 				<Icon
 					name="chevron-down"

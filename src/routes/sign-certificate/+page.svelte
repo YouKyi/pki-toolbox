@@ -1,13 +1,20 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { requireTool } from '$lib/tools';
+	import { revealResult } from '$lib/reveal';
 	import { importCa, issueCertificate, type CaContext } from '$lib/pki/sign';
-	import { KEY_ALGORITHM_LABELS, type KeyAlgorithmChoice } from '$lib/pki/generate';
+	import {
+		generateSelfSigned,
+		KEY_ALGORITHM_LABELS,
+		type KeyAlgorithmChoice
+	} from '$lib/pki/generate';
 	import { decodeCsr } from '$lib/pki/parse';
 	import type { IssuedCertificate } from '$lib/pki/sign';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
 	import PemOutput from '$lib/components/PemOutput.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 
 	const tool = requireTool('sign-certificate');
@@ -22,16 +29,60 @@
 	let ca = $state<CaContext | null>(null);
 	let caError = $state('');
 	let caLoading = $state(false);
+	/**
+	 * The two CA fields are one input: a certificate without its key proves
+	 * nothing here, and a single button validates the pair. So they fold and
+	 * unfold together, on the same flag, once the pair has been accepted.
+	 */
+	let caFolded = $state(false);
+
+	/** The CA's CN if the DN carries one; the alert below still shows the whole DN. */
+	const caName = (c: CaContext) => /CN=([^,]+)/.exec(c.cert.subject)?.[1]?.trim() ?? c.cert.subject;
 
 	async function loadCa() {
 		caLoading = true;
 		caError = '';
 		try {
 			ca = await importCa(caCertPem, caKeyPem);
+			caFolded = true;
+		} catch (e) {
+			caError = e instanceof Error ? e.message : String(e);
+			caFolded = false;
+		} finally {
+			caLoading = false;
+		}
+	}
+
+	let generatingCa = $state(false);
+
+	/**
+	 * Every other tool ships a sample to try it on. This one cannot: a CA
+	 * certificate is useless here without its private key, and a private key
+	 * shipped in the bundle would be the same one for every reader. So the
+	 * example is generated in the page instead, and dies with the tab.
+	 */
+	async function generateTestCa() {
+		generatingCa = true;
+		caError = '';
+		try {
+			const generated = await generateSelfSigned({
+				commonName: 'Toolbox Test CA',
+				organization: 'youkyi',
+				keyAlgorithm: 'ec-p256',
+				validityDays: 3650,
+				sans: [],
+				isCa: true
+			});
+			caCertPem = generated.certificatePem;
+			caKeyPem = generated.privateKeyPem;
+			// Filling the two fields invalidates the loaded CA through the effect
+			// below. Let it run before importing, or it would wipe what we import.
+			await tick();
+			await loadCa();
 		} catch (e) {
 			caError = e instanceof Error ? e.message : String(e);
 		} finally {
-			caLoading = false;
+			generatingCa = false;
 		}
 	}
 
@@ -39,6 +90,8 @@
 	let mode = $state<'generate' | 'csr'>('generate');
 	let csrPem = $state('');
 	let csrError = $state('');
+	let csrFolded = $state(false);
+	let csrName = $state('');
 	let commonName = $state('service.internal');
 	let organization = $state('');
 	let country = $state('');
@@ -51,6 +104,7 @@
 		csrError = '';
 		try {
 			const csr = await decodeCsr(csrPem);
+			csrFolded = true;
 			const part = (key: string) => csr.subjectParts.find((p) => p.key === key)?.value ?? '';
 			commonName = part('CN');
 			organization = part('O');
@@ -59,8 +113,10 @@
 				.filter((s) => s.type.toLowerCase().includes('dns'))
 				.map((s) => s.value)
 				.join(', ');
+			csrName = commonName;
 		} catch (e) {
 			csrError = e instanceof Error ? e.message : String(e);
+			csrFolded = false;
 		}
 	}
 
@@ -68,6 +124,16 @@
 	let result = $state<IssuedCertificate | null>(null);
 	let signError = $state('');
 	let signing = $state(false);
+	let resultRegion: HTMLDivElement | undefined = $state();
+
+	/** One sentence for assistive technology; the blocks below carry the detail. */
+	const status = $derived(
+		signError
+			? `Signing failed: ${signError}`
+			: result
+				? `Certificate issued for ${commonName}, signed by the loaded CA`
+				: ''
+	);
 
 	// Editing the CA material invalidates the previously loaded CA and any
 	// previously issued result, which was signed by the old CA.
@@ -95,6 +161,8 @@
 				isCa,
 				subject: mode === 'csr' ? { kind: 'csr', csrPem } : { kind: 'generate', keyAlgorithm }
 			});
+			await tick();
+			revealResult(resultRegion);
 		} catch (e) {
 			signError = e instanceof Error ? e.message : String(e);
 		} finally {
@@ -117,25 +185,60 @@
 	<div class="grid gap-4 lg:grid-cols-2">
 		<div>
 			<p class="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">CA certificate</p>
-			<PemInput bind:value={caCertPem} derLabel="CERTIFICATE" accept=".pem,.crt,.cer,.der" />
+			<PemInput
+				bind:value={caCertPem}
+				bind:collapsed={caFolded}
+				summary={ca ? caName(ca) : ''}
+				derLabel="CERTIFICATE"
+				accept=".pem,.crt,.cer,.der"
+			/>
 		</div>
 		<div>
 			<p class="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">
 				CA private key (unencrypted PKCS#8)
 			</p>
-			<PemInput bind:value={caKeyPem} derLabel="PRIVATE KEY" accept=".pem,.key,.der" />
+			<!-- The recap names the field and nothing else. A private key is the one
+			     artefact whose content must never be read back to the screen, so the
+			     summary is a constant; the size shown beside it comes from the input
+			     itself, not from anything parsed out of the key. -->
+			<PemInput
+				bind:value={caKeyPem}
+				bind:collapsed={caFolded}
+				acceptsPrivateKey
+				summary="CA private key"
+				derLabel="PRIVATE KEY"
+				accept=".pem,.key,.der"
+			/>
 		</div>
 	</div>
 
-	<button
-		type="button"
-		onclick={loadCa}
-		disabled={caLoading || !caCertPem.trim() || !caKeyPem.trim()}
-		class="yk-pressable mt-4 inline-flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
-	>
-		<Icon name={caLoading ? 'clock' : 'shield'} size={16} />
-		{caLoading ? 'Loading…' : 'Load the CA'}
-	</button>
+	<div class="mt-4 flex flex-wrap items-center gap-2">
+		<button
+			type="button"
+			onclick={loadCa}
+			disabled={caLoading || !caCertPem.trim() || !caKeyPem.trim()}
+			class="yk-pressable inline-flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 max-sm:min-h-11 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
+		>
+			<Icon name={caLoading ? 'clock' : 'shield'} size={16} />
+			{caLoading ? 'Loading…' : 'Load the CA'}
+		</button>
+
+		<!-- The dry run this tool was missing: no CA of your own to paste, and the
+		     page hands you a throwaway one so the rest can be tried at once. -->
+		<button
+			type="button"
+			onclick={generateTestCa}
+			disabled={generatingCa || caLoading}
+			class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-teal-700 disabled:cursor-not-allowed disabled:opacity-50 max-sm:min-h-11 dark:text-slate-400 dark:hover:text-teal-400"
+		>
+			<Icon name={generatingCa ? 'clock' : 'stamp'} size={16} />
+			{generatingCa ? 'Generating…' : 'Generate a test CA'}
+		</button>
+	</div>
+	<p class="mt-2 text-xs text-ink-3">
+		The test CA is a P-256 key pair generated in this page, valid ten years, for trying the tool. It
+		is stored nowhere and dies with the tab; never issue anything real with it.
+	</p>
 
 	<div class="mt-3 space-y-3" aria-live="polite">
 		{#if caError}
@@ -143,7 +246,7 @@
 		{/if}
 		{#if ca}
 			<Alert variant="info" title="CA loaded">
-				{ca.cert.subject} — valid until {ca.cert.notAfter.toISOString().slice(0, 10)}
+				{ca.cert.subject}, valid until {ca.cert.notAfter.toISOString().slice(0, 10)}
 			</Alert>
 			{#each ca.warnings as warning (warning)}
 				<Alert variant="warn" title="Warning">{warning}</Alert>
@@ -171,7 +274,7 @@
 				onclick={() => (mode = m.id as typeof mode)}
 				class="rounded-md px-3 py-1.5 font-medium transition {mode === m.id
 					? 'bg-teal-700 text-white dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)]'
-					: 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}"
+					: 'text-slate-600 hover:bg-surface-2 dark:text-slate-300'}"
 			>
 				{m.label}
 			</button>
@@ -181,10 +284,12 @@
 	{#if mode === 'csr'}
 		<div class="mb-4">
 			<p class="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-				PKCS#10 request — its subject and DNS SANs pre-fill the form below; the form wins.
+				PKCS#10 request: its subject and DNS SANs pre-fill the form below; the form wins.
 			</p>
 			<PemInput
 				bind:value={csrPem}
+				bind:collapsed={csrFolded}
+				summary={csrName ? `${csrName} · signing request` : ''}
 				derLabel="CERTIFICATE REQUEST"
 				accept=".pem,.csr,.req,.der"
 				decodeLabel="Read the CSR"
@@ -255,7 +360,8 @@
 </section>
 
 <!-- Results -->
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
+<div bind:this={resultRegion} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={status} />
 	{#if signError}
 		<Alert variant="error" title="Signing failed">{signError}</Alert>
 	{/if}

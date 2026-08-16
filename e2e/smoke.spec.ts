@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { PRIVATE_KEY } from './artefacts';
 
 /**
- * Smoke suite for pki-toolbox — fast health check of the REAL static build
+ * Smoke suite for pki-toolbox: fast health check of the REAL static build
  * served by `pnpm preview` (adapter-static, prerender=true; see
  * playwright.config.ts). Covers the shell: home render, navigation, and theme
  * persistence. Feature coverage lives in tools.spec.ts.
@@ -19,7 +20,9 @@ test('S1 home renders with content on the first frame, title set', async ({ page
 	await page.goto('/');
 
 	await expect(page).toHaveTitle(/PKI-Toolbox/i);
-	await expect(page.getByRole('heading', { name: 'PKI toolbox', level: 1 })).toBeVisible();
+	await expect(
+		page.getByRole('heading', { name: /Decode a certificate without uploading it/, level: 1 })
+	).toBeVisible();
 
 	// No splash may cover the page: nothing fixed and full-viewport on top.
 	expect(
@@ -40,7 +43,31 @@ test('S1 home renders with content on the first frame, title set', async ({ page
 	await expect(page.getByRole('link', { name: 'Certificate decoder' })).toBeVisible();
 	await expect(page.getByRole('link', { name: 'Self-signed certificate' })).toBeVisible();
 
-	await expect(page.getByText('100% client-side, no data sent')).toBeVisible();
+	// The no-network claim is part of the sentence under the heading now, not an
+	// eyebrow above it.
+	await expect(page.getByText('Nothing you paste leaves the page.')).toBeVisible();
+
+	// The page is an entry point before it is a directory: paste, and the
+	// artefact names the tool it belongs to.
+	const box = page.getByLabel('PKI artefact input');
+	await expect(box).toBeVisible();
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	await page.getByRole('button', { name: 'Open the right tool' }).click();
+	await expect(page).toHaveURL(/\/decode-certificate$/);
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue(/BEGIN CERTIFICATE/);
+	expect(new URL(page.url()).search).toBe('');
+
+	// Nothing to route: the page says so rather than failing silently.
+	await page.goto('/');
+	await page.getByLabel('PKI artefact input').fill('not an artefact');
+	await page.getByRole('button', { name: 'Open the right tool' }).click();
+	await expect(page.getByText('Nothing recognisable in there')).toBeVisible();
+
+	// A private key has no tool here, and the veil already says it: the action is
+	// held back instead of answered with a second notice.
+	await page.getByLabel('PKI artefact input').fill(PRIVATE_KEY);
+	await expect(page.getByRole('button', { name: 'Open the right tool' })).toBeDisabled();
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
 });
 
 test('S2 navigate home → tool → home, then a second full document load', async ({ page }) => {
@@ -57,7 +84,9 @@ test('S2 navigate home → tool → home, then a second full document load', asy
 		.first()
 		.click();
 	await expect(page).toHaveURL(/\/$/);
-	await expect(page.getByRole('heading', { name: 'PKI toolbox', level: 1 })).toBeVisible();
+	await expect(
+		page.getByRole('heading', { name: /Decode a certificate without uploading it/, level: 1 })
+	).toBeVisible();
 
 	// A second FULL document load lands directly on the tool, with no gate.
 	await page.goto('/decode-certificate');

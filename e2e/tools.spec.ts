@@ -1,12 +1,13 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
+import { PRIVATE_KEY, REVOCATION_LIST } from './artefacts';
 
 /**
  * Tool feature suite for pki-toolbox, run against the REAL static build served
- * by `pnpm preview` (adapter-static, prerender=true) — see playwright.config.ts.
+ * by `pnpm preview` (adapter-static, prerender=true), see playwright.config.ts.
  * Everything is decoded client-side (WebCrypto / @peculiar/x509 / pkijs); the CSP
  * `connect-src 'none'` forbids any outbound request, which S4 asserts explicitly.
  *
- * Result scoping — IMPORTANT: getByText defaults to a case-insensitive SUBSTRING
+ * Result scoping. IMPORTANT: getByText defaults to a case-insensitive SUBSTRING
  * match, so bare text like "Public key" or "PKCS#10 signing request" also hits
  * the ToolHeader description paragraph, causing strict-mode violations. Every
  * tool page wraps its output in a single `<div id="result">`; content
@@ -36,7 +37,7 @@ function watchExternalRequests(page: Page): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// S4 — Certificate decoder via "Load an example" (ISRG_ROOT_X1) + no-network
+// S4: Certificate decoder via "Load an example" (ISRG_ROOT_X1) + no-network
 // ---------------------------------------------------------------------------
 test('S4 decode certificate example (ISRG Root X1)', async ({ page }) => {
 	const external = watchExternalRequests(page);
@@ -81,7 +82,7 @@ test('S4 decode certificate example (ISRG Root X1)', async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
-// S5 — CSR decoder via "Load an example" (TEST_CSR)
+// S5: CSR decoder via "Load an example" (TEST_CSR)
 // ---------------------------------------------------------------------------
 test('S5 decode CSR example', async ({ page }) => {
 	await page.goto('/decode-csr');
@@ -90,7 +91,7 @@ test('S5 decode CSR example', async ({ page }) => {
 
 	const result = region(page);
 
-	// Structural labels only — the CN of the test CSR is not asserted (not
+	// Structural labels only: the CN of the test CSR is not asserted (not
 	// guaranteed stable). Scoped to the result region so "Public key" /
 	// "Signature algorithm" don't collide with the ToolHeader prose above.
 	// The verdict band names the request and answers what key it asks for.
@@ -111,7 +112,7 @@ test('S5 decode CSR example', async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
-// S6 — Chain decoder via "Load an example" (TEST_CHAIN: leaf+intermediate+root)
+// S6: Chain decoder via "Load an example" (TEST_CHAIN: leaf+intermediate+root)
 // ---------------------------------------------------------------------------
 test('S6 decode chain example (ordered, verified)', async ({ page }) => {
 	await page.goto('/decode-chain');
@@ -137,12 +138,12 @@ test('S6 decode chain example (ordered, verified)', async ({ page }) => {
 	// At least one cryptographically verified issuer link.
 	await expect(result.getByText(/Signature verified/).first()).toBeVisible();
 
-	// One "Identity" section per certificate — validates the multi-card render.
+	// One "Identity" section per certificate, validates the multi-card render.
 	await expect(result.getByRole('heading', { name: 'Identity' })).toHaveCount(3);
 });
 
 // ---------------------------------------------------------------------------
-// S7 — Fingerprints via "Load an example" (ISRG_ROOT_X1)
+// S7: Fingerprints via "Load an example" (ISRG_ROOT_X1)
 // ---------------------------------------------------------------------------
 test('S7 compute fingerprints example', async ({ page }) => {
 	await page.goto('/fingerprint');
@@ -166,7 +167,7 @@ test('S7 compute fingerprints example', async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
-// S8 — Format conversion via "Load an example" (ISRG_ROOT_X2, not X1)
+// S8: Format conversion via "Load an example" (ISRG_ROOT_X2, not X1)
 // ---------------------------------------------------------------------------
 test('S8 format conversion example (ISRG Root X2)', async ({ page }) => {
 	await page.goto('/format-convert');
@@ -180,9 +181,13 @@ test('S8 format conversion example (ISRG Root X2)', async ({ page }) => {
 	await expect(result.getByText('DER (base64)')).toBeVisible();
 	await expect(result.getByText('DER (hexadecimal)')).toBeVisible();
 
-	// Item label badge + byte-size hint.
-	await expect(result.getByText('CERTIFICATE', { exact: true })).toBeVisible();
-	await expect(result.getByText(/bytes/)).toBeVisible();
+	// The answer layer, same as every decoder: the artefact names itself and its
+	// measure is stated before the encodings.
+	await expect(result.getByRole('heading', { name: 'Certificate', level: 2 })).toBeVisible();
+	await expect(result.getByText(/^\d+ bytes$/)).toBeVisible();
+	// Copy and download ride on the terminal bar of each encoding, three of each.
+	await expect(result.getByRole('button', { name: 'Copy' })).toHaveCount(3);
+	await expect(result.getByRole('button', { name: 'Download', exact: true })).toHaveCount(3);
 
 	// At least one certificate => PKCS#7 bundle download offered.
 	await expect(result.getByRole('button', { name: /Download as PKCS#7/ })).toBeVisible();
@@ -192,7 +197,7 @@ test('S8 format conversion example (ISRG Root X2)', async ({ page }) => {
 });
 
 // ---------------------------------------------------------------------------
-// S9 — Self-signed generation: fill form -> generate -> cert + private key
+// S9: Self-signed generation: fill form -> generate -> cert + private key
 // ---------------------------------------------------------------------------
 test('S9 generate self-signed certificate', async ({ page }) => {
 	await page.goto('/generate-selfsigned');
@@ -209,7 +214,7 @@ test('S9 generate self-signed certificate', async ({ page }) => {
 	await expect(result.getByText('e2e.test.local').first()).toBeVisible({ timeout: 20000 });
 
 	// Certificate PEM output. NOTE: the block title is a <span>, not a heading,
-	// so this must be getByText — a getByRole('heading') lookup would find nothing.
+	// so this must be getByText: a getByRole('heading') lookup would find nothing.
 	await expect(result.getByText('Certificate (PEM)')).toBeVisible();
 	await expect(
 		result.locator('pre').filter({ hasText: 'BEGIN CERTIFICATE' }).first()
@@ -227,4 +232,190 @@ test('S9 generate self-signed certificate', async ({ page }) => {
 	await expect(result.getByRole('button', { name: 'Download' }).first()).toBeVisible();
 
 	await expect(result.getByText('Generation failed')).toHaveCount(0);
+});
+
+// ---------------------------------------------------------------------------
+// S10: CA signing, from the in-page test CA to an issued certificate
+// ---------------------------------------------------------------------------
+test('S10 issue a certificate from the generated test CA', async ({ page }) => {
+	await page.goto('/sign-certificate');
+
+	// One click has to leave the CA generated, imported and folded: the button
+	// fills both fields, waits for the invalidating effect, then imports.
+	await page.getByRole('button', { name: 'Generate a test CA' }).click();
+	await expect(page.getByText('CA loaded')).toBeVisible({ timeout: 20000 });
+	await expect(page.getByText('CN=Toolbox Test CA')).toBeVisible();
+
+	// The pair is one input: both fields fold together, and the key's recap
+	// names the field and its size, never anything read out of the key.
+	await expect(page.getByRole('button', { name: 'Edit input' })).toHaveCount(2);
+	// The recap paragraph, not the field label above it, which carries the same
+	// words. PemInput mirrors the summary into `title`, so this asserts the
+	// recap says exactly that and nothing read out of the key.
+	await expect(page.locator('p[title="CA private key"]')).toBeVisible();
+	await expect(page.getByText('BEGIN PRIVATE KEY')).toHaveCount(0);
+
+	await page.getByLabel('Common Name (CN)').fill('signed.e2e.local');
+	await page.getByRole('button', { name: 'Sign the certificate' }).click();
+
+	const result = region(page);
+	await expect(result.getByText('Certificate (PEM)')).toBeVisible({ timeout: 20000 });
+	await expect(result.getByText('Fullchain (certificate + CA)')).toBeVisible();
+	await expect(
+		result.locator('pre').filter({ hasText: 'BEGIN CERTIFICATE' }).first()
+	).toBeVisible();
+	await expect(page.getByText('Signing failed')).toHaveCount(0);
+});
+
+// ---------------------------------------------------------------------------
+// S11: the privacy claim, and the three things that make it checkable
+// ---------------------------------------------------------------------------
+test('S11 the no-network claim carries its proof', async ({ page }) => {
+	const external = watchExternalRequests(page);
+
+	await page.goto('/decode-certificate');
+
+	// The claim sits in the box that receives the artefact, not under the
+	// action row where it used to be read after the fact.
+	await expect(page.getByText('Nothing you paste leaves it.')).toBeVisible();
+
+	await page.getByRole('button', { name: 'Verify' }).click();
+	// Read from the page's own CSP meta tag. A hardcoded string in the
+	// component would be one more claim; this fails if the policy ever drops
+	// the directive.
+	await expect(page.getByText("connect-src 'none'")).toBeVisible();
+
+	// The live attempt is refused by the browser itself, and says so.
+	await page.getByRole('button', { name: 'Try to send something' }).click();
+	await expect(page.getByText(/Refused by the browser/)).toBeVisible();
+
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	await page.getByRole('button', { name: 'Decode' }).click();
+
+	// The editor folds after a decode, and the proof folds with it: one click on
+	// the recap brings back the input and the count that covers the decode.
+	await page.getByRole('button', { name: 'Edit input' }).click();
+	await page.getByRole('button', { name: /^Verify/ }).click();
+	await expect(page.getByText('0 requests able to carry data out since you pasted.')).toBeVisible();
+
+	expect(external).toEqual([]);
+});
+
+// ---------------------------------------------------------------------------
+// S14: what a reader does with the answer once they have it
+// ---------------------------------------------------------------------------
+test('S14 copy, carry and the slash shortcut', async ({ page }) => {
+	await page.goto('/decode-certificate');
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	await page.getByRole('button', { name: 'Decode' }).click();
+
+	const result = region(page);
+
+	// The two strings that get pasted into an incident ticket, and the whole
+	// card for the ticket that wants all of it.
+	await expect(result.getByRole('button', { name: 'Copy Subject' })).toBeVisible();
+	await expect(result.getByRole('button', { name: 'Copy Issuer' })).toBeVisible();
+	await expect(result.getByRole('button', { name: 'Copy every field' })).toBeVisible();
+
+	// The serial is hex, and only hex: the decimal form used to trail it in the
+	// same cell and double the height of the row.
+	// (the fingerprints are colon hex too, hence .first())
+	await expect(result.getByText(/^[0-9A-F]{2}(:[0-9A-F]{2})+$/).first()).toBeVisible();
+	await expect(result.getByText(/\(\d{10,}\)/)).toHaveCount(0);
+
+	// `/` reopens the folded editor and lands the caret in it.
+	await page.keyboard.press('/');
+	await expect(page.getByLabel('PKI artefact input')).toBeFocused();
+
+	// One artefact, several questions, and no re-paste between them.
+	await result.getByRole('button', { name: 'ASN.1 viewer' }).click();
+	await expect(page).toHaveURL(/\/asn1-viewer$/);
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue(/BEGIN CERTIFICATE/);
+	expect(new URL(page.url()).search).toBe('');
+});
+
+// ---------------------------------------------------------------------------
+// S12: a mismatched artefact names itself and carries over to the right tool
+// ---------------------------------------------------------------------------
+test('S12 a CRL pasted in the certificate decoder routes to the CRL decoder', async ({ page }) => {
+	await page.goto('/decode-certificate');
+
+	// The body does not need to parse: what is on trial here is the label, and
+	// the failure that follows is exactly the case being fixed.
+	const crl = REVOCATION_LIST;
+	await page.getByLabel('PKI artefact input').fill(crl);
+	await page.getByRole('button', { name: 'Decode' }).click();
+
+	// Led by what to do about it, with the raw parser message kept underneath.
+	await expect(page.getByText('This looks like a certificate revocation list')).toBeVisible();
+	await page.getByRole('button', { name: 'Open it there' }).click();
+
+	await expect(page).toHaveURL(/\/decode-crl$/);
+	// The artefact travelled in memory: it is in the box, and not in the URL.
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue(crl);
+	expect(new URL(page.url()).search).toBe('');
+});
+
+// ---------------------------------------------------------------------------
+// S13: the highest-consequence paste this product can receive
+// ---------------------------------------------------------------------------
+test('S13 a private key names itself the moment it lands', async ({ page }) => {
+	const key = PRIVATE_KEY;
+
+	await page.goto('/decode-certificate');
+	await page.getByLabel('PKI artefact input').fill(key);
+
+	// No decode needed: the veil lands with the paste, covers the key material,
+	// states what is in the box and what did not happen to it.
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
+	await expect(page.getByText(/It has not left this page/)).toBeVisible();
+	await expect(page.getByText(/Its content stays hidden/)).toBeVisible();
+
+	// Reading it back is a legitimate need, so the veil lifts on demand.
+	await page.getByRole('button', { name: 'Show it anyway' }).click();
+	await expect(page.getByText('A private key is in this box.')).toHaveCount(0);
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue(key);
+
+	// Emptying the box restores the veil for whatever lands next.
+	await page.getByRole('button', { name: 'Clear', exact: true }).click();
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue('');
+	await page.getByLabel('PKI artefact input').fill(key);
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
+
+	await page.getByRole('button', { name: 'Clear it' }).click();
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue('');
+	await expect(page.getByText('A private key is in this box.')).toHaveCount(0);
+
+	// A fullchain in the certificate decoder: the first certificate is the
+	// answer, and the page says how many the paste held rather than letting the
+	// reader believe their file carried one.
+	await page.goto('/decode-chain');
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	const chain = await page.getByLabel('PKI artefact input').inputValue();
+	await page.goto('/decode-certificate');
+	await page.getByLabel('PKI artefact input').fill(chain);
+	await page.getByRole('button', { name: 'Decode' }).click();
+	await expect(
+		region(page).getByText('This paste carries 3 certificates. You are reading the first.')
+	).toBeVisible();
+	await expect(region(page).getByRole('button', { name: 'Chain decoder' })).toBeVisible();
+
+	// A key travelling with its certificate, which is what a server `.pem` holds
+	// and what a reader pastes: still covered, and no longer in the way of the
+	// certificate underneath it.
+	await page.goto('/decode-certificate');
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	const example = await page.getByLabel('PKI artefact input').inputValue();
+	await page.getByLabel('PKI artefact input').fill(`${key}\n${example}`);
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
+	await page.getByRole('button', { name: 'Decode' }).click();
+	await expect(region(page).getByRole('heading', { name: 'ISRG Root X1', level: 2 })).toBeVisible();
+
+	// The signing page asks for a CA key on purpose. The veil still covers it,
+	// because key material is never displayed, but it stops scolding.
+	await page.goto('/sign-certificate');
+	await page.getByLabel('PKI artefact input').nth(1).fill(key);
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
+	await expect(page.getByText(/It is what this step needs/)).toBeVisible();
+	await expect(page.getByText(/nothing here needs it/)).toHaveCount(0);
 });

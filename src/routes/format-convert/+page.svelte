@@ -1,82 +1,62 @@
 <script lang="ts">
-	import { tick } from 'svelte';
-	import { revealResult } from '$lib/reveal';
 	import { requireTool } from '$lib/tools';
+	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
 	import { convertArtefact, buildPkcs7, type ConvertedItem } from '$lib/pki/convert';
 	import { hexWithColons } from '$lib/pki/format';
-	import { downloadBytes, downloadText } from '$lib/download';
-	import { writeToClipboard } from '$lib/clipboard';
+	import { downloadBytes } from '$lib/download';
 	import { ISRG_ROOT_X2 } from '$lib/samples';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
-	import Alert from '$lib/components/Alert.svelte';
+	import DecodeError from '$lib/components/DecodeError.svelte';
+	import CarryTo from '$lib/components/CarryTo.svelte';
 	import StatusLine from '$lib/components/StatusLine.svelte';
-	import Badge from '$lib/components/Badge.svelte';
+	import VerdictBand from '$lib/components/VerdictBand.svelte';
+	import PemOutput from '$lib/components/PemOutput.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 
 	const tool = requireTool('format-convert');
 
-	let input = $state('');
-	let items = $state<ConvertedItem[]>([]);
-	let error = $state('');
-	let copied = $state('');
-	/** Folded once converted: the outputs are the point, the source is not. */
-	let collapsed = $state(false);
-	let resultRegion: HTMLDivElement | undefined = $state();
-	/** Ties the failure message to the field that caused it. */
-	const errorId = $props.id();
-
-	const certItems = $derived(items.filter((i) => i.label.endsWith('CERTIFICATE')));
+	const certs = (items: ConvertedItem[]) => items.filter((i) => i.label.endsWith('CERTIFICATE'));
 
 	/**
-	 * One entry per artefact found in the input, each rendered in every format —
+	 * One entry per artefact found in the input, each rendered in every format,
 	 * so the recap counts artefacts, and names the single one when there is only
 	 * one.
 	 */
-	const summary = $derived(
-		items.length === 1 ? items[0].label : items.length ? `${items.length} artefacts` : ''
-	);
+	const named = (items: ConvertedItem[]) =>
+		items.length === 1 ? items[0].label : `${items.length} artefacts`;
 
-	async function decode() {
-		error = '';
-		items = [];
-		try {
-			items = convertArtefact(input.trim());
-			collapsed = true;
-			await tick();
-			revealResult(resultRegion);
-		} catch (e) {
-			error = e instanceof Error ? e.message : String(e);
-			collapsed = false;
-		}
-	}
+	const flow = createDecodeFlow({
+		run: (input) => convertArtefact(input),
+		summary: named,
+		announce: (items) => `Converted: ${named(items)}`,
+		failureLabel: 'Conversion failed'
+	});
 
-	async function copy(text: string, id: string) {
-		const ok = await writeToClipboard(text);
-		if (ok) {
-			copied = id;
-			setTimeout(() => {
-				if (copied === id) copied = '';
-			}, 1200);
-		}
-	}
+	/**
+	 * The band names the artefact the way a person would; the armour label stays
+	 * where it belongs, inside the PEM block itself.
+	 */
+	const TITLES: Record<string, string> = {
+		CERTIFICATE: 'Certificate',
+		'TRUSTED CERTIFICATE': 'Certificate',
+		'CERTIFICATE REQUEST': 'Signing request',
+		'X509 CRL': 'Revocation list',
+		PKCS7: 'PKCS#7 bundle'
+	};
+	const humanLabel = (label: string) => TITLES[label] ?? label;
 
 	function slug(label: string) {
 		return label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 	}
 
-	function downloadPkcs7() {
+	function downloadPkcs7(certItems: ConvertedItem[]) {
 		downloadBytes(
 			'bundle.p7b',
 			buildPkcs7(certItems.map((i) => i.der)),
 			'application/x-pkcs7-certificates'
 		);
 	}
-
-	/** One sentence for assistive technology; the card carries the detail. */
-	const status = $derived(
-		error ? `Conversion failed: ${error}` : items.length ? `Converted: ${summary}` : ''
-	);
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -84,35 +64,45 @@
 <ToolHeader {tool} />
 
 <PemInput
-	bind:value={input}
-	invalid={Boolean(error)}
-	{errorId}
-	bind:collapsed
-	{summary}
-	ondecode={decode}
+	bind:value={flow.input}
+	bind:collapsed={flow.collapsed}
+	invalid={Boolean(flow.error)}
+	errorId={flow.errorId}
+	summary={flow.summary}
+	loading={flow.loading}
+	ondecode={() => flow.decode()}
 	decodeLabel="Convert"
 	example={ISRG_ROOT_X2}
 	placeholder="Paste a PEM/DER certificate or a PKCS#7 bundle, or import a file…"
 />
 
-<div bind:this={resultRegion} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
-	<StatusLine message={status} />
-	{#if error}
-		<Alert id={errorId} variant="error" title="Conversion failed">{error}</Alert>
+<div bind:this={flow.region} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={flow.status} />
+	{#if flow.error}
+		<DecodeError
+			id={flow.errorId}
+			title={flow.failureLabel}
+			message={flow.error}
+			input={flow.input}
+			current={tool.slug}
+		/>
 	{/if}
 
-	{#if items.length}
+	{#if flow.result && flow.result.length}
+		{@const items = flow.result}
+		{@const certItems = certs(items)}
 		{#if certItems.length}
 			<div
 				class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 dark:border-slate-800 dark:bg-slate-900"
 			>
 				<span class="text-sm text-slate-600 dark:text-slate-300">
-					{certItems.length} certificate(s), bundle into a single file:
+					{certItems.length === 1 ? '1 certificate' : `${certItems.length} certificates`}, bundled
+					into a single file:
 				</span>
 				<button
 					type="button"
-					onclick={downloadPkcs7}
-					class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+					onclick={() => downloadPkcs7(certItems)}
+					class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-surface-2 dark:border-slate-700 dark:text-slate-200"
 				>
 					<Icon name="package" size={15} /> Download as PKCS#7 (.p7b)
 				</button>
@@ -120,60 +110,50 @@
 		{/if}
 
 		{#each items as item, i (i)}
-			{@const id = `item-${i}`}
 			<article
 				class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 			>
-				<header class="flex flex-wrap items-center gap-2 px-5 py-3">
-					<Badge tone="neutral">{item.label}</Badge>
-					<span class="text-xs text-ink-3">{item.der.length} bytes</span>
-					<div class="ml-auto flex gap-2">
-						<button
-							type="button"
-							onclick={() =>
-								downloadText(
-									`${slug(item.label)}-${i + 1}.pem`,
-									item.pem,
-									'application/x-pem-file'
-								)}
-							class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-						>
-							<Icon name="upload" size={13} class="rotate-180" /> .pem
-						</button>
-						<button
-							type="button"
-							onclick={() => downloadBytes(`${slug(item.label)}-${i + 1}.der`, item.der)}
-							class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-						>
-							<Icon name="upload" size={13} class="rotate-180" /> .der
-						</button>
-					</div>
-				</header>
-
-				{#snippet block(title: string, value: string, blockId: string)}
-					<div class="border-t border-slate-200 px-5 py-3 dark:border-slate-800">
-						<div class="mb-1.5 flex items-center justify-between">
-							<span class="text-xs font-semibold tracking-wide text-ink-3 uppercase">
-								{title}
-							</span>
-							<button
-								type="button"
-								onclick={() => copy(value, blockId)}
-								class="yk-hit -my-3 rounded p-1 text-slate-500 transition hover:text-teal-700 dark:hover:text-teal-400"
-							>
-								<Icon name={copied === blockId ? 'check' : 'copy'} size={14} />
-							</button>
-						</div>
-						<!-- Du code : bloc terminal de la charte, sombre même en page claire.
-						     Variante sans barre, le titre étant déjà porté au-dessus. -->
-						<pre class="ykterm ykterm__body max-h-48">{value}</pre>
-					</div>
-				{/snippet}
-
-				{@render block('PEM', item.pem, `${id}-pem`)}
-				{@render block('DER (base64)', item.derBase64, `${id}-b64`)}
-				{@render block('DER (hexadecimal)', hexWithColons(item.derHex), `${id}-hex`)}
+				<!-- The same answer layer as every decoder: the artefact names itself and
+				     its measure is stated once, before the encodings that follow. The
+				     armour label is not repeated as a badge, the PEM block spells it
+				     out two lines below. -->
+				<VerdictBand
+					icon="convert"
+					title={humanLabel(item.label)}
+					lead="DER"
+					value="{item.der.length} bytes"
+					note="the same bytes in the three encodings below"
+					meta="PEM · DER as base64 · DER as hexadecimal"
+				/>
 			</article>
+
+			<!-- Du code : bloc terminal de la charte, sombre même en page claire, et
+			     la même barre que sur les pages de génération. Un artefact converti
+			     se lit et s'emporte de la même façon d'un outil à l'autre.
+
+			     Le PEM est ouvert, les deux formes DER sont repliées sur leur barre :
+			     c'est le PEM qu'on relit, le DER qu'on emporte. Copier et télécharger
+			     restent accessibles sans rien déplier. -->
+			<PemOutput title="PEM" value={item.pem} filename="{slug(item.label)}-{i + 1}.pem" />
+			<PemOutput
+				title="DER (base64)"
+				value={item.derBase64}
+				filename="{slug(item.label)}-{i + 1}.der"
+				bytes={item.der}
+				foldable
+			/>
+			<PemOutput
+				title="DER (hexadecimal)"
+				value={hexWithColons(item.derHex)}
+				filename="{slug(item.label)}-{i + 1}.hex.txt"
+				mime="text/plain"
+				foldable
+			/>
 		{/each}
+	{/if}
+
+	<!-- The answer first, then what else can be asked of the same artefact. -->
+	{#if flow.result}
+		<CarryTo artefact={flow.input} current={tool.slug} />
 	{/if}
 </div>
