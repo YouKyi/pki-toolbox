@@ -6,7 +6,7 @@
 	 * the charter renders in glass, over a full-width hairline.
 	 *
 	 * A11y: this is a disclosure pattern (button toggling a group of links), not a
-	 * menubar — so it deliberately does NOT claim role="menu"/"menuitem", which
+	 * menubar, so it deliberately does NOT claim role="menu"/"menuitem", which
 	 * would promise arrow-key navigation we do not implement. Escape closes the
 	 * open folder and returns focus to its trigger; the current page is marked
 	 * with aria-current, not colour alone.
@@ -16,14 +16,31 @@
 	import { categories, toolsByCategory, toolBySlug, type ToolCategory } from '$lib/tools';
 	import Icon from './Icon.svelte';
 	import Badge from './Badge.svelte';
-	import { initTheme, toggleTheme, theme } from '$lib/theme.svelte';
+	import {
+		initTheme,
+		setThemeMode,
+		theme,
+		THEME_ICON,
+		THEME_LABEL,
+		THEME_MODES,
+		type ThemeMode
+	} from '$lib/theme.svelte';
 	import { onMount } from 'svelte';
 
 	onMount(initTheme);
 
+	/**
+	 * A folder opens on hover and on click, and never closes on the trigger
+	 * itself: moving the pointer to a trigger already opened the folder, so a
+	 * toggle would shut what the hover had just raised, and a click would look
+	 * like it did nothing. Leaving the folder closes it, and so do Escape, a
+	 * click outside the bar and any navigation.
+	 */
 	let openCat = $state<ToolCategory | null>(null);
 	let mobileOpen = $state(false);
+	let themeOpen = $state(false);
 	let navEl: HTMLElement | undefined = $state();
+	let themeTrigger: HTMLButtonElement | undefined = $state();
 	/** Trigger buttons, so Escape can hand focus back to the one that opened. */
 	let triggers = $state<Partial<Record<ToolCategory, HTMLButtonElement>>>({});
 
@@ -31,18 +48,29 @@
 	/** Category that owns the current route (drives the active underline). */
 	const activeCat = $derived(toolBySlug(current.replace(/^\//, ''))?.category ?? null);
 
-	const themeAction = $derived(
-		theme.value === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
+	/** The control states the MODE, not the colour it currently resolves to. */
+	const themeLabel = $derived(
+		`Theme: ${THEME_LABEL[theme.mode]}${theme.mode === 'auto' ? ' (follows the system)' : ''}`
 	);
+
+	function chooseTheme(mode: ThemeMode) {
+		setThemeMode(mode);
+		themeOpen = false;
+		themeTrigger?.focus();
+	}
 
 	// Any navigation closes the open folder and the mobile panel.
 	afterNavigate(() => {
 		openCat = null;
 		mobileOpen = false;
+		themeOpen = false;
 	});
 
 	function onWindowClick(event: MouseEvent) {
-		if (navEl && !navEl.contains(event.target as Node)) openCat = null;
+		if (navEl && !navEl.contains(event.target as Node)) {
+			openCat = null;
+			themeOpen = false;
+		}
 	}
 
 	function onKeydown(event: KeyboardEvent) {
@@ -52,6 +80,10 @@
 			openCat = null;
 			trigger?.focus();
 		}
+		if (themeOpen) {
+			themeOpen = false;
+			themeTrigger?.focus();
+		}
 		mobileOpen = false;
 	}
 </script>
@@ -60,26 +92,41 @@
 
 <div bind:this={navEl} class="yk-chrome sticky top-0 z-40 border-b">
 	<nav aria-label="Primary">
-		<div class="relative mx-auto flex h-16 max-w-6xl items-center gap-8 px-4 sm:px-6 lg:px-8">
+		<!-- 56px, not 64. The bar was sized by the 36px wordmark plate while the
+		     eye reads 17px labels, which left 23.5px of empty chrome under every
+		     word, more than the height of the word itself, and put the section
+		     marker further from its label than the label is tall. The plate comes
+		     down to 32px with it, so the plate keeps its share of the bar. -->
+		<div class="relative mx-auto flex h-14 max-w-6xl items-center gap-8 px-4 sm:px-6 lg:px-8">
 			<!-- Wordmark. The text and its underscore are one flex item, otherwise the
 			     container's gap lands between the word and the underscore. -->
 			<a
 				href="/"
-				class="yk-wordmark flex shrink-0 items-center gap-2.5 text-[17px] text-slate-900 dark:text-slate-100"
+				class="yk-wordmark flex min-h-11 shrink-0 items-center gap-2.5 text-[17px] text-slate-900 dark:text-slate-100"
 			>
-				<span class="yk-chip grid h-9 w-9 place-items-center bg-ink-solid text-on-ink">
-					<Icon name="shield" size={20} />
+				<!-- `ink` and `page` swap with the theme, so the plate inverts on its own:
+				     dark plate on paper in light, paper plate on ink in dark. The locked
+				     `--yk-ink-solid` used before sat at roughly 1.1:1 against the night
+				     ground, so the plate vanished in the theme the charter calls its
+				     signature. -->
+				<span class="yk-chip grid h-8 w-8 place-items-center bg-ink text-page">
+					<Icon name="shield" size={18} />
 				</span>
 				<span>pki-toolbox<u>_</u></span>
 			</a>
 
-			<!-- Desktop category folders -->
-			<div class="hidden items-stretch gap-7 lg:flex">
+			<!-- Desktop category folders. The row spans the bar's full height, so a
+			     trigger is a full-height band rather than a 44px pill floating in it: the
+			     pointer meets the label anywhere in the bar, and the marker below can
+			     be welded to the bar's own edge. -->
+			<div class="hidden items-stretch gap-7 self-stretch lg:flex">
 				{#each categories as category (category.id)}
 					{@const list = toolsByCategory(category.id)}
 					{#if list.length}
 						{@const isActive = activeCat === category.id}
 						{@const isOpen = openCat === category.id}
+						<!-- Opens on hover, and so does the theme control beside it: one gesture
+						     for every folder in the bar. -->
 						<div
 							class="relative flex"
 							role="none"
@@ -91,8 +138,8 @@
 								bind:this={triggers[category.id]}
 								aria-haspopup="true"
 								aria-expanded={isOpen}
-								onclick={() => (openCat = isOpen ? null : category.id)}
-								class="relative inline-flex items-center gap-1.5 py-2 text-sm font-medium transition-colors {isActive ||
+								onclick={() => (openCat = category.id)}
+								class="relative inline-flex min-h-11 items-center gap-1.5 py-2 text-sm font-medium transition-colors {isActive ||
 								isOpen
 									? 'text-slate-900 dark:text-slate-100'
 									: 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'}"
@@ -113,15 +160,22 @@
 										stroke-linecap="square"
 									/>
 								</svg>
-								{#if isActive}
-									<!-- Soulignement orange plein : emploi 3 du territoire de l'accent.
-									     La terminaison oblique de la v1 est retirée — en v2 la pente ne
-									     s'applique plus à un contrôle. -->
-									<span
-										class="absolute right-0 -bottom-[7px] left-0 h-[2.5px] rounded-full bg-[color:var(--yk-accent)]"
-									></span>
-								{/if}
 							</button>
+
+							{#if isActive}
+								<!-- Emploi 3 du territoire de l'accent : « vous êtes ici ».
+								     Le marqueur est posé sur le FILET DE FERMETURE de la barre, pas
+								     sous le libellé : accroché à la boîte du bouton il flottait à
+								     12,5px du texte et à 6,5px du filet, rattaché à rien, et il
+								     descendait de 8px dès qu'on touchait à la hauteur du bouton.
+								     L'accent recouvre le filet neutre exactement sur la largeur de
+								     la section ouverte, le même geste que l'entaille du pied de page
+								     sur son propre filet. Bouts droits, comme le filet qu'il
+								     remplace. -->
+								<span
+									class="pointer-events-none absolute inset-x-0 bottom-0 h-[2.5px] bg-[color:var(--yk-accent)]"
+								></span>
+							{/if}
 
 							{#if isOpen}
 								<!-- top-full + transparent pt bridges the gap so the pointer never
@@ -130,14 +184,14 @@
 									<!-- Panneau posé au-dessus du contenu : avec la barre, c'est le seul
 									     endroit où la charte v2 autorise le verre. -->
 									<div
-										class="yk-chrome min-w-[248px] overflow-hidden rounded-xl border py-1.5 shadow-md"
+										class="yk-chrome yk-chrome--panel min-w-[248px] overflow-hidden rounded-xl border py-1.5 shadow-md"
 									>
 										{#each list as tool (tool.slug)}
 											{@const isCurrent = current === `/${tool.slug}`}
 											<a
 												href="/{tool.slug}"
 												aria-current={isCurrent ? 'page' : undefined}
-												class="group/item relative flex items-center gap-2.5 py-2 pr-4 pl-4 text-sm transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 {isCurrent
+												class="group/item relative flex min-h-11 items-center gap-2.5 py-2 pr-4 pl-4 text-sm transition-colors hover:bg-surface-2 {isCurrent
 													? 'font-medium text-slate-900 dark:text-slate-100'
 													: 'text-slate-600 dark:text-slate-300'}"
 											>
@@ -166,15 +220,96 @@
 			</div>
 
 			<div class="ml-auto flex shrink-0 items-center gap-2">
-				<button
-					type="button"
-					onclick={toggleTheme}
-					class="yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-					aria-label={themeAction}
-					title={themeAction}
+				<!-- Three modes, not a two-state flip: "follows the system" is an answer
+				     in its own right, and a toggle cannot express it: it can only leave
+				     the reader guessing which of the two states means "I did not
+				     choose". The control states the mode, never the resolved colour. -->
+				<!-- The same gesture as the folders beside it: the bar behaves one way,
+				     whichever of its controls the pointer meets. The click toggle stays
+				     for the keyboard and for touch, where a tap is what raises it. -->
+				<div
+					class="relative"
+					role="none"
+					onmouseenter={() => (themeOpen = true)}
+					onmouseleave={() => (themeOpen = false)}
 				>
-					<Icon name={theme.value === 'dark' ? 'sun' : 'moon'} size={19} />
-				</button>
+					<button
+						type="button"
+						bind:this={themeTrigger}
+						onclick={() => (themeOpen = true)}
+						aria-haspopup="true"
+						aria-expanded={themeOpen}
+						aria-label={themeLabel}
+						title={themeLabel}
+						class="yk-pressable inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium transition-colors {themeOpen
+							? 'text-slate-900 dark:text-slate-100'
+							: 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'}"
+					>
+						<Icon name={THEME_ICON[theme.mode]} size={17} />
+						<span class="hidden sm:inline">{THEME_LABEL[theme.mode]}</span>
+						<svg
+							viewBox="0 0 10 6"
+							width="9"
+							height="6"
+							aria-hidden="true"
+							class="transition-transform {themeOpen ? 'rotate-180' : ''}"
+						>
+							<polyline
+								points="1,0.8 5,4.8 9,0.8"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.6"
+								stroke-linecap="square"
+							/>
+						</svg>
+					</button>
+
+					{#if themeOpen}
+						<!-- The 8px stand-off is padding INSIDE the panel's box, not a margin
+						     outside it, exactly as the category folders do it. As a margin it
+						     was dead space: crossing it on the way down left the control, the
+						     pointer left the group, and the menu shut before it could be
+						     reached. The gap looks the same and the hit region is continuous. -->
+						<div class="absolute top-full right-0 z-40 pt-2">
+							<div
+								class="yk-chrome yk-chrome--panel min-w-[180px] overflow-hidden rounded-xl border py-1.5 shadow-md"
+								role="menu"
+								aria-label="Theme"
+							>
+								{#each THEME_MODES as mode (mode)}
+									{@const on = theme.mode === mode}
+									<!-- The same row as a tool in the folder beside it: the accent rail
+									     scaled from nothing on hover and pinned on the chosen mode, the
+									     glyph, the label, then the state. -->
+									<button
+										type="button"
+										role="menuitemradio"
+										aria-checked={on}
+										onclick={() => chooseTheme(mode)}
+										class="group/item relative flex min-h-11 w-full items-center gap-2.5 px-4 text-sm transition-colors hover:bg-surface-2 {on
+											? 'font-medium text-slate-900 dark:text-slate-100'
+											: 'text-slate-600 dark:text-slate-300'}"
+									>
+										<span
+											class="absolute top-1 bottom-1 left-0 w-[2.5px] bg-[color:var(--yk-accent)] transition-transform group-hover/item:scale-y-100 {on
+												? 'scale-y-100'
+												: 'scale-y-0'}"
+										></span>
+										<Icon
+											name={THEME_ICON[mode]}
+											size={16}
+											class="shrink-0 text-slate-500 dark:text-slate-400"
+										/>
+										<span class="flex-1 text-left">{THEME_LABEL[mode]}</span>
+										{#if on}
+											<Icon name="check" size={15} class="shrink-0 text-[color:var(--yk-accent)]" />
+										{/if}
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</div>
 				<!-- Right anchor (like the DA nav's CTA): bordered GitHub link. -->
 				<a
 					href="https://github.com/youkyi/pki-toolbox"
@@ -188,7 +323,7 @@
 				<button
 					type="button"
 					onclick={() => (mobileOpen = !mobileOpen)}
-					class="yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+					class="yk-hit yk-pressable rounded-lg p-2 text-slate-600 transition hover:bg-surface-2 lg:hidden dark:text-slate-300"
 					aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
 					aria-expanded={mobileOpen}
 				>
@@ -201,25 +336,34 @@
 		     left under the bar so the last categories stay reachable in landscape. -->
 		{#if mobileOpen}
 			<div
-				class="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-slate-200 px-4 py-3 lg:hidden dark:border-slate-800"
+				class="max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-slate-200 px-4 py-3 lg:hidden dark:border-slate-800"
 			>
 				{#each categories as category (category.id)}
 					{@const list = toolsByCategory(category.id)}
 					{#if list.length}
-						<p class="yk-kicker mt-3 mb-1 px-1 text-slate-500 first:mt-0 dark:text-slate-500">
+						<p class="yk-kicker mt-3 mb-1 px-1 text-ink-3 first:mt-0">
 							{category.label}
 						</p>
 						<ul class="space-y-0.5">
 							{#each list as tool (tool.slug)}
 								{@const isCurrent = current === `/${tool.slug}`}
 								<li>
+									<!-- The same rail as the desktop folder and the theme menu, rather
+									     than a coloured border on the row: one marker for "you are
+									     here" across the whole bar, and not the one border-on-a-card
+									     that reads as generated. -->
 									<a
 										href="/{tool.slug}"
 										aria-current={isCurrent ? 'page' : undefined}
-										class="flex items-center gap-2.5 rounded-lg border-l-2 px-2.5 py-2 text-sm transition-colors {isCurrent
-											? 'border-[color:var(--yk-accent)] bg-slate-100 font-medium text-slate-900 dark:bg-slate-800 dark:text-slate-100'
-											: 'border-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}"
+										class="group/item relative flex min-h-11 items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-2 text-sm transition-colors {isCurrent
+											? 'bg-surface-2 font-medium text-slate-900 dark:text-slate-100'
+											: 'text-slate-600 hover:bg-surface-2 dark:text-slate-300'}"
 									>
+										<span
+											class="absolute top-1 bottom-1 left-0 w-[2.5px] bg-[color:var(--yk-accent)] transition-transform group-hover/item:scale-y-100 {isCurrent
+												? 'scale-y-100'
+												: 'scale-y-0'}"
+										></span>
 										<Icon name={tool.icon} size={18} class="shrink-0" />
 										<span class="flex-1 truncate">{tool.name}</span>
 									</a>

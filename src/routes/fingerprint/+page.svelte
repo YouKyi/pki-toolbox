@@ -1,58 +1,35 @@
 <script lang="ts">
 	import { requireTool } from '$lib/tools';
+	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
 	import { decodeCertificate, type DecodedCertificate } from '$lib/pki/parse';
 	import { hexWithColons } from '$lib/pki/format';
 	import { ISRG_ROOT_X1 } from '$lib/samples';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import DecodeError from '$lib/components/DecodeError.svelte';
+	import CarryTo from '$lib/components/CarryTo.svelte';
+	import FirstOfMany from '$lib/components/FirstOfMany.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import RowList from '$lib/components/RowList.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import VerdictBand from '$lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('fingerprint');
 
-	let input = $state('');
-	let result = $state<DecodedCertificate | null>(null);
-	let error = $state('');
-	let loading = $state(false);
+	const cn = (c: DecodedCertificate) =>
+		c.subjectParts.find((p) => p.key === 'CN')?.value ?? c.subject;
 
-	async function decode() {
-		loading = true;
-		error = '';
-		result = null;
-		try {
-			result = await decodeCertificate(input.trim());
-		} catch (e) {
-			error = e instanceof Error ? e.message : String(e);
-		} finally {
-			loading = false;
-		}
-	}
+	const fingerprintRows = (c: DecodedCertificate) => [
+		{ label: 'SHA-1', value: hexWithColons(c.fingerprints.sha1), mono: true, copy: true },
+		{ label: 'SHA-256', value: hexWithColons(c.fingerprints.sha256), mono: true, copy: true },
+		{ label: 'SHA-512', value: hexWithColons(c.fingerprints.sha512), mono: true, copy: true }
+	];
 
-	const fingerprintRows = $derived(
-		result
-			? [
-					{
-						label: 'SHA-1',
-						value: hexWithColons(result.fingerprints.sha1),
-						mono: true,
-						copy: true
-					},
-					{
-						label: 'SHA-256',
-						value: hexWithColons(result.fingerprints.sha256),
-						mono: true,
-						copy: true
-					},
-					{
-						label: 'SHA-512',
-						value: hexWithColons(result.fingerprints.sha512),
-						mono: true,
-						copy: true
-					}
-				]
-			: []
-	);
+	const flow = createDecodeFlow({
+		run: (input) => decodeCertificate(input),
+		summary: (c) => `${cn(c)} · certificate`,
+		announce: (c) => `Fingerprints computed for ${cn(c)}`
+	});
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -60,42 +37,57 @@
 <ToolHeader {tool} />
 
 <PemInput
-	bind:value={input}
-	{loading}
-	ondecode={decode}
+	bind:value={flow.input}
+	bind:collapsed={flow.collapsed}
+	invalid={Boolean(flow.error)}
+	errorId={flow.errorId}
+	summary={flow.summary}
+	loading={flow.loading}
+	ondecode={() => flow.decode()}
 	decodeLabel="Compute fingerprints"
 	example={ISRG_ROOT_X1}
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
-	{#if error}
-		<Alert variant="error" title="Decoding failed">{error}</Alert>
+<div bind:this={flow.region} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={flow.status} />
+	{#if flow.error}
+		<DecodeError
+			id={flow.errorId}
+			title={flow.failureLabel}
+			message={flow.error}
+			input={flow.input}
+			current={tool.slug}
+		/>
 	{/if}
 
-	{#if result}
+	{#if flow.result}
+		<FirstOfMany input={flow.input} reading="These are the first one's fingerprints." />
+		{@const cert = flow.result}
 		<article
 			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 		>
-			<header class="flex items-center gap-3 px-5 py-4">
-				<span
-					class="yk-chip grid h-9 w-9 place-items-center bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-				>
-					<Icon name="fingerprint" size={20} />
-				</span>
-				<div class="min-w-0 flex-1">
-					<p class="truncate font-semibold text-slate-900 dark:text-slate-100">{result.subject}</p>
-					<p class="text-xs text-slate-500 dark:text-slate-500">
-						Fingerprints computed over {result.der.length} bytes of DER
-					</p>
-				</div>
-			</header>
-			<div class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
-				<RowList rows={fingerprintRows} />
+			<!-- The digests themselves are the answer, and they are one row below;
+			     the band names what was hashed and over how much. -->
+			<VerdictBand
+				icon="fingerprint"
+				title={cn(cert)}
+				lead="Computed over"
+				value={`${cert.der.length} bytes`}
+				note="the certificate's complete DER"
+				meta={cert.subject}
+			/>
+			<div class="px-5 py-4">
+				<RowList rows={fingerprintRows(cert)} />
 			</div>
 		</article>
 		<Alert variant="info">
 			Fingerprints are digests of the certificate's complete DER, the same value shown by a browser
 			or by <code class="font-mono text-xs">openssl x509 -fingerprint</code>.
 		</Alert>
+	{/if}
+
+	<!-- The answer first, then what else can be asked of the same artefact. -->
+	{#if flow.result}
+		<CarryTo artefact={flow.input} current={tool.slug} />
 	{/if}
 </div>

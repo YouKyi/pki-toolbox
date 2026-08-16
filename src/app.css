@@ -1,5 +1,5 @@
 /*
- * youkyi · DA v2 — https://git.youkyi.net/youkyi-brand (brand.md 1.0.0)
+ * youkyi · DA v2, https://git.youkyi.net/youkyi-brand (brand.md 1.0.0)
  * Neutres mats + orange unique. Le RAYON est la forme par défaut ; la pente
  * 1/Φ² ≈ 21° n'est plus qu'une signature (wordmark, frontière de masses,
  * semis de fond) et ne gouverne plus aucun contrôle.
@@ -251,6 +251,7 @@
 	   au-dessus du contenu). Jamais une carte, jamais un champ, jamais un
 	   fond de section. */
 	--yk-chrome: rgb(255 255 255 / 0.62);
+	--yk-chrome-panel: rgb(255 255 255 / 0.94);
 	--yk-chrome-line: rgb(26 24 22 / 0.08);
 	--yk-chrome-blur: 20px;
 
@@ -308,6 +309,7 @@
 	--yk-on-ok: #08150a;
 
 	--yk-chrome: rgb(26 25 23 / 0.58);
+	--yk-chrome-panel: rgb(31 29 27 / 0.95);
 	--yk-chrome-line: rgb(255 255 255 / 0.12);
 
 	/* en sombre l'ombre ne se lit presque pas : elle sert de profondeur, pas de
@@ -318,6 +320,10 @@
 
 html {
 	color-scheme: light dark;
+	/* The navigation bar is sticky chrome 56px tall, so anything scrolled into
+	   view (an anchor, or the result region taking focus after a decode) would
+	   land underneath it. Reserve the bar plus a breath. */
+	scroll-padding-top: 4.5rem;
 }
 
 body {
@@ -365,6 +371,17 @@ input[type='range'] {
 	border-radius: var(--r-control);
 }
 
+/* Le placeholder est piloté par les tokens, jamais laissé au navigateur : son
+   défaut est une opacité appliquée à la couleur du texte, qui tombe sous 4,5:1
+   dans les deux thèmes. Cran tertiaire de la rampe d'encre, opacité pleine.
+   Règle globale plutôt qu'utilitaire, car ::placeholder ne s'exprime pas en
+   style inline et tout champ futur doit en hériter. */
+input::placeholder,
+textarea::placeholder {
+	color: var(--yk-ink-3);
+	opacity: 1;
+}
+
 /* ---- v2 · chrome flottant en verre ----
    Réservé à la barre de navigation et aux panneaux posés au-dessus du contenu.
    Repli opaque si le navigateur ne sait pas flouter l'arrière-plan. */
@@ -377,6 +394,13 @@ input[type='range'] {
 		background: var(--yk-chrome);
 		-webkit-backdrop-filter: blur(var(--yk-chrome-blur)) saturate(140%);
 		backdrop-filter: blur(var(--yk-chrome-blur)) saturate(140%);
+	}
+	/* Un panneau n'est pas une barre. La barre flotte au-dessus du fond de page
+	   et peut se permettre d'être très translucide ; un panneau se pose sur du
+	   TEXTE, et la même valeur y laisse lire les lignes du dessous à travers les
+	   siennes. Même matière, même flou, ground bien plus dense. */
+	.yk-chrome--panel {
+		background: var(--yk-chrome-panel);
 	}
 }
 
@@ -394,6 +418,27 @@ input[type='range'] {
 	opacity: 0.5;
 	mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
 	-webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
+}
+
+/* ---- cible tactile ----
+   La boîte est agrandie pour de vrai, le glyphe reste petit et centré. Une
+   variante en pseudo-élément débordant a été essayée puis abandonnée : ce que
+   l'élément peint hors de sa boîte compte dans le `scrollWidth` du parent, donc
+   la garde responsive à 390px le signalait, à juste titre, comme du contenu
+   qui déborde. Une cible qu'on ne peut pas mesurer est une cible qu'on ne peut
+   pas garantir.
+
+   Déclarée dans la couche `components` : elle pose un `display`, et une règle
+   ordinaire écrite après l'import écraserait `lg:hidden` à spécificité égale :
+   c'est ce qui a fait réapparaître le bouton de menu mobile sur grand écran.
+   Dans cette couche, tout utilitaire reprend la main. */
+@layer components {
+	.yk-hit {
+		display: inline-grid;
+		place-items: center;
+		min-width: 44px;
+		min-height: 44px;
+	}
 }
 
 /* ---- v2 · tout élément pressable répond à l'appui ----
@@ -481,7 +526,7 @@ input[type='range'] {
 	scrollbar-width: thin;
 }
 
-/* Tailwind v4 removed the default pointer cursor on buttons — restore it so
+/* Tailwind v4 removed the default pointer cursor on buttons. Restore it so
    interactive controls read as clickable. */
 button:not(:disabled),
 [role='button']:not([aria-disabled='true']),

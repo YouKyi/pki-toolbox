@@ -119,7 +119,10 @@
 				"displayName": "Page Title",
 				"purpose": "One per surface, at the top of the content threshold."
 			},
-			"title": { "displayName": "Tool Title", "purpose": "Tool page headings." },
+			"title": {
+				"displayName": "Tool Title",
+				"purpose": "Tool page headings."
+			},
 			"body": {
 				"displayName": "Reading",
 				"purpose": "Running copy, measure capped around 65-75ch."
@@ -131,6 +134,10 @@
 			"data": {
 				"displayName": "Instrument",
 				"purpose": "Fingerprints, DNs, serials, PEM bodies, badge text."
+			},
+			"data-small": {
+				"displayName": "Instrument, small",
+				"purpose": "Badge text and the terminal body, where the token or the window sets the measure."
 			}
 		},
 		"shadows": [
@@ -173,10 +180,22 @@
 			}
 		],
 		"breakpoints": [
-			{ "name": "sm", "value": "640px" },
-			{ "name": "lg", "value": "1024px" },
-			{ "name": "xl", "value": "1280px" },
-			{ "name": "container", "value": "1152px" }
+			{
+				"name": "sm",
+				"value": "640px"
+			},
+			{
+				"name": "lg",
+				"value": "1024px"
+			},
+			{
+				"name": "xl",
+				"value": "1280px"
+			},
+			{
+				"name": "container",
+				"value": "1152px"
+			}
 		]
 	},
 	"components": [
@@ -226,7 +245,7 @@
 			"refersTo": "nav-chrome",
 			"description": "The floating glass bar: wordmark on an ink plate, categories, active one underlined in orange.",
 			"html": "<div class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"#\"><span class=\"ds-nav-plate\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"/></svg></span>pki-toolbox<u>_</u></a><span class=\"ds-nav-item ds-nav-item--active\">Decoding</span><span class=\"ds-nav-item\">Inspection</span></div>",
-			"css": ".ds-nav { display: flex; align-items: center; gap: 28px; height: 64px; padding: 0 16px; background: rgb(255 255 255 / .62); -webkit-backdrop-filter: blur(20px) saturate(140%); backdrop-filter: blur(20px) saturate(140%); border-bottom: 1px solid rgb(26 24 22 / .08); } .ds-nav-brand { display: inline-flex; align-items: center; gap: 10px; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: -0.5px; color: #1A1816; text-decoration: none; } .ds-nav-brand u { text-decoration: none; color: #D6470D; } .ds-nav-plate { display: grid; place-items: center; width: 36px; height: 36px; background: #1A1816; color: #F8F7F4; border-radius: 12px; } .ds-nav-item { position: relative; font-family: Inter, system-ui, sans-serif; font-size: 14px; font-weight: 500; color: #6E6A63; padding: 8px 0; cursor: pointer; transition: color 150ms; } .ds-nav-item:hover { color: #1A1816; } .ds-nav-item--active { color: #1A1816; } .ds-nav-item--active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -7px; height: 2.5px; border-radius: 999px; background: #D6470D; }"
+			"css": ".ds-nav { display: flex; align-items: center; gap: 28px; height: 56px; padding: 0 16px; background: rgb(255 255 255 / .62); -webkit-backdrop-filter: blur(20px) saturate(140%); backdrop-filter: blur(20px) saturate(140%); border-bottom: 1px solid rgb(26 24 22 / .08); } .ds-nav-brand { display: inline-flex; align-items: center; gap: 10px; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: -0.5px; color: #1A1816; text-decoration: none; } .ds-nav-brand u { text-decoration: none; color: #D6470D; } .ds-nav-plate { display: grid; place-items: center; width: 32px; height: 32px; background: #1A1816; color: #F8F7F4; border-radius: 12px; } .ds-nav-item { position: relative; font-family: Inter, system-ui, sans-serif; font-size: 14px; font-weight: 500; color: #6E6A63; padding: 8px 0; cursor: pointer; transition: color 150ms; } .ds-nav-item:hover { color: #1A1816; } .ds-nav-item--active { color: #1A1816; } .ds-nav-item--active::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2.5px; background: #D6470D; }"
 		},
 		{
 			"name": "Terminal Block",
@@ -240,20 +259,20 @@
 			"name": "Alert",
 			"kind": "custom",
 			"refersTo": "card",
-			"description": "Neutral plane with a marker rail; error is orange plus its wording, never red.",
-			"html": "<div class=\"ds-alert\"><span class=\"ds-alert-rail\"></span><svg class=\"ds-alert-icon\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z\"/><path d=\"M12 9v4M12 17h.01\"/></svg><div><p class=\"ds-alert-title\">Unreadable PEM block</p><p class=\"ds-alert-body\">No BEGIN header was found in the pasted input.</p></div></div>",
-			"css": ".ds-alert { position: relative; display: flex; gap: 12px; overflow: hidden; background: #F2EFE9; color: #3A342E; border-radius: 16px; padding: 12px 16px 12px 20px; box-shadow: inset 0 0 0 1px #E2DED6; font-family: Inter, system-ui, sans-serif; font-size: 14px; } .ds-alert-rail { position: absolute; top: 0; bottom: 0; left: 0; width: 3px; background: #D6470D; } .ds-alert-icon { flex: none; margin-top: 2px; color: #AF3A0B; } .ds-alert-title { margin: 0; font-weight: 600; color: #1A1816; } .ds-alert-body { margin: 2px 0 0; }"
+			"description": "Neutral plane ringed in accent; error is orange plus its wording, never red, and never a rail down one side.",
+			"html": "<div class=\"ds-alert\"><svg class=\"ds-alert-icon\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z\"/><path d=\"M12 9v4M12 17h.01\"/></svg><div><p class=\"ds-alert-title\">Unreadable PEM block</p><p class=\"ds-alert-body\">No BEGIN header was found in the pasted input.</p></div></div>",
+			"css": ".ds-alert { position: relative; display: flex; gap: 12px; overflow: hidden; background: #F2EFE9; color: #3A342E; border-radius: 16px; padding: 12px 16px; box-shadow: inset 0 0 0 1px #D6470D; font-family: Inter, system-ui, sans-serif; font-size: 14px; } .ds-alert-icon { flex: none; margin-top: 2px; color: #AF3A0B; } .ds-alert-title { margin: 0; font-weight: 600; color: #1A1816; } .ds-alert-body { margin: 2px 0 0; }"
 		}
 	],
 	"narrative": {
 		"northStar": "The Sealed Workshop",
-		"overview": "A workshop with the door closed. Every surface is matte and mixed by hand — paper, slate, ink — and nothing in the room is polished for show. Tools are laid out where a working hand expects them, the measurements are legible from across the bench, and what enters the room does not leave it. That last part is not a metaphor the interface merely evokes: the product parses every artefact in the page and declares connect-src 'none', and the visual world is built so that nothing looks like it phones anywhere either. No gloss, no glow, no gradient, no borrowed shine.\n\nThe system runs on one orange and nothing else. A single accent, rationed to five sanctioned uses, is the only colour in a world of matte neutrals. Its scarcity is the mechanism: when orange appears, something is happening — focus, a primary action, an active section, a status. Depth is carried by the value of a surface, not by ornament, so planes separate the way stacked paper separates. The 1/Φ² slope (≈ 21°) that gives the brand its silhouette is a signature, not a grammar: it appears in the wordmark, on the threshold hatch, and on the boundary between two masses — never on a button, a field, or a badge.\n\nLight is the default and dark is the signature: both are matte, neither is a washed tint of the other, and the terminal block stays dark on a light page like a screenshot pinned to a paper wall. This world defines itself against the gradient-and-glass SaaS register, the neon hacker terminal, the corporate enterprise blue, and the undesigned raw tool that the online PKI decoder category usually settles for.",
+		"overview": "A workshop with the door closed. Every surface is matte and mixed by hand (paper, slate, ink), and nothing in the room is polished for show. Tools are laid out where a working hand expects them, the measurements are legible from across the bench, and what enters the room does not leave it. That last part is not a metaphor the interface merely evokes: the product parses every artefact in the page and declares connect-src 'none', and the visual world is built so that nothing looks like it phones anywhere either. No gloss, no glow, no gradient, no borrowed shine.\n\nThe system runs on one orange and nothing else. A single accent, rationed to five sanctioned uses, is the only colour in a world of matte neutrals. Its scarcity is the mechanism: when orange appears, something is happening: focus, a primary action, an active section, a status. Depth is carried by the value of a surface, not by ornament, so planes separate the way stacked paper separates. The 1/Φ² slope (≈ 21°) that gives the brand its silhouette is a signature, not a grammar: it appears in the wordmark, on the threshold hatch, and on the boundary between two masses, never on a button, a field, or a badge.\n\nLight is the default and dark is the signature: both are matte, neither is a washed tint of the other, and the terminal block stays dark on a light page like a screenshot pinned to a paper wall. This world defines itself against the gradient-and-glass SaaS register, the neon hacker terminal, the corporate enterprise blue, and the undesigned raw tool that the online PKI decoder category usually settles for.",
 		"keyCharacteristics": [
 			"One accent, five uses, and nothing else coloured",
 			"Matte neutrals in both themes; zero gradient, zero halo, zero glow",
-			"Elevation by value: a hairline or a shadow, never both",
+			"Elevation by value: at rest, a hairline or a shadow, never both",
 			"Radius as the default shape (≈ 0.30 × control height); the slope is a signature",
-			"Glass is reserved for floating chrome — the nav bar and its panels",
+			"Glass is reserved for floating chrome: the nav bar and its panels",
 			"Mono carries data, commands and measures; it never dresses a paragraph",
 			"Colour is never the only carrier of meaning"
 		],
@@ -265,7 +284,7 @@
 			},
 			{
 				"name": "The No Red Rule",
-				"body": "There is no red outside the terminal block. An error is signalled by the orange and its wording — never by hue alone, and never by a second warning colour, because an amber would read as a second orange.",
+				"body": "There is no red outside the terminal block. An error is signalled by the orange and its wording, never by hue alone, and never by a second warning colour, because an amber would read as a second orange.",
 				"section": "colors"
 			},
 			{
@@ -285,7 +304,7 @@
 			},
 			{
 				"name": "The Value-Separates Rule",
-				"body": "Elevation is declared once: a hairline or a shadow, never both on the same edge.",
+				"body": "Elevation is declared once: a hairline or a shadow, never both on the same edge, at rest. A surface that leaves the page keeps its hairline and gains a shadow: a card on hover, and the floating chrome. Nothing that sits still carries both.",
 				"section": "elevation"
 			},
 			{
@@ -295,7 +314,7 @@
 			},
 			{
 				"name": "The Floating Chrome Rule",
-				"body": "Glass — a translucent ground plus a 20px backdrop blur — belongs to the navigation bar and to panels that float above the content. Never a card, never a field, never a section background.",
+				"body": "Glass, a translucent ground plus a 20px backdrop blur, belongs to the navigation bar and to panels that float above the content. Never a card, never a field, never a section background. A panel is denser than a bar: what floats over the page ground may be translucent, what sits on text may not.",
 				"section": "elevation"
 			},
 			{
@@ -305,7 +324,7 @@
 			},
 			{
 				"name": "The Threshold Rule",
-				"body": "The hatch is localised and faded — it marks the shift from one zone to another and dissolves before it occupies a surface. One per page, at the top of the content, never a full background.",
+				"body": "The hatch is localised and faded: it marks the shift from one zone to another and dissolves before it occupies a surface. One per page, at the top of the content, never a full background.",
 				"section": "shapes"
 			}
 		],
@@ -313,21 +332,23 @@
 			"Do keep exactly one orange fill per screen, and spend the accent only on its five sanctioned uses.",
 			"Do separate planes with the value ramp (#FFFFFF → #F2EFE9 → #EAE6DE, night #211E1B → #282522 → #2E2A26), adding a hairline only where two planes of the same value touch.",
 			"Do pick the radius from the scale by control height (6 / 8 / 9 / 12 / 14 / 16 / 24px), and reserve the pill for shapes that are round by nature.",
-			"Do double every colour signal with an icon, a dot and a label — status must survive greyscale.",
+			"Do double every colour signal with an icon, a dot and a label: status must survive greyscale.",
 			"Do render code as the dark terminal block, whatever the page theme.",
 			"Do keep hairlines relative in the dark theme (rgb(255 255 255 / .11) and /.22) so they track the surface they border.",
 			"Do give every shadow a vertical offset and a wide blur.",
 			"Do keep the threshold hatch localised and faded, one per page."
 		],
 		"donts": [
-			"Don't cut a control at the slope — no cut button, field, badge, or clipped card corner. The slope belongs to the wordmark, the threshold hatch, and a boundary between masses.",
+			"Don't cut a control at the slope: no cut button, field, badge, or clipped card corner. The slope belongs to the wordmark, the threshold hatch, and a boundary between masses.",
 			"Don't introduce a second accent, an amber warning, or any red outside the terminal block; an error is orange plus its wording.",
 			"Don't tint an icon by default, or fill a badge, alert, or section background with the accent.",
-			"Don't use glass anywhere but the floating chrome — not on a card, a field, or a section.",
+			"Don't use glass anywhere but the floating chrome: not on a card, a field, or a section.",
 			"Don't ship a gradient, a glow, or a shadow without offset.",
 			"Don't set running text in the monospace face, or a paragraph in the compliance green.",
 			"Don't load a font, a script, or an image from a third-party origin; every asset is served from this origin, which the CSP enforces.",
-			"Don't let any element render content wider than its box at 390px — the end-to-end suite fails the pipeline for it."
+			"Don't let any element render content wider than its box at 390px: the end-to-end suite fails the pipeline for it.",
+			"Don't let a hit area be the painted area: enlarge the box for the thumb, keep the paint at the glyph's size.",
+			"Don't write a rule that sets display outside the components layer: an ordinary rule after the Tailwind import outranks lg:hidden by source order alone."
 		]
 	}
 }

@@ -137,7 +137,7 @@ test:
 # preview`). Uses the official Playwright image (browsers + system deps baked
 # in), pinned to the same version as the @playwright/test devDependency. A noble
 # base (Node >= 22.13) is required so corepack/pnpm@11 in the default
-# before_script works — the Node-20 -jammy image fails the pnpm engine check.
+# before_script works: the Node-20 -jammy image fails the pnpm engine check.
 e2e:
   stage: e2e
   image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e

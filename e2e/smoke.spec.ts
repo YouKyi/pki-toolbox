@@ -1,40 +1,76 @@
 import { test, expect } from '@playwright/test';
+import { PRIVATE_KEY } from './artefacts';
 
 /**
- * Smoke suite for pki-toolbox — fast health check of the REAL static build
+ * Smoke suite for pki-toolbox: fast health check of the REAL static build
  * served by `pnpm preview` (adapter-static, prerender=true; see
- * playwright.config.ts). Covers the shell: home render, the first-load loader,
- * navigation, and theme persistence. Feature coverage lives in tools.spec.ts.
+ * playwright.config.ts). Covers the shell: home render, navigation, and theme
+ * persistence. Feature coverage lives in tools.spec.ts.
  *
  * Selectors are functional contracts only (roles / accessible names / visible
- * text / the `#yk-loader` node / the `.dark` & `.yk-ready` <html> classes). No
- * reliance on Tailwind/DA classes or colours, which change with the design.
+ * text / the `.dark` <html> class). No reliance on Tailwind/DA classes or
+ * colours, which change with the design.
  *
- * Loader nuance (app.html): each Playwright test gets a fresh context, so
- * sessionStorage is empty and the first `goto` behaves like the session's first
- * load — `#yk-loader` is shown then REMOVED from the DOM (no `html.yk-ready`). A
- * second full document load in the same context hits the sessionStorage flag, so
- * `html.yk-ready` is applied before paint and the loader stays but is hidden via
- * CSS. S2 exercises both paths.
+ * There is deliberately no loading screen to assert: the site is prerendered
+ * and paints on the first frame, so nothing may gate the content behind a
+ * timer. S1 asserts the shell is present immediately.
  */
 
-test('S1 home renders, loader removed on first load, title set', async ({ page }) => {
+test('S1 home renders with content on the first frame, title set', async ({ page }) => {
 	await page.goto('/');
 
 	await expect(page).toHaveTitle(/PKI-Toolbox/i);
-	await expect(page.getByRole('heading', { name: 'PKI toolbox', level: 1 })).toBeVisible();
+	await expect(
+		page.getByRole('heading', { name: /Decode a certificate without uploading it/, level: 1 })
+	).toBeVisible();
 
-	// First load of the session: the loader is removed from the DOM after fade.
-	await expect(page.locator('#yk-loader')).toHaveCount(0);
+	// No splash may cover the page: nothing fixed and full-viewport on top.
+	expect(
+		await page.evaluate(() =>
+			Array.from(document.body.querySelectorAll('*')).some((el) => {
+				const s = getComputedStyle(el as HTMLElement);
+				return (
+					s.position === 'fixed' &&
+					(el as HTMLElement).clientHeight >= window.innerHeight &&
+					s.visibility !== 'hidden' &&
+					s.display !== 'none'
+				);
+			})
+		)
+	).toBe(false);
 
 	// A couple of the ten "ready" tool cards must be present (nav links).
 	await expect(page.getByRole('link', { name: 'Certificate decoder' })).toBeVisible();
 	await expect(page.getByRole('link', { name: 'Self-signed certificate' })).toBeVisible();
 
-	await expect(page.getByText('100% client-side, no data sent')).toBeVisible();
+	// The no-network claim is part of the sentence under the heading now, not an
+	// eyebrow above it.
+	await expect(page.getByText('Nothing you paste leaves the page.')).toBeVisible();
+
+	// The page is an entry point before it is a directory: paste, and the
+	// artefact names the tool it belongs to.
+	const box = page.getByLabel('PKI artefact input');
+	await expect(box).toBeVisible();
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	await page.getByRole('button', { name: 'Open the right tool' }).click();
+	await expect(page).toHaveURL(/\/decode-certificate$/);
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue(/BEGIN CERTIFICATE/);
+	expect(new URL(page.url()).search).toBe('');
+
+	// Nothing to route: the page says so rather than failing silently.
+	await page.goto('/');
+	await page.getByLabel('PKI artefact input').fill('not an artefact');
+	await page.getByRole('button', { name: 'Open the right tool' }).click();
+	await expect(page.getByText('Nothing recognisable in there')).toBeVisible();
+
+	// A private key has no tool here, and the veil already says it: the action is
+	// held back instead of answered with a second notice.
+	await page.getByLabel('PKI artefact input').fill(PRIVATE_KEY);
+	await expect(page.getByRole('button', { name: 'Open the right tool' })).toBeDisabled();
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
 });
 
-test('S2 navigate home → tool → home, yk-ready on a second load', async ({ page }) => {
+test('S2 navigate home → tool → home, then a second full document load', async ({ page }) => {
 	await page.goto('/');
 
 	// Navigate via the home card (robust, unlike the hover-driven desktop menu).
@@ -48,32 +84,59 @@ test('S2 navigate home → tool → home, yk-ready on a second load', async ({ p
 		.first()
 		.click();
 	await expect(page).toHaveURL(/\/$/);
-	await expect(page.getByRole('heading', { name: 'PKI toolbox', level: 1 })).toBeVisible();
+	await expect(
+		page.getByRole('heading', { name: /Decode a certificate without uploading it/, level: 1 })
+	).toBeVisible();
 
-	// Second FULL document load in the same context: the sessionStorage flag is
-	// set, so html.yk-ready is applied before paint and the loader is kept in the
-	// DOM but hidden by CSS (`html.yk-ready #yk-loader { display: none }`).
+	// A second FULL document load lands directly on the tool, with no gate.
 	await page.goto('/decode-certificate');
-	await expect(page.locator('html')).toHaveClass(/yk-ready/);
-	await expect(page.locator('#yk-loader')).toHaveCount(1);
-	await expect(page.locator('#yk-loader')).toBeHidden();
+	await expect(page.getByRole('heading', { name: 'Certificate decoder', level: 1 })).toBeVisible();
+	await expect(page.getByLabel('PKI artefact input')).toBeVisible();
 });
 
-test('S3 theme toggle persists across reload (pre-paint head script)', async ({ page }) => {
+test('S3 theme follows the OS until the reader chooses', async ({ page }) => {
+	// An unset preference follows the operating system, so the test has to state
+	// which system it is standing in rather than assume light.
+	await page.emulateMedia({ colorScheme: 'dark' });
+	await page.goto('/');
+	await expect(page.locator('html')).toHaveClass(/dark/);
+	expect(await page.evaluate(() => localStorage.getItem('pki-toolbox-theme'))).toBeNull();
+
+	// The control states the mode, not the colour it resolves to.
+	await expect(page.getByRole('button', { name: /Theme: Auto/ })).toBeVisible();
+
+	// The OS changing mid-session moves the page with it, while no explicit
+	// choice exists.
+	await page.emulateMedia({ colorScheme: 'light' });
+	await expect(page.locator('html')).not.toHaveClass(/dark/);
+	await expect(page.getByRole('button', { name: /Theme: Auto/ })).toBeVisible();
+});
+
+test('S3b an explicit choice outranks the OS and survives a reload', async ({ page }) => {
+	await page.emulateMedia({ colorScheme: 'light' });
 	await page.goto('/');
 
-	// Light by default (no .dark on <html>).
+	// Light, because the OS says so and nothing was chosen yet.
 	await expect(page.locator('html')).not.toHaveClass(/dark/);
-	const toggle = page.getByRole('button', { name: /Switch to (dark|light) theme/ });
-	await expect(page.getByRole('button', { name: 'Switch to dark theme' })).toBeVisible();
 
-	// Switch to dark: class flips, label flips, choice persisted to localStorage.
-	await toggle.click();
+	// Open the menu and pick Dark: the mode is stated, checked, and persisted.
+	await page.getByRole('button', { name: /Theme: Auto/ }).click();
+	const menu = page.getByRole('menu', { name: 'Theme' });
+	await expect(menu.getByRole('menuitemradio', { name: 'Auto' })).toHaveAttribute(
+		'aria-checked',
+		'true'
+	);
+	await menu.getByRole('menuitemradio', { name: 'Dark' }).click();
+
 	await expect(page.locator('html')).toHaveClass(/dark/);
-	await expect(page.getByRole('button', { name: 'Switch to light theme' })).toBeVisible();
+	await expect(page.getByRole('button', { name: /Theme: Dark/ })).toBeVisible();
 	expect(await page.evaluate(() => localStorage.getItem('pki-toolbox-theme'))).toBe('dark');
 
 	// The head pre-script re-applies .dark before hydration on reload.
 	await page.reload();
+	await expect(page.locator('html')).toHaveClass(/dark/);
+
+	// And the OS flipping the other way no longer overrides that choice.
+	await page.emulateMedia({ colorScheme: 'light' });
 	await expect(page.locator('html')).toHaveClass(/dark/);
 });

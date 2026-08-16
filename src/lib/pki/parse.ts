@@ -20,7 +20,7 @@ import {
 	type Name
 } from '@peculiar/x509';
 import { ekuName, extensionName } from './oids';
-import { assertInputSize } from './pem';
+import { assertInputSize, splitBlocks } from './pem';
 import {
 	bytesToHex,
 	humanKeyAlgorithm,
@@ -168,9 +168,20 @@ function readExtendedKeyUsage(host: ExtensionHost): string[] {
 export async function decodeCertificate(input: string): Promise<DecodedCertificate> {
 	assertInputSize(input);
 
+	/**
+	 * A server bundle is a private key followed by its certificate, which is what
+	 * `openssl` writes and what a reader pastes. Handing the whole text to the
+	 * parser makes it choke on the key, so the certificate is sliced out first
+	 * when the input carries several armoured blocks. A single block, or a bare
+	 * base64 DER, is passed through untouched.
+	 */
+	const blocks = splitBlocks(input);
+	const armoured = blocks.find((block) => block.type.toUpperCase().endsWith('CERTIFICATE'));
+	const source = blocks.length > 1 && armoured ? armoured.pem : input;
+
 	let cert: X509Certificate;
 	try {
-		cert = new X509Certificate(input);
+		cert = new X509Certificate(source);
 	} catch (e) {
 		throw new Error(`This does not look like an X.509 certificate (${errMessage(e)}).`, {
 			cause: e

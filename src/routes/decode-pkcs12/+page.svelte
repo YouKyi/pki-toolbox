@@ -1,37 +1,39 @@
 <script lang="ts">
 	import { requireTool } from '$lib/tools';
+	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
 	import { decodePkcs12, type DecodedPkcs12 } from '$lib/pki/pkcs12';
 	import { TEST_PKCS12, TEST_PKCS12_PASSWORD } from '$lib/samples';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
 	import CertCard from '$lib/components/CertCard.svelte';
-	import Alert from '$lib/components/Alert.svelte';
+	import DecodeError from '$lib/components/DecodeError.svelte';
+	import CarryTo from '$lib/components/CarryTo.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import VerdictBand from '$lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-pkcs12');
 
-	let input = $state('');
+	/** Kept out of the flow: the keystore needs a second input the flow knows nothing about. */
 	let password = $state('');
-	let result = $state<DecodedPkcs12 | null>(null);
-	let error = $state('');
-	let loading = $state(false);
 
-	async function decode() {
-		loading = true;
-		error = '';
-		result = null;
-		try {
-			result = await decodePkcs12(input.trim(), password);
-		} catch (e) {
-			error = e instanceof Error ? e.message : String(e);
-		} finally {
-			loading = false;
-		}
-	}
+	/** A keystore is opened to find out what came out of it. */
+	const contents = (k: DecodedPkcs12) =>
+		[
+			k.certificateCount === 1 ? '1 certificate' : `${k.certificateCount} certificates`,
+			k.keyCount === 1 ? '1 private key' : `${k.keyCount} private keys`
+		].join(', ');
+
+	const flow = createDecodeFlow({
+		run: (input) => decodePkcs12(input, password),
+		summary: (k) => `PKCS#12 keystore · ${contents(k)}`,
+		announce: (k) => `Keystore decrypted: ${contents(k)}`,
+		failureLabel: 'Decryption failed'
+	});
 
 	function loadExample() {
-		input = TEST_PKCS12;
+		flow.input = TEST_PKCS12;
 		password = TEST_PKCS12_PASSWORD;
 	}
 </script>
@@ -61,40 +63,58 @@
 </div>
 
 <PemInput
-	bind:value={input}
-	{loading}
-	ondecode={decode}
+	bind:value={flow.input}
+	bind:collapsed={flow.collapsed}
+	invalid={Boolean(flow.error)}
+	errorId={flow.errorId}
+	summary={flow.summary}
+	loading={flow.loading}
+	ondecode={() => flow.decode()}
 	decodeLabel="Decrypt"
 	derLabel="PKCS12"
 	placeholder="Import a .p12 / .pfx file, or paste its base64 content…"
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
-	{#if error}
-		<Alert variant="error" title="Decryption failed">{error}</Alert>
+<div bind:this={flow.region} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={flow.status} />
+	{#if flow.error}
+		<DecodeError
+			id={flow.errorId}
+			title={flow.failureLabel}
+			message={flow.error}
+			input={flow.input}
+			current={tool.slug}
+		/>
 	{/if}
 
-	{#if result}
-		<Alert variant={result.integrityVerified ? 'success' : 'warn'}>
-			{#if result.integrityVerified}
-				MAC integrity verified, password correct. {result.certificateCount} certificate(s) and {result.keyCount}
-				private key(s).
-			{:else}
-				Content decrypted (this file has no integrity MAC).
-			{/if}
-		</Alert>
+	{#if flow.result}
+		{@const store = flow.result}
+		<article
+			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+		>
+			{#snippet p12Badges()}
+				{#if store.integrityVerified}<Badge tone="valid">MAC verified</Badge>
+				{:else}<Badge tone="warn">No integrity MAC</Badge>{/if}
+			{/snippet}
+			<VerdictBand
+				icon="lock"
+				title="PKCS#12 keystore"
+				lead="Contains"
+				value={contents(store)}
+				meta={store.integrityVerified
+					? 'Password correct, MAC integrity verified'
+					: 'Content decrypted; this file carries no integrity MAC'}
+				badges={p12Badges}
+			/>
+		</article>
 
-		{#if result.keys.length}
+		{#if store.keys.length}
 			<div
 				class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
 			>
-				<h3
-					class="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-500"
-				>
-					Private keys
-				</h3>
+				<h3 class="mb-2 text-xs font-semibold tracking-wide text-ink-3 uppercase">Private keys</h3>
 				<ul class="space-y-2">
-					{#each result.keys as key, i (i)}
+					{#each store.keys as key, i (i)}
 						<li class="flex flex-wrap items-center gap-2 text-sm">
 							<Icon name="lock" size={16} class="text-slate-500" />
 							<span class="font-medium text-slate-900 dark:text-slate-200">
@@ -105,14 +125,17 @@
 						</li>
 					{/each}
 				</ul>
-				<p class="mt-2 text-xs text-slate-500 dark:text-slate-500">
-					Private key material is never displayed.
-				</p>
+				<p class="mt-2 text-xs text-ink-3">Private key material is never displayed.</p>
 			</div>
 		{/if}
 
-		{#each result.certificates as cert, i (i)}
+		{#each store.certificates as cert, i (i)}
 			<CertCard {cert} index={i} />
 		{/each}
+	{/if}
+
+	<!-- The answer first, then what else can be asked of the same artefact. -->
+	{#if flow.result}
+		<CarryTo artefact={flow.input} current={tool.slug} />
 	{/if}
 </div>

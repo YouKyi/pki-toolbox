@@ -13,8 +13,8 @@ import { defineConfig, devices } from '@playwright/test';
  * denies all network egress (connect-src 'none'), so no backend is needed.
  *
  * Tooling has no Node on the host and runs inside a container; in CI, use the
- * official Playwright image (Debian) — Alpine is not supported by the browser
- * binaries — and run `pnpm exec playwright test`, which picks up this config.
+ * official Playwright image (Debian), since Alpine is not supported by the browser
+ * binaries, and run `pnpm exec playwright test`, which picks up this config.
  */
 
 const PORT = 4173;

@@ -1,32 +1,36 @@
 <script lang="ts">
 	import { requireTool } from '$lib/tools';
+	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
 	import { decodeChain, type DecodedChain } from '$lib/pki/chain';
 	import { TEST_CHAIN } from '$lib/samples';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
 	import CertCard from '$lib/components/CertCard.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import DecodeError from '$lib/components/DecodeError.svelte';
+	import CarryTo from '$lib/components/CarryTo.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
+	import Badge from '$lib/components/Badge.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import VerdictBand from '$lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-chain');
 
-	let input = $state('');
-	let result = $state<DecodedChain | null>(null);
-	let error = $state('');
-	let loading = $state(false);
+	const length = (c: DecodedChain) =>
+		c.links.length === 1 ? '1 certificate' : `${c.links.length} certificates`;
 
-	async function decode() {
-		loading = true;
-		error = '';
-		result = null;
-		try {
-			result = await decodeChain(input.trim());
-		} catch (e) {
-			error = e instanceof Error ? e.message : String(e);
-		} finally {
-			loading = false;
-		}
-	}
+	/** The leaf is what the chain is actually about; it names the whole result. */
+	const leafName = (c: DecodedChain) =>
+		c.links[0]?.certificate.subjectParts.find((p) => p.key === 'CN')?.value ??
+		c.links[0]?.certificate.subject ??
+		'Certificate chain';
+
+	const flow = createDecodeFlow({
+		run: (input) => decodeChain(input),
+		summary: (c) => `${leafName(c)} · chain of ${length(c)}`,
+		announce: (c) =>
+			`Chain decoded: ${length(c)}, ${c.complete ? 'every signature verified' : 'a link could not be verified'}`
+	});
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -34,26 +38,55 @@
 <ToolHeader {tool} />
 
 <PemInput
-	bind:value={input}
-	{loading}
-	ondecode={decode}
+	bind:value={flow.input}
+	bind:collapsed={flow.collapsed}
+	invalid={Boolean(flow.error)}
+	errorId={flow.errorId}
+	summary={flow.summary}
+	loading={flow.loading}
+	ondecode={() => flow.decode()}
 	decodeLabel="Decode the chain"
 	example={TEST_CHAIN}
 	placeholder="Paste several concatenated PEM certificates here (leaf → … → root)…"
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
-	{#if error}
-		<Alert variant="error" title="Decoding failed">{error}</Alert>
+<div bind:this={flow.region} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={flow.status} />
+	{#if flow.error}
+		<DecodeError
+			id={flow.errorId}
+			title={flow.failureLabel}
+			message={flow.error}
+			input={flow.input}
+			current={tool.slug}
+		/>
 	{/if}
 
-	{#if result}
-		{#if result.complete}
-			<Alert variant="success" title="Valid chain">
-				The {result.links.length} certificates link together correctly: every signature has been verified
-				cryptographically, and the chain ends with a valid self-signed root.
-			</Alert>
-		{:else}
+	{#if flow.result}
+		{@const chain = flow.result}
+		<!-- One question owns this tool: does the chain hold. The band answers it,
+		     and the alert below stays only when there is something to fix. -->
+		<article
+			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+		>
+			{#snippet chainBadges()}
+				{#if chain.complete}<Badge tone="valid">Verified</Badge>
+				{:else}<Badge tone="expired">Incomplete</Badge>{/if}
+			{/snippet}
+			<VerdictBand
+				icon="link"
+				title={leafName(chain)}
+				lead="Chain of"
+				value={length(chain)}
+				note={chain.complete ? 'every signature verified' : 'a link could not be verified'}
+				meta={chain.complete
+					? 'Ends with a valid self-signed root'
+					: 'Does not end with a valid self-signed root'}
+				badges={chainBadges}
+			/>
+		</article>
+
+		{#if !chain.complete}
 			<Alert variant="warn" title="Incomplete or unordered chain">
 				A signature could not be verified, or the chain does not end with a valid self-signed root.
 				Check the order of the certificates (leaf first, root last).
@@ -61,7 +94,7 @@
 		{/if}
 
 		<div class="space-y-0">
-			{#each result.links as link (link.index)}
+			{#each chain.links as link (link.index)}
 				<CertCard cert={link.certificate} role={link.role} index={link.index} />
 
 				{#if link.issuedByNext !== null}
@@ -81,5 +114,10 @@
 				{/if}
 			{/each}
 		</div>
+	{/if}
+
+	<!-- The answer first, then what else can be asked of the same artefact. -->
+	{#if flow.result}
+		<CarryTo artefact={flow.input} current={tool.slug} />
 	{/if}
 </div>

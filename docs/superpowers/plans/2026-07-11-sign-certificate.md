@@ -1,20 +1,20 @@
-# Sign Certificate From a CA — Implementation Plan
+# Sign Certificate From a CA: Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** New `/sign-certificate` tool: paste a CA certificate + private key, issue a signed leaf or intermediate CA certificate (new key pair or pasted CSR) — 100 % client-side.
+**Goal:** New `/sign-certificate` tool: paste a CA certificate + private key, issue a signed leaf or intermediate CA certificate (new key pair or pasted CSR), 100 % client-side.
 
 **Architecture:** A new `src/lib/pki/sign.ts` module (CA import + issuance via `@peculiar/x509` `X509CertificateGenerator.create`) reusing helpers exported from `generate.ts`; a new SvelteKit route `/sign-certificate` registered in `tools.ts`; a shared `PemOutput.svelte` component extracted from `generate-selfsigned`.
 
 **Tech Stack:** SvelteKit 2 (Svelte 5 runes), TypeScript, `@peculiar/x509` v2 (+ `@abraham/reflection` polyfill), WebCrypto, Tailwind 4, Vitest 4, Playwright.
 
-**Spec:** `docs/superpowers/specs/2026-07-11-sign-certificate-design.md` — read it first.
+**Spec:** `docs/superpowers/specs/2026-07-11-sign-certificate-design.md`, read it first.
 
 ## Global Constraints
 
 - Branch: `feat/sign-certificate`, MR !126, issue #11. Commit messages: Conventional Commits, `Refs #11` in the body.
 - **NEVER add `Co-Authored-By`, `Claude-Session`, or any "Generated with Claude Code" mention to commits, MR or issues.**
-- Toolchain: Node 24 via nvm, no global pnpm — prefix every package command with `corepack`: `corepack pnpm <cmd>`. Run `corepack pnpm install` once before anything.
+- Toolchain: Node 24 via nvm, no global pnpm, prefix every package command with `corepack`: `corepack pnpm <cmd>`. Run `corepack pnpm install` once before anything.
 - UI copy in English (matches the rest of the app). Code comments in English.
 - `@peculiar/x509` v2 needs `import '@abraham/reflection';` as the FIRST import of any module that uses it.
 - Vitest runs in Node (WebCrypto available via `globalThis.crypto`). Test command: `corepack pnpm vitest --run tests/pki/sign.test.ts`. Full gate: `corepack pnpm test && corepack pnpm check && corepack pnpm lint`.
@@ -27,11 +27,11 @@
 **Files:**
 
 - Modify: `src/lib/pki/generate.ts`
-- Test: existing `tests/pki/v2.test.ts` (no new test — pure visibility refactor, no behaviour change)
+- Test: existing `tests/pki/v2.test.ts` (no new test, pure visibility refactor, no behaviour change)
 
 **Interfaces:**
 
-- Produces: `export const ALGORITHMS: Record<KeyAlgorithmChoice, AlgoSpec>`, `export type AlgoSpec`, `export function randomSerial(crypto: Crypto): string`, `export function buildName(opts: Pick<GenerateOptions, 'commonName' | 'organization' | 'country'>): JsonName`, `export function webCrypto(): Crypto` — all consumed by Task 2/3.
+- Produces: `export const ALGORITHMS: Record<KeyAlgorithmChoice, AlgoSpec>`, `export type AlgoSpec`, `export function randomSerial(crypto: Crypto): string`, `export function buildName(opts: Pick<GenerateOptions, 'commonName' | 'organization' | 'country'>): JsonName`, `export function webCrypto(): Crypto`, all consumed by Task 2/3.
 
 - [ ] **Step 1: Make the helpers exported**
 
@@ -79,7 +79,7 @@ Refs #11"
 
 ---
 
-### Task 2: `sign.ts` — `importCa`
+### Task 2: `sign.ts`, `importCa`
 
 **Files:**
 
@@ -89,7 +89,7 @@ Refs #11"
 **Interfaces:**
 
 - Consumes: `webCrypto` from `$lib/pki/generate`, `pemToDer` from `$lib/pki/pem` (`pemToDer(pem: string): Uint8Array`, no label argument).
-- Produces: `export type CaContext = { cert: X509Certificate; key: CryptoKey; signingAlgorithm: { name: string; hash?: string }; warnings: string[] }`, `export async function importCa(certPem: string, keyPem: string): Promise<CaContext>` — consumed by Task 3/4 and the page (Task 6).
+- Produces: `export type CaContext = { cert: X509Certificate; key: CryptoKey; signingAlgorithm: { name: string; hash?: string }; warnings: string[] }`, `export async function importCa(certPem: string, keyPem: string): Promise<CaContext>`, consumed by Task 3/4 and the page (Task 6).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -172,7 +172,7 @@ describe('importCa', () => {
 - [ ] **Step 2: Run tests, verify they fail**
 
 Run: `corepack pnpm vitest --run tests/pki/sign.test.ts`
-Expected: FAIL — cannot resolve `$lib/pki/sign`.
+Expected: FAIL, cannot resolve `$lib/pki/sign`.
 
 - [ ] **Step 3: Implement `importCa`**
 
@@ -312,7 +312,7 @@ Refs #11"
 
 ---
 
-### Task 3: `sign.ts` — `issueCertificate`, new-key mode
+### Task 3: `sign.ts`, `issueCertificate`, new-key mode
 
 **Files:**
 
@@ -465,7 +465,7 @@ describe('issueCertificate (new key pair)', () => {
 - [ ] **Step 2: Run tests, verify the new ones fail**
 
 Run: `corepack pnpm vitest --run tests/pki/sign.test.ts`
-Expected: FAIL — `issueCertificate` is not exported.
+Expected: FAIL, `issueCertificate` is not exported.
 
 - [ ] **Step 3: Implement `issueCertificate` (new-key mode only)**
 
@@ -574,7 +574,7 @@ async function csrPublicKey(csrPem: string, crypto: Crypto): Promise<PublicKeyTy
 }
 ```
 
-If `PublicKeyType` is not exported by the installed `@peculiar/x509` version, type `publicKey` as `CryptoKey | import('@peculiar/x509').PublicKey` instead — check with `corepack pnpm check`.
+If `PublicKeyType` is not exported by the installed `@peculiar/x509` version, type `publicKey` as `CryptoKey | import('@peculiar/x509').PublicKey` instead, check with `corepack pnpm check`.
 
 - [ ] **Step 4: Run tests, verify they pass**
 
@@ -592,7 +592,7 @@ Refs #11"
 
 ---
 
-### Task 4: `sign.ts` — CSR mode
+### Task 4: `sign.ts`, CSR mode
 
 **Files:**
 
@@ -601,8 +601,8 @@ Refs #11"
 
 **Interfaces:**
 
-- Consumes: `TEST_CSR` from `tests/fixtures/certs.ts`; `decodeCsr` from `$lib/pki/parse` (page-side pre-fill — no new helper).
-- Produces: the `{ kind: 'csr'; csrPem: string }` branch of `IssueSubject` becomes functional. `sign.ts` verifies the CSR signature itself (`Pkcs10CertificateRequest.verify`) — `decodeCsr` does not.
+- Consumes: `TEST_CSR` from `tests/fixtures/certs.ts`; `decodeCsr` from `$lib/pki/parse` (page-side pre-fill, no new helper).
+- Produces: the `{ kind: 'csr'; csrPem: string }` branch of `IssueSubject` becomes functional. `sign.ts` verifies the CSR signature itself (`Pkcs10CertificateRequest.verify`), `decodeCsr` does not.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -669,7 +669,7 @@ describe('issueCertificate (CSR)', () => {
 });
 ```
 
-Note: `leaf.publicKey.toString('hex')` — if `PublicKey` has no `toString('hex')` in the installed version, compare `Buffer.from(leaf.publicKey.rawData).toString('base64')` against the CSR's instead.
+Note: `leaf.publicKey.toString('hex')`, if `PublicKey` has no `toString('hex')` in the installed version, compare `Buffer.from(leaf.publicKey.rawData).toString('base64')` against the CSR's instead.
 
 - [ ] **Step 2: Run tests, verify the new ones fail**
 
@@ -683,7 +683,7 @@ In `src/lib/pki/sign.ts`, add `Pkcs10CertificateRequest` to the `@peculiar/x509`
 ```ts
 /**
  * Parse and verify a PKCS#10 request, returning its public key. `decodeCsr`
- * (parse.ts) does not check the signature, so it is verified here — a CSR
+ * (parse.ts) does not check the signature, so it is verified here: a CSR
  * whose proof-of-possession fails must not be certified.
  */
 async function csrPublicKey(csrPem: string, crypto: Crypto): Promise<PublicKeyType> {
@@ -732,7 +732,7 @@ Refs #11"
 
 **Interfaces:**
 
-- Produces: `PemOutput` props `{ title: string; value: string; filename: string }` — copy/download handled internally. Consumed by `generate-selfsigned` and the new page (Task 6).
+- Produces: `PemOutput` props `{ title: string; value: string; filename: string }`, copy/download handled internally. Consumed by `generate-selfsigned` and the new page (Task 6).
 - `PemInput` change: the decode button and the Ctrl+Enter hint render only when `ondecode` is passed. All existing callers pass it → no visible change for them.
 
 - [ ] **Step 1: Create `PemOutput.svelte`**
@@ -790,7 +790,7 @@ Refs #11"
 
 - [ ] **Step 2: Use it in `generate-selfsigned/+page.svelte`**
 
-Remove the `pemBlock` snippet, the `copy()` function, the `copied` state and the now-unused imports (`writeToClipboard`, `downloadText`, `Icon` stays — it is still used by the generate button). Replace the two `{@render pemBlock(...)}` calls with:
+Remove the `pemBlock` snippet, the `copy()` function, the `copied` state and the now-unused imports (`writeToClipboard`, `downloadText`, `Icon` stays, it is still used by the generate button). Replace the two `{@render pemBlock(...)}` calls with:
 
 ```svelte
 <PemOutput title="Certificate (PEM)" value={result.certificatePem} filename="certificate.crt" />
@@ -857,7 +857,7 @@ stamp:
 	'<path d="M5 21h14" /><path d="M5 18a1 1 0 0 1 -1 -1v-1a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v1a1 1 0 0 1 -1 1z" /><path d="M9.5 14c.318 -1.483 .509 -2.734 .509 -4a3.5 3.5 0 1 0 -6.918 .75" transform="translate(5 0)" /><path d="M14.5 14c-.318 -1.483 -.509 -2.734 -.509 -4" />',
 ```
 
-If the rendering looks off in the user's visual check, fall back to `certificate` — do not block on icon aesthetics.
+If the rendering looks off in the user's visual check, fall back to `certificate`, do not block on icon aesthetics.
 
 - [ ] **Step 2: Register the tool**
 
@@ -1021,7 +1021,7 @@ In `src/lib/tools.ts`, append after the `generate-selfsigned` entry:
 		{/if}
 		{#if ca}
 			<Alert variant="info" title="CA loaded">
-				{ca.cert.subject} — valid until {ca.cert.notAfter.toISOString().slice(0, 10)}
+				{ca.cert.subject}, valid until {ca.cert.notAfter.toISOString().slice(0, 10)}
 			</Alert>
 			{#each ca.warnings as warning (warning)}
 				<Alert variant="warn" title="Warning">{warning}</Alert>
@@ -1059,7 +1059,7 @@ In `src/lib/tools.ts`, append after the `generate-selfsigned` entry:
 	{#if mode === 'csr'}
 		<div class="mb-4">
 			<p class="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-				PKCS#10 request — its subject and DNS SANs pre-fill the form below; the form wins.
+				PKCS#10 request: its subject and DNS SANs pre-fill the form below; the form wins.
 			</p>
 			<PemInput
 				bind:value={csrPem}
@@ -1179,7 +1179,7 @@ In `README.md`, add to the tools table (match the existing column formatting):
 - [ ] **Step 5: Verify**
 
 Run: `corepack pnpm check && corepack pnpm lint && corepack pnpm test`
-Expected: clean. Then `corepack pnpm build` — must succeed (static adapter prerender).
+Expected: clean. Then `corepack pnpm build`, must succeed (static adapter prerender).
 
 - [ ] **Step 6: Commit**
 
@@ -1249,7 +1249,7 @@ test('issues a CA-signed certificate end to end', async ({ page }) => {
 - [ ] **Step 2: Run the e2e suite**
 
 Run: `corepack pnpm exec playwright install chromium` (once), then `corepack pnpm test:e2e`
-Expected: new spec PASS, existing specs (smoke/tools/responsive) still PASS — the new tool appears in the navbar/home grid, so watch for any snapshot-ish assertions and fix the test (not the app) if one trips.
+Expected: new spec PASS, existing specs (smoke/tools/responsive) still PASS, the new tool appears in the navbar/home grid, so watch for any snapshot-ish assertions and fix the test (not the app) if one trips.
 
 - [ ] **Step 3: Commit and push**
 

@@ -1,31 +1,47 @@
 <script lang="ts">
 	import { requireTool } from '$lib/tools';
+	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
 	import { decodeCrl, type DecodedCrl } from '$lib/pki/crl';
 	import { formatDate } from '$lib/pki/format';
 	import { TEST_CRL } from '$lib/samples';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
 	import PemInput from '$lib/components/PemInput.svelte';
-	import Alert from '$lib/components/Alert.svelte';
+	import DecodeError from '$lib/components/DecodeError.svelte';
+	import CarryTo from '$lib/components/CarryTo.svelte';
+	import StatusLine from '$lib/components/StatusLine.svelte';
 	import RowList from '$lib/components/RowList.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import Badge from '$lib/components/Badge.svelte';
+	import VerdictBand from '$lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-crl');
 
 	const MAX_ROWS = 250;
+	const DAY_MS = 86_400_000;
 
-	let input = $state('');
-	let result = $state<DecodedCrl | null>(null);
-	let error = $state('');
+	/** The issuer's CN if the DN carries one; the whole DN is for the rows below. */
+	const issuerName = (c: DecodedCrl) => /CN=([^,]+)/.exec(c.issuer)?.[1]?.trim() ?? c.issuer;
 
-	function decode() {
-		error = '';
-		result = null;
-		try {
-			result = decodeCrl(input.trim());
-		} catch (e) {
-			error = e instanceof Error ? e.message : String(e);
-		}
+	const revoked = (c: DecodedCrl) =>
+		c.entryCount === 1 ? '1 revoked certificate' : `${c.entryCount} revoked certificates`;
+
+	/**
+	 * A CRL past its next update is stale, and a stale CRL is the reason someone
+	 * opens this tool at 2am. The band says so before the entry table does.
+	 */
+	function freshness(c: DecodedCrl): { note: string; overdue: boolean } {
+		if (!c.nextUpdate) return { note: 'no next update announced', overdue: false };
+		const days = Math.round((c.nextUpdate.getTime() - Date.now()) / DAY_MS);
+		const count = new Intl.NumberFormat('en').format(Math.abs(days));
+		return days < 0
+			? { note: `overdue by ${count} days`, overdue: true }
+			: { note: days === 0 ? 'due today' : `in ${count} days`, overdue: false };
 	}
+
+	const flow = createDecodeFlow({
+		run: (input) => decodeCrl(input),
+		summary: (c) => `${issuerName(c)} · revocation list`,
+		announce: (c) => `Revocation list decoded: ${revoked(c)}, next update ${freshness(c).note}`
+	});
 </script>
 
 <svelte:head><title>{tool.name}, PKI-Toolbox</title></svelte:head>
@@ -33,46 +49,60 @@
 <ToolHeader {tool} />
 
 <PemInput
-	bind:value={input}
-	ondecode={decode}
+	bind:value={flow.input}
+	bind:collapsed={flow.collapsed}
+	invalid={Boolean(flow.error)}
+	errorId={flow.errorId}
+	summary={flow.summary}
+	loading={flow.loading}
+	ondecode={() => flow.decode()}
 	decodeLabel="Decode the CRL"
 	derLabel="X509 CRL"
 	example={TEST_CRL}
 	placeholder="Paste a CRL here (-----BEGIN X509 CRL-----)…"
 />
 
-<div class="mt-6 space-y-4" aria-live="polite" aria-atomic="false">
-	{#if error}
-		<Alert variant="error" title="Decoding failed">{error}</Alert>
+<div bind:this={flow.region} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">
+	<StatusLine message={flow.status} />
+	{#if flow.error}
+		<DecodeError
+			id={flow.errorId}
+			title={flow.failureLabel}
+			message={flow.error}
+			input={flow.input}
+			current={tool.slug}
+		/>
 	{/if}
 
-	{#if result}
+	{#if flow.result}
+		{@const crl = flow.result}
+		{@const fresh = freshness(crl)}
 		<article
 			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
 		>
-			<header class="flex items-center gap-3 px-5 py-4">
-				<span
-					class="yk-chip grid h-9 w-9 place-items-center bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-				>
-					<Icon name="ban" size={20} />
-				</span>
-				<div class="min-w-0 flex-1">
-					<p class="font-semibold text-slate-900 dark:text-slate-100">
-						Revocation list, {result.entryCount} revoked certificate{result.entryCount > 1
-							? 's'
-							: ''}
-					</p>
-				</div>
-			</header>
-			<div class="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
+			{#snippet crlBadges()}
+				{#if fresh.overdue}<Badge tone="expired">Overdue</Badge>
+				{:else if crl.nextUpdate}<Badge tone="valid">Current</Badge>{/if}
+			{/snippet}
+			<VerdictBand
+				icon="ban"
+				title={issuerName(crl)}
+				lead="Next update"
+				value={crl.nextUpdate ? formatDate(crl.nextUpdate) : 'not announced'}
+				datetime={crl.nextUpdate?.toISOString()}
+				note={fresh.note}
+				meta={`${revoked(crl)} · issued ${formatDate(crl.thisUpdate)}`}
+				badges={crlBadges}
+			/>
+			<div class="px-5 py-4">
 				<RowList
 					rows={[
-						{ label: 'Issuer', value: result.issuer, mono: true },
-						{ label: 'Signature algorithm', value: result.signatureAlgorithm },
-						{ label: 'Issued on', value: formatDate(result.thisUpdate), mono: true },
+						{ label: 'Issuer', value: crl.issuer, mono: true },
+						{ label: 'Signature algorithm', value: crl.signatureAlgorithm },
+						{ label: 'Issued on', value: formatDate(crl.thisUpdate), mono: true },
 						{
 							label: 'Next update',
-							value: result.nextUpdate ? formatDate(result.nextUpdate) : '-',
+							value: crl.nextUpdate ? formatDate(crl.nextUpdate) : '-',
 							mono: true
 						}
 					]}
@@ -80,13 +110,13 @@
 			</div>
 		</article>
 
-		{#if result.entries.length}
+		{#if crl.entries.length}
 			<div
 				class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
 			>
 				<table class="w-full text-left text-sm">
 					<thead
-						class="border-b border-slate-200 text-xs tracking-wide text-slate-500 uppercase dark:border-slate-800 dark:text-slate-500"
+						class="border-b border-slate-200 text-xs tracking-wide text-ink-3 uppercase dark:border-slate-800"
 					>
 						<tr>
 							<th class="px-5 py-2.5 font-semibold">Serial number</th>
@@ -95,7 +125,7 @@
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-						{#each result.entries.slice(0, MAX_ROWS) as entry (entry.serialNumber + entry.revocationDate)}
+						{#each crl.entries.slice(0, MAX_ROWS) as entry (entry.serialNumber + entry.revocationDate)}
 							<tr>
 								<td class="px-5 py-2 font-mono text-[13px] break-all">{entry.serialNumber}</td>
 								<td class="px-5 py-2 font-mono text-[13px]">{formatDate(entry.revocationDate)}</td>
@@ -104,16 +134,21 @@
 						{/each}
 					</tbody>
 				</table>
-				{#if result.entries.length > MAX_ROWS}
+				{#if crl.entries.length > MAX_ROWS}
 					<p
 						class="border-t border-slate-200 px-5 py-2 text-xs text-slate-500 dark:border-slate-800"
 					>
-						{result.entries.length - MAX_ROWS} additional entr{result.entries.length - MAX_ROWS > 1
+						{crl.entries.length - MAX_ROWS} additional entr{crl.entries.length - MAX_ROWS > 1
 							? 'ies'
 							: 'y'} not shown.
 					</p>
 				{/if}
 			</div>
 		{/if}
+	{/if}
+
+	<!-- The answer first, then what else can be asked of the same artefact. -->
+	{#if flow.result}
+		<CarryTo artefact={flow.input} current={tool.slug} />
 	{/if}
 </div>

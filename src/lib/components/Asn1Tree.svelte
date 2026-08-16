@@ -34,7 +34,7 @@
 				type="button"
 				onclick={() => (open = !open)}
 				aria-expanded={open}
-				class="flex items-baseline gap-1.5 rounded text-left hover:bg-slate-100 dark:hover:bg-slate-800"
+				class="flex items-baseline gap-1.5 rounded text-left hover:bg-surface-2"
 			>
 				<Icon
 					name="chevron-down"
@@ -42,7 +42,7 @@
 					class="shrink-0 transition-transform {open ? '' : '-rotate-90'}"
 				/>
 				<span class="font-semibold {tagColor(node)}">{node.tag}</span>
-				<span class="text-xs text-slate-500 dark:text-slate-500">
+				<span class="text-xs text-ink-3">
 					{node.children.length} element{node.children.length > 1 ? 's' : ''}
 				</span>
 			</button>

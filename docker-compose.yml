@@ -27,7 +27,7 @@ services:
       - /tmp:mode=1777,size=64m
       # nginx may write cache metadata here; owned by app user (Dockerfile line 33)
       - /var/cache/nginx:mode=0755,size=32m
-    # Resource limits — plain service-level form (mem_limit / cpus) instead of
+    # Resource limits: plain service-level form (mem_limit / cpus) instead of
     # deploy.resources.limits because this stack is run with plain `docker compose`,
     # not `docker stack deploy`. The deploy.resources key is silently ignored
     # outside of Swarm mode, so the service-level keys are the correct choice here.

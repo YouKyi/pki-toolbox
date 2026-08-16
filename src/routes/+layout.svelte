@@ -3,12 +3,52 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 
 	let { children } = $props();
+
+	/**
+	 * `/` puts the caret in the input, the way every tool a system administrator
+	 * already lives in does. Ctrl/Cmd+Enter to decode was the product's only
+	 * accelerator; this is the other half of the same gesture, and it works from
+	 * anywhere on the page.
+	 *
+	 * A page with several inputs, the signing page, hands it to the first one:
+	 * the reader is heading for the top of the form either way.
+	 */
+	function onKeydown(event: KeyboardEvent) {
+		if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
+		const active = document.activeElement as HTMLElement | null;
+		// A slash typed inside a field is a slash, not a shortcut.
+		if (
+			active instanceof HTMLInputElement ||
+			active instanceof HTMLTextAreaElement ||
+			active instanceof HTMLSelectElement ||
+			active?.isContentEditable
+		) {
+			return;
+		}
+		const field = document.querySelector<HTMLTextAreaElement>('textarea[aria-label]');
+		if (field) {
+			event.preventDefault();
+			field.focus();
+			return;
+		}
+		// Decoded already: the editor is folded into its recap, so reopen it. The
+		// input takes the caret itself once it is back on screen.
+		const reopen = document.querySelector<HTMLButtonElement>('[data-yk-edit]');
+		if (!reopen) return;
+		event.preventDefault();
+		reopen.click();
+	}
 </script>
 
+<svelte:window onkeydown={onKeydown} />
+
 <div class="flex min-h-screen flex-col">
+	<!-- `not-sr-only` resets padding to 0, so the revealed link has to restate its
+	     own: without `focus:px-4 focus:py-3` it appears 137x20, under the 24px
+	     minimum, and it is the very first target a keyboard user meets. -->
 	<a
 		href="#main"
-		class="sr-only rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:outline-2 focus:outline-offset-2 focus:outline-teal-700 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)]"
+		class="sr-only rounded-lg bg-teal-500 text-sm font-semibold text-white focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:px-4 focus:py-3 focus:outline-2 focus:outline-offset-2 focus:outline-teal-700 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)]"
 	>
 		Skip to main content
 	</a>
@@ -19,45 +59,35 @@
 		{@render children()}
 	</main>
 
-	<!-- Footer DA youkyi (condensé) : filet neutre interrompu par une entaille
-	     oblique orange (le geste signature), baseline, mentions légales en mono. -->
+	<!-- Footer DA youkyi : filet neutre interrompu par l'entaille oblique orange,
+	     le geste signature, frontière entre deux masses, l'un des trois emplois
+	     que la charte v2 laisse à la pente.
+
+	     La pente est TENUE, pas dessinée puis étirée : les deux filets sont des
+	     éléments souples, l'entaille est un SVG de taille fixe entre eux. Avec un
+	     seul SVG en `preserveAspectRatio="none"` la diagonale se couchait avec la
+	     fenêtre (≈4° à 1280px, ≈13° à 390px) et la seule signature dessinée du
+	     site l'était donc fausse à toutes les largeurs. Ici dy/dx = 15,3/40 =
+	     0,382, soit 1/Φ² ≈ 21°, quelle que soit la largeur. -->
 	<footer class="relative text-slate-500 dark:text-slate-400">
-		<svg
-			class="pointer-events-none absolute top-0 left-0 block text-slate-200 dark:text-slate-800"
-			viewBox="0 0 1200 8"
-			width="100%"
-			height="8"
-			preserveAspectRatio="none"
+		<div
+			class="pointer-events-none absolute inset-x-0 top-0 flex items-start text-slate-200 dark:text-slate-800"
 			aria-hidden="true"
 		>
-			<line
-				x1="0"
-				y1="4"
-				x2="470"
-				y2="4"
-				stroke="currentColor"
-				stroke-width="1"
-				vector-effect="non-scaling-stroke"
-			/>
-			<line
-				x1="470"
-				y1="4"
-				x2="510"
-				y2="1"
-				stroke="var(--yk-accent)"
-				stroke-width="2"
-				vector-effect="non-scaling-stroke"
-			/>
-			<line
-				x1="510"
-				y1="1"
-				x2="1200"
-				y2="1"
-				stroke="currentColor"
-				stroke-width="1"
-				vector-effect="non-scaling-stroke"
-			/>
-		</svg>
+			<span class="mt-[17.5px] h-px flex-1 bg-current"></span>
+			<svg width="40" height="20" viewBox="0 0 40 20" fill="none" class="block shrink-0">
+				<line
+					x1="0"
+					y1="17.5"
+					x2="40"
+					y2="2.2"
+					stroke="var(--yk-accent)"
+					stroke-width="2"
+					stroke-linecap="square"
+				/>
+			</svg>
+			<span class="mt-[2.2px] h-px flex-1 bg-current"></span>
+		</div>
 		<div
 			class="mx-auto flex w-full max-w-6xl flex-wrap items-end justify-between gap-4 px-4 pt-9 pb-8 sm:px-6 lg:px-8"
 		>
@@ -66,7 +96,7 @@
 					href="https://youkyi.fr"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="yk-wordmark text-slate-900 hover:text-teal-700 dark:text-slate-100 dark:hover:text-teal-300"
+					class="yk-wordmark inline-flex min-h-11 items-center text-slate-900 hover:text-teal-700 dark:text-slate-100 dark:hover:text-teal-300"
 					>youkyi<u>_</u></a
 				>
 				<p class="mt-2 text-xs">
@@ -80,13 +110,15 @@
 						href="https://youkyi.fr"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-teal-700 hover:underline dark:text-teal-300">youkyi.fr</a
+						class="inline-flex min-h-11 items-center text-teal-700 hover:underline dark:text-teal-300"
+						>youkyi.fr</a
 					>
 					<a
 						href="https://github.com/youkyi/pki-toolbox"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="text-teal-700 hover:underline dark:text-teal-300">github</a
+						class="inline-flex min-h-11 items-center text-teal-700 hover:underline dark:text-teal-300"
+						>github</a
 					>
 				</span>
 				<span>© 2026 · Agasseau Alexandre</span>

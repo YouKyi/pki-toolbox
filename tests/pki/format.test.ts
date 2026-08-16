@@ -42,14 +42,16 @@ describe('hexWithColons', () => {
 });
 
 describe('formatSerial', () => {
-	it('shows the hex form alongside the decimal value', () => {
-		expect(formatSerial('0a')).toBe('0A  (10)');
+	it('shows the hex form, and nothing else', () => {
+		expect(formatSerial('0a')).toBe('0A');
 	});
 
-	it('handles a long serial number', () => {
-		const out = formatSerial('00ffff');
-		expect(out).toContain('00:FF:FF');
-		expect(out).toContain('(65535)');
+	it('groups a long serial into colon-separated bytes', () => {
+		expect(formatSerial('00ffff')).toBe('00:FF:FF');
+	});
+
+	it('never trails the decimal form, which doubled the row it sat in', () => {
+		expect(formatSerial('00ffff')).not.toContain('65535');
 	});
 });
 

@@ -1,5 +1,5 @@
 /**
- * Clipboard helper — thin wrapper around the Clipboard API so callers do not
+ * Clipboard helper: thin wrapper around the Clipboard API so callers do not
  * need to repeat the try/catch boilerplate.
  *
  * Reactive "copied" indicator state (per-item id, 1200 ms reset) is intentionally

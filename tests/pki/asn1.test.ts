@@ -121,7 +121,7 @@ function buildFlatSequenceWithNulls(count: number): Uint8Array {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('parseAsn1 — normal small DER', () => {
+describe('parseAsn1: normal small DER', () => {
 	it('parses a minimal SEQUENCE { INTEGER } structure', () => {
 		const der = sequence(integer(42));
 		const node = parseAsn1(wrapPem(der));
@@ -161,7 +161,7 @@ describe('parseAsn1 — normal small DER', () => {
 	});
 });
 
-describe('parseAsn1 — MAX_DEPTH truncation (ARCH-01)', () => {
+describe('parseAsn1: MAX_DEPTH truncation (ARCH-01)', () => {
 	it('handles a structure nested to exactly MAX_DEPTH without crashing', () => {
 		// MAX_DEPTH layers of SEQUENCE around an INTEGER leaf.
 		// The walker must terminate gracefully, not recurse past the limit.
@@ -201,7 +201,7 @@ describe('parseAsn1 — MAX_DEPTH truncation (ARCH-01)', () => {
 	});
 });
 
-describe('parseAsn1 — node-count budget (ARCH-01)', () => {
+describe('parseAsn1: node-count budget (ARCH-01)', () => {
 	it('parses successfully when node count is comfortably within the budget', () => {
 		// 1 SEQUENCE + 1000 NULLs = 1001 nodes, far below any limit.
 		const der = buildFlatSequenceWithNulls(1000);
@@ -230,7 +230,7 @@ describe('parseAsn1 — node-count budget (ARCH-01)', () => {
 	});
 });
 
-describe('parseAsn1 — trailing-bytes rejection (ARCH-01)', () => {
+describe('parseAsn1: trailing-bytes rejection (ARCH-01)', () => {
 	it('rejects two complete DER structures concatenated inside one PEM block', () => {
 		const singleDer = sequence(integer(1));
 		const doubled = concat(singleDer, singleDer);
@@ -244,7 +244,7 @@ describe('parseAsn1 — trailing-bytes rejection (ARCH-01)', () => {
 	});
 });
 
-describe('parseAsn1 — invalid input', () => {
+describe('parseAsn1: invalid input', () => {
 	it('rejects input that is neither valid PEM nor base64-encoded DER', () => {
 		expect(() => parseAsn1('definitely not der')).toThrowError(/could not be parsed as ASN\.1/i);
 	});
