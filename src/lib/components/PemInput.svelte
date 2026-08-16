@@ -5,6 +5,8 @@
 	 * into a PEM block (`derLabel`) so the textarea always shows armoured text.
 	 */
 	import Icon from './Icon.svelte';
+	import NoNetworkProof from './NoNetworkProof.svelte';
+	import { network } from '$lib/network.svelte';
 	import { derToPem, MAX_INPUT_BYTES } from '$lib/pki/pem';
 
 	type Props = {
@@ -71,6 +73,19 @@
 	const recap = $derived(
 		summary || (blockCount === 1 ? '1 PEM block' : `${blockCount} PEM blocks`)
 	);
+
+	/**
+	 * The count the proof panel reports runs from the moment an artefact was
+	 * handed over, because that is the question a reader actually has: not
+	 * whether the page has ever loaded a font, but whether what they just
+	 * pasted went anywhere.
+	 */
+	let hadContent = false;
+	$effect(() => {
+		const has = value.trim().length > 0;
+		if (has && !hadContent) network.mark();
+		hadContent = has;
+	});
 
 	/** Reopening the editor puts the caret back where the user left off. */
 	function edit() {
@@ -166,6 +181,9 @@
 			ondragleave={() => (dragOver = false)}
 			ondrop={onDrop}
 		>
+			<!-- The claim belongs to the box that receives the artefact, not to a
+			     line under the action row where it was read after the fact. -->
+			<NoNetworkProof />
 			<textarea
 				bind:this={textarea}
 				bind:value
@@ -255,10 +273,7 @@
 			tabindex="-1"
 		/>
 	</div>
-	<p class="text-xs text-ink-3">
-		Everything is decoded locally in your browser, no data is sent.
-		{#if ondecode}
-			<span class="hidden sm:inline">Tip: Ctrl/⌘ + Enter to decode.</span>
-		{/if}
-	</p>
+	{#if ondecode}
+		<p class="hidden text-xs text-ink-3 sm:block">Tip: Ctrl/⌘ + Enter to decode.</p>
+	{/if}
 </div>

@@ -425,6 +425,13 @@ primary action, an active section, a status.
 - **Drop-active:** the dashed border turns orange and the ground steps one plane
   up, with a centred "Drop the file" label.
 - **Error:** ember orange text with its wording; never a red field.
+- **Proof strip:** the top row of the box carries the lock glyph and the claim at
+  body size, with a **Verify** disclosure on the right. The panel it opens shows
+  the page's own `connect-src` directive read back from the served policy, the
+  number of requests able to carry data out since the reader pasted, and a live
+  attempt the browser refuses in front of them. The claim is stated where the
+  artefact is handed over, never under the action row after the fact, and it is
+  never stated without the means to check it.
 - **Folded state:** once the artefact is decoded the editor becomes a one-line
   recap on the raised plane, naming what was read and its size, with **Edit
   input** and **Clear**. The answer is worth more screen than the base64 the

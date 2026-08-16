@@ -261,3 +261,37 @@ test('S10 issue a certificate from the generated test CA', async ({ page }) => {
 	).toBeVisible();
 	await expect(page.getByText('Signing failed')).toHaveCount(0);
 });
+
+// ---------------------------------------------------------------------------
+// S11: the privacy claim, and the three things that make it checkable
+// ---------------------------------------------------------------------------
+test('S11 the no-network claim carries its proof', async ({ page }) => {
+	const external = watchExternalRequests(page);
+
+	await page.goto('/decode-certificate');
+
+	// The claim sits in the box that receives the artefact, not under the
+	// action row where it used to be read after the fact.
+	await expect(page.getByText('Nothing you paste leaves it.')).toBeVisible();
+
+	await page.getByRole('button', { name: 'Verify' }).click();
+	// Read from the page's own CSP meta tag. A hardcoded string in the
+	// component would be one more claim; this fails if the policy ever drops
+	// the directive.
+	await expect(page.getByText("connect-src 'none'")).toBeVisible();
+
+	// The live attempt is refused by the browser itself, and says so.
+	await page.getByRole('button', { name: 'Try to send something' }).click();
+	await expect(page.getByText(/Refused by the browser/)).toBeVisible();
+
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	await page.getByRole('button', { name: 'Decode' }).click();
+
+	// The editor folds after a decode, and the proof folds with it: one click on
+	// the recap brings back the input and the count that covers the decode.
+	await page.getByRole('button', { name: 'Edit input' }).click();
+	await page.getByRole('button', { name: /^Verify/ }).click();
+	await expect(page.getByText('0 requests able to carry data out since you pasted.')).toBeVisible();
+
+	expect(external).toEqual([]);
+});
