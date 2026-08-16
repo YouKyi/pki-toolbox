@@ -439,7 +439,7 @@ primary action, an active section, a status.
   never stated without the means to check it.
 - **Private key state:** whatever the tool, a private key in the box is covered
   by an opaque veil that names it, states that it has not left the page, and
-  offers **Clear it** or **Show it anyway**. Hiding the material *is* the
+  offers **Clear it** or **Show it anyway**. Hiding the material _is_ the
   message, and it holds the same rule the keystore decoder already states. Where
   a key is asked for, the signing page's CA field, the veil stays but drops the
   accent: it is a discretion, not an alarm.

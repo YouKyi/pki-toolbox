@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { PRIVATE_KEY } from './artefacts';
 
 /**
  * Smoke suite for pki-toolbox: fast health check of the REAL static build
@@ -64,9 +65,7 @@ test('S1 home renders with content on the first frame, title set', async ({ page
 
 	// A private key has no tool here, and the veil already says it: the action is
 	// held back instead of answered with a second notice.
-	await page
-		.getByLabel('PKI artefact input')
-		.fill('-----BEGIN PRIVATE KEY-----\nMIIBVQIBADANBgkqhkiG9w0B\n-----END PRIVATE KEY-----');
+	await page.getByLabel('PKI artefact input').fill(PRIVATE_KEY);
 	await expect(page.getByRole('button', { name: 'Open the right tool' })).toBeDisabled();
 	await expect(page.getByText('A private key is in this box.')).toBeVisible();
 });

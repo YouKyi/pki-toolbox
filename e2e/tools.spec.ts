@@ -1,4 +1,5 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
+import { PRIVATE_KEY, REVOCATION_LIST } from './artefacts';
 
 /**
  * Tool feature suite for pki-toolbox, run against the REAL static build served
@@ -341,8 +342,7 @@ test('S12 a CRL pasted in the certificate decoder routes to the CRL decoder', as
 
 	// The body does not need to parse: what is on trial here is the label, and
 	// the failure that follows is exactly the case being fixed.
-	const crl =
-		'-----BEGIN X509 CRL-----\nMIIBrjCBlwIBATANBgkqhkiG9w0BAQsFADAa\n-----END X509 CRL-----';
+	const crl = REVOCATION_LIST;
 	await page.getByLabel('PKI artefact input').fill(crl);
 	await page.getByRole('button', { name: 'Decode' }).click();
 
@@ -360,8 +360,7 @@ test('S12 a CRL pasted in the certificate decoder routes to the CRL decoder', as
 // S13: the highest-consequence paste this product can receive
 // ---------------------------------------------------------------------------
 test('S13 a private key names itself the moment it lands', async ({ page }) => {
-	const key =
-		'-----BEGIN PRIVATE KEY-----\nMIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8w\n-----END PRIVATE KEY-----';
+	const key = PRIVATE_KEY;
 
 	await page.goto('/decode-certificate');
 	await page.getByLabel('PKI artefact input').fill(key);
