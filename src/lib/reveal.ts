@@ -1,5 +1,5 @@
 /** Sticky chrome height plus a breath, mirrored from `scroll-padding-top`. */
-const CHROME = 80;
+const CHROME = 72;
 
 /**
  * Hands the keyboard and, only when needed, the viewport to a freshly rendered

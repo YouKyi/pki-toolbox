@@ -320,10 +320,10 @@
 
 html {
 	color-scheme: light dark;
-	/* The navigation bar is sticky chrome 64px tall, so anything scrolled into
+	/* The navigation bar is sticky chrome 56px tall, so anything scrolled into
 	   view (an anchor, or the result region taking focus after a decode) would
 	   land underneath it. Reserve the bar plus a breath. */
-	scroll-padding-top: 5rem;
+	scroll-padding-top: 4.5rem;
 }
 
 body {

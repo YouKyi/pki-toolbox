@@ -92,7 +92,12 @@
 
 <div bind:this={navEl} class="yk-chrome sticky top-0 z-40 border-b">
 	<nav aria-label="Primary">
-		<div class="relative mx-auto flex h-16 max-w-6xl items-center gap-8 px-4 sm:px-6 lg:px-8">
+		<!-- 56px, not 64. The bar was sized by the 36px wordmark plate while the
+		     eye reads 17px labels, which left 23.5px of empty chrome under every
+		     word, more than the height of the word itself, and put the section
+		     marker further from its label than the label is tall. The plate comes
+		     down to 32px with it, so the plate keeps its share of the bar. -->
+		<div class="relative mx-auto flex h-14 max-w-6xl items-center gap-8 px-4 sm:px-6 lg:px-8">
 			<!-- Wordmark. The text and its underscore are one flex item, otherwise the
 			     container's gap lands between the word and the underscore. -->
 			<a
@@ -104,14 +109,17 @@
 				     `--yk-ink-solid` used before sat at roughly 1.1:1 against the night
 				     ground, so the plate vanished in the theme the charter calls its
 				     signature. -->
-				<span class="yk-chip grid h-9 w-9 place-items-center bg-ink text-page">
-					<Icon name="shield" size={20} />
+				<span class="yk-chip grid h-8 w-8 place-items-center bg-ink text-page">
+					<Icon name="shield" size={18} />
 				</span>
 				<span>pki-toolbox<u>_</u></span>
 			</a>
 
-			<!-- Desktop category folders -->
-			<div class="hidden items-stretch gap-7 lg:flex">
+			<!-- Desktop category folders. The row spans the bar's full height, so a
+			     trigger is a full-height band rather than a 44px pill floating in it: the
+			     pointer meets the label anywhere in the bar, and the marker below can
+			     be welded to the bar's own edge. -->
+			<div class="hidden items-stretch gap-7 self-stretch lg:flex">
 				{#each categories as category (category.id)}
 					{@const list = toolsByCategory(category.id)}
 					{#if list.length}
@@ -152,15 +160,22 @@
 										stroke-linecap="square"
 									/>
 								</svg>
-								{#if isActive}
-									<!-- Soulignement orange plein : emploi 3 du territoire de l'accent.
-									     La terminaison oblique de la v1 est retirée : en v2 la pente ne
-									     s'applique plus à un contrôle. -->
-									<span
-										class="absolute right-0 -bottom-[7px] left-0 h-[2.5px] rounded-full bg-[color:var(--yk-accent)]"
-									></span>
-								{/if}
 							</button>
+
+							{#if isActive}
+								<!-- Emploi 3 du territoire de l'accent : « vous êtes ici ».
+								     Le marqueur est posé sur le FILET DE FERMETURE de la barre, pas
+								     sous le libellé : accroché à la boîte du bouton il flottait à
+								     12,5px du texte et à 6,5px du filet, rattaché à rien, et il
+								     descendait de 8px dès qu'on touchait à la hauteur du bouton.
+								     L'accent recouvre le filet neutre exactement sur la largeur de
+								     la section ouverte, le même geste que l'entaille du pied de page
+								     sur son propre filet. Bouts droits, comme le filet qu'il
+								     remplace. -->
+								<span
+									class="pointer-events-none absolute inset-x-0 bottom-0 h-[2.5px] bg-[color:var(--yk-accent)]"
+								></span>
+							{/if}
 
 							{#if isOpen}
 								<!-- top-full + transparent pt bridges the gap so the pointer never
@@ -321,7 +336,7 @@
 		     left under the bar so the last categories stay reachable in landscape. -->
 		{#if mobileOpen}
 			<div
-				class="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-slate-200 px-4 py-3 lg:hidden dark:border-slate-800"
+				class="max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-slate-200 px-4 py-3 lg:hidden dark:border-slate-800"
 			>
 				{#each categories as category (category.id)}
 					{@const list = toolsByCategory(category.id)}

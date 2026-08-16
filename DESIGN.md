@@ -125,7 +125,7 @@ components:
   nav-chrome:
     backgroundColor: 'rgb(255 255 255 / 0.62)'
     textColor: '{colors.ink}'
-    height: '64px'
+    height: '56px'
   terminal-block:
     backgroundColor: '{colors.terminal-ground}'
     textColor: '{colors.terminal-ink}'
@@ -290,7 +290,7 @@ throughout. Emphasis comes from size and ink strength, not from a third weight.
 
 A single centred column, `max-width: 72rem` (`max-w-6xl`), with 16px gutters
 that open to 24px at `sm` and 32px at `lg`. The navigation bar is a full-bleed
-sticky chrome 64px tall; the page content sits in 32px of vertical padding
+sticky chrome 56px tall; the page content sits in 32px of vertical padding
 beneath it, and the footer closes on the same measure.
 
 The tool grid is a single column on mobile, two at `sm` (640px) and three at
@@ -464,11 +464,15 @@ primary action, an active section, a status.
 
 ### Navigation
 
-- **Style:** a 64px sticky bar in glass (`rgb(255 255 255 / .62)` over a 20px
+- **Style:** a 56px sticky bar in glass (`rgb(255 255 255 / .62)` over a 20px
   blur, night `rgb(26 25 23 / .58)`), closed by a full-width hairline, with an
   opaque fallback where backdrop-filter is unsupported.
-- **States:** category triggers are half-ink and turn full ink on hover; the
-  active category carries a 2.5px orange underline. Dropdown panels are glass
+- **States:** category triggers are half-ink and turn full ink on hover. The
+  active category carries a **2.5px orange marker welded to the bar's closing
+  hairline**, the width of its trigger: the accent overwrites the neutral line
+  exactly where the reader is, the same gesture the footer's notch makes on its
+  own hairline. Anchored to the bar, not to the trigger's box, so a change in
+  the trigger's height cannot drag it out of place. Dropdown panels are glass
   cards (16px radius, **Float** shadow) whose items reveal a 2.5px orange bar on
   the left edge, scaled from 0 on hover and pinned for the current page.
 - **Panels are denser than the bar** (94% light, 95% dark, same 20px blur). A
