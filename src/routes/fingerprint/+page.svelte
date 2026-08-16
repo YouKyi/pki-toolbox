@@ -9,6 +9,7 @@
 	import Alert from '$lib/components/Alert.svelte';
 	import DecodeError from '$lib/components/DecodeError.svelte';
 	import CarryTo from '$lib/components/CarryTo.svelte';
+	import FirstOfMany from '$lib/components/FirstOfMany.svelte';
 	import StatusLine from '$lib/components/StatusLine.svelte';
 	import RowList from '$lib/components/RowList.svelte';
 	import VerdictBand from '$lib/components/VerdictBand.svelte';
@@ -60,6 +61,7 @@
 	{/if}
 
 	{#if flow.result}
+		<FirstOfMany input={flow.input} reading="These are the first one's fingerprints." />
 		{@const cert = flow.result}
 		<article
 			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"

@@ -285,8 +285,12 @@
 				     already in the field when a paste lands, and lifting on focus would
 				     mean the veil is never seen by the one person it is for. Both its
 				     controls sit in the tab order, so nobody is trapped. -->
+				<!-- The live region is the sentence, not the panel. On the panel, a
+				     screen reader recited the whole subtree on insertion, the two button
+				     labels included, so the controls were read as prose before they
+				     could be reached. They stay visible, clickable and in the tab order;
+				     they simply stop being announced as text. -->
 				<div
-					role="status"
 					class="flex flex-col items-center justify-center gap-1 rounded-xl px-6 py-8 text-center {compact
 						? 'min-h-32'
 						: 'min-h-64'}"
@@ -296,7 +300,9 @@
 						size={24}
 						class={unwantedKey ? 'text-[color:var(--yk-accent-txt)]' : 'text-ink-3'}
 					/>
-					<p class="mt-1 text-lg font-semibold text-ink">{keyName(pastedKey)} is in this box.</p>
+					<p role="status" class="mt-1 text-lg font-semibold text-ink">
+						{keyName(pastedKey)} is in this box.
+					</p>
 					<p class="max-w-md text-sm text-ink-2">
 						{acceptsPrivateKey
 							? 'It is what this step needs. It is imported non-extractable, never leaves this page, and stays hidden here.'

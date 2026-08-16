@@ -386,6 +386,20 @@ test('S13 a private key names itself the moment it lands', async ({ page }) => {
 	await expect(page.getByLabel('PKI artefact input')).toHaveValue('');
 	await expect(page.getByText('A private key is in this box.')).toHaveCount(0);
 
+	// A fullchain in the certificate decoder: the first certificate is the
+	// answer, and the page says how many the paste held rather than letting the
+	// reader believe their file carried one.
+	await page.goto('/decode-chain');
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	const chain = await page.getByLabel('PKI artefact input').inputValue();
+	await page.goto('/decode-certificate');
+	await page.getByLabel('PKI artefact input').fill(chain);
+	await page.getByRole('button', { name: 'Decode' }).click();
+	await expect(
+		region(page).getByText('This paste carries 3 certificates. You are reading the first.')
+	).toBeVisible();
+	await expect(region(page).getByRole('button', { name: 'Chain decoder' })).toBeVisible();
+
 	// A key travelling with its certificate, which is what a server `.pem` holds
 	// and what a reader pastes: still covered, and no longer in the way of the
 	// certificate underneath it.
