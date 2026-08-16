@@ -9,6 +9,8 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-08-16
+
 ### Added
 
 - **The privacy claim is now checkable, not merely stated.** Every input box
@@ -292,7 +294,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.1.0...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.2.0...main
+[2.2.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.1.0...v2.2.0
 [2.1.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.0.0...v2.1.0
 [2.0.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.1.0...v2.0.0
 [1.1.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.0.4...v1.1.0
