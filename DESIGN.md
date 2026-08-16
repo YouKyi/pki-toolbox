@@ -425,6 +425,16 @@ primary action, an active section, a status.
 - **Drop-active:** the dashed border turns orange and the ground steps one plane
   up, with a centred "Drop the file" label.
 - **Error:** ember orange text with its wording; never a red field.
+- **Folded state:** once the artefact is decoded the editor becomes a one-line
+  recap on the raised plane, naming what was read and its size, with **Edit
+  input** and **Clear**. The answer is worth more screen than the base64 the
+  reader just pasted. Folding is the shared behaviour; a page that wants the
+  editor to stay open declares it.
+- **Group fold:** where several fields form one input validated by a single
+  button, the CA certificate and its key on the signing page, they fold and
+  unfold on the same flag: one **Edit input** reopens the whole group. A recap
+  never derives anything from a private key, only the field's name and the byte
+  size of what was pasted.
 
 ### Navigation
 
