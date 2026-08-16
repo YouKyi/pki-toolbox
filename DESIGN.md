@@ -361,8 +361,13 @@ hatch that marks the shift from chrome to content, and the footer's boundary
 between two masses. Borders are 1px hairlines. Two thicker strokes exist, and
 both mark a state rather than an edge: **2px** for the dashed drop zone, and
 **2.5px** for the accent markers that say "you are here": the active-nav
-underline, the current item's bar in a dropdown, and the marker rail of an
-alert (3px there, on a plane rather than a control).
+underline and the current item's bar in a dropdown.
+
+A block that carries a **state** takes the accent on its whole hairline: the
+alert, and the input box while it holds a private key. Never a coloured rail
+down one side. That rail is the house style of the generated web, it says
+nothing the hairline does not say, and one vocabulary is enough: what is in
+question is ringed, never barred.
 
 ### Named Rules
 
@@ -432,6 +437,12 @@ primary action, an active section, a status.
   attempt the browser refuses in front of them. The claim is stated where the
   artefact is handed over, never under the action row after the fact, and it is
   never stated without the means to check it.
+- **Private key state:** whatever the tool, a private key in the box is covered
+  by an opaque veil that names it, states that it has not left the page, and
+  offers **Clear it** or **Show it anyway**. Hiding the material *is* the
+  message, and it holds the same rule the keystore decoder already states. Where
+  a key is asked for, the signing page's CA field, the veil stays but drops the
+  accent: it is a discretion, not an alarm.
 - **Folded state:** once the artefact is decoded the editor becomes a one-line
   recap on the raised plane, naming what was read and its size, with **Edit
   input** and **Clear**. The answer is worth more screen than the base64 the
