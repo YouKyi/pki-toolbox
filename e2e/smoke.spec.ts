@@ -45,6 +45,30 @@ test('S1 home renders with content on the first frame, title set', async ({ page
 	// The no-network claim is part of the sentence under the heading now, not an
 	// eyebrow above it.
 	await expect(page.getByText('Nothing you paste leaves the page.')).toBeVisible();
+
+	// The page is an entry point before it is a directory: paste, and the
+	// artefact names the tool it belongs to.
+	const box = page.getByLabel('PKI artefact input');
+	await expect(box).toBeVisible();
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	await page.getByRole('button', { name: 'Open the right tool' }).click();
+	await expect(page).toHaveURL(/\/decode-certificate$/);
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue(/BEGIN CERTIFICATE/);
+	expect(new URL(page.url()).search).toBe('');
+
+	// Nothing to route: the page says so rather than failing silently.
+	await page.goto('/');
+	await page.getByLabel('PKI artefact input').fill('not an artefact');
+	await page.getByRole('button', { name: 'Open the right tool' }).click();
+	await expect(page.getByText('Nothing recognisable in there')).toBeVisible();
+
+	// A private key has no tool here, and the veil already says it: the action is
+	// held back instead of answered with a second notice.
+	await page
+		.getByLabel('PKI artefact input')
+		.fill('-----BEGIN PRIVATE KEY-----\nMIIBVQIBADANBgkqhkiG9w0B\n-----END PRIVATE KEY-----');
+	await expect(page.getByRole('button', { name: 'Open the right tool' })).toBeDisabled();
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
 });
 
 test('S2 navigate home → tool → home, then a second full document load', async ({ page }) => {

@@ -443,6 +443,10 @@ primary action, an active section, a status.
   message, and it holds the same rule the keystore decoder already states. Where
   a key is asked for, the signing page's CA field, the veil stays but drops the
   accent: it is a discretion, not an alarm.
+- **Doorway:** the home page carries the same input at half height, as an
+  entry point rather than a workbench: it only has to recognise what was
+  pasted, name it, and hand it to the tool that reads it. Every property of the
+  shared box rides along, the no-network proof, the key veil, the file drop.
 - **Shortcut:** `/` puts the caret in the input from anywhere on the page, and
   reopens the folded editor first if the artefact is already decoded. With
   `Ctrl/⌘ + Enter` to decode, those are the product's two accelerators, and both

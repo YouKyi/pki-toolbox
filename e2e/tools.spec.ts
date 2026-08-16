@@ -387,6 +387,17 @@ test('S13 a private key names itself the moment it lands', async ({ page }) => {
 	await expect(page.getByLabel('PKI artefact input')).toHaveValue('');
 	await expect(page.getByText('A private key is in this box.')).toHaveCount(0);
 
+	// A key travelling with its certificate, which is what a server `.pem` holds
+	// and what a reader pastes: still covered, and no longer in the way of the
+	// certificate underneath it.
+	await page.goto('/decode-certificate');
+	await page.getByRole('button', { name: 'Load an example' }).click();
+	const example = await page.getByLabel('PKI artefact input').inputValue();
+	await page.getByLabel('PKI artefact input').fill(`${key}\n${example}`);
+	await expect(page.getByText('A private key is in this box.')).toBeVisible();
+	await page.getByRole('button', { name: 'Decode' }).click();
+	await expect(region(page).getByRole('heading', { name: 'ISRG Root X1', level: 2 })).toBeVisible();
+
 	// The signing page asks for a CA key on purpose. The veil still covers it,
 	// because key material is never displayed, but it stops scolding.
 	await page.goto('/sign-certificate');
