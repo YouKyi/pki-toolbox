@@ -228,3 +228,36 @@ test('S9 generate self-signed certificate', async ({ page }) => {
 
 	await expect(result.getByText('Generation failed')).toHaveCount(0);
 });
+
+// ---------------------------------------------------------------------------
+// S10: CA signing, from the in-page test CA to an issued certificate
+// ---------------------------------------------------------------------------
+test('S10 issue a certificate from the generated test CA', async ({ page }) => {
+	await page.goto('/sign-certificate');
+
+	// One click has to leave the CA generated, imported and folded: the button
+	// fills both fields, waits for the invalidating effect, then imports.
+	await page.getByRole('button', { name: 'Generate a test CA' }).click();
+	await expect(page.getByText('CA loaded')).toBeVisible({ timeout: 20000 });
+	await expect(page.getByText('CN=Toolbox Test CA')).toBeVisible();
+
+	// The pair is one input: both fields fold together, and the key's recap
+	// names the field and its size, never anything read out of the key.
+	await expect(page.getByRole('button', { name: 'Edit input' })).toHaveCount(2);
+	// The recap paragraph, not the field label above it, which carries the same
+	// words. PemInput mirrors the summary into `title`, so this asserts the
+	// recap says exactly that and nothing read out of the key.
+	await expect(page.locator('p[title="CA private key"]')).toBeVisible();
+	await expect(page.getByText('BEGIN PRIVATE KEY')).toHaveCount(0);
+
+	await page.getByLabel('Common Name (CN)').fill('signed.e2e.local');
+	await page.getByRole('button', { name: 'Sign the certificate' }).click();
+
+	const result = region(page);
+	await expect(result.getByText('Certificate (PEM)')).toBeVisible({ timeout: 20000 });
+	await expect(result.getByText('Fullchain (certificate + CA)')).toBeVisible();
+	await expect(
+		result.locator('pre').filter({ hasText: 'BEGIN CERTIFICATE' }).first()
+	).toBeVisible();
+	await expect(page.getByText('Signing failed')).toHaveCount(0);
+});

@@ -3,7 +3,11 @@
 	import { requireTool } from '$lib/tools';
 	import { revealResult } from '$lib/reveal';
 	import { importCa, issueCertificate, type CaContext } from '$lib/pki/sign';
-	import { KEY_ALGORITHM_LABELS, type KeyAlgorithmChoice } from '$lib/pki/generate';
+	import {
+		generateSelfSigned,
+		KEY_ALGORITHM_LABELS,
+		type KeyAlgorithmChoice
+	} from '$lib/pki/generate';
 	import { decodeCsr } from '$lib/pki/parse';
 	import type { IssuedCertificate } from '$lib/pki/sign';
 	import ToolHeader from '$lib/components/ToolHeader.svelte';
@@ -46,6 +50,39 @@
 			caFolded = false;
 		} finally {
 			caLoading = false;
+		}
+	}
+
+	let generatingCa = $state(false);
+
+	/**
+	 * Every other tool ships a sample to try it on. This one cannot: a CA
+	 * certificate is useless here without its private key, and a private key
+	 * shipped in the bundle would be the same one for every reader. So the
+	 * example is generated in the page instead, and dies with the tab.
+	 */
+	async function generateTestCa() {
+		generatingCa = true;
+		caError = '';
+		try {
+			const generated = await generateSelfSigned({
+				commonName: 'Toolbox Test CA',
+				organization: 'youkyi',
+				keyAlgorithm: 'ec-p256',
+				validityDays: 3650,
+				sans: [],
+				isCa: true
+			});
+			caCertPem = generated.certificatePem;
+			caKeyPem = generated.privateKeyPem;
+			// Filling the two fields invalidates the loaded CA through the effect
+			// below. Let it run before importing, or it would wipe what we import.
+			await tick();
+			await loadCa();
+		} catch (e) {
+			caError = e instanceof Error ? e.message : String(e);
+		} finally {
+			generatingCa = false;
 		}
 	}
 
@@ -174,15 +211,33 @@
 		</div>
 	</div>
 
-	<button
-		type="button"
-		onclick={loadCa}
-		disabled={caLoading || !caCertPem.trim() || !caKeyPem.trim()}
-		class="yk-pressable mt-4 inline-flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
-	>
-		<Icon name={caLoading ? 'clock' : 'shield'} size={16} />
-		{caLoading ? 'Loading…' : 'Load the CA'}
-	</button>
+	<div class="mt-4 flex flex-wrap items-center gap-2">
+		<button
+			type="button"
+			onclick={loadCa}
+			disabled={caLoading || !caCertPem.trim() || !caKeyPem.trim()}
+			class="yk-pressable inline-flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 max-sm:min-h-11 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
+		>
+			<Icon name={caLoading ? 'clock' : 'shield'} size={16} />
+			{caLoading ? 'Loading…' : 'Load the CA'}
+		</button>
+
+		<!-- The dry run this tool was missing: no CA of your own to paste, and the
+		     page hands you a throwaway one so the rest can be tried at once. -->
+		<button
+			type="button"
+			onclick={generateTestCa}
+			disabled={generatingCa || caLoading}
+			class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-teal-700 disabled:cursor-not-allowed disabled:opacity-50 max-sm:min-h-11 dark:text-slate-400 dark:hover:text-teal-400"
+		>
+			<Icon name={generatingCa ? 'clock' : 'stamp'} size={16} />
+			{generatingCa ? 'Generating…' : 'Generate a test CA'}
+		</button>
+	</div>
+	<p class="mt-2 text-xs text-ink-3">
+		The test CA is a P-256 key pair generated in this page, valid ten years, for trying the tool. It
+		is stored nowhere and dies with the tab; never issue anything real with it.
+	</p>
 
 	<div class="mt-3 space-y-3" aria-live="polite">
 		{#if caError}
