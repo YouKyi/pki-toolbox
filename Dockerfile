@@ -2,15 +2,17 @@
 
 # ---- Stage 1: build the static site ----
 # Digest-pinned for a reproducible, immutable build base. Renovate keeps the
-# tag and the @sha256 digest in sync when a new node:20-alpine is published.
+# tag and the @sha256 digest in sync when a new node:24-alpine is published.
 FROM node:24-alpine@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43 AS builder
 WORKDIR /app
-# Pin pnpm to the exact version from package.json so the build never drifts to
-# whatever version Corepack would otherwise default to.
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 # Install dependencies against the committed lockfile first (better layer caching).
 COPY package.json pnpm-lock.yaml ./
+# Activate the exact pnpm version from package.json's `packageManager` field
+# (hence after the COPY): a version hardcoded here drifts silently every time
+# Renovate bumps that field, and the build would then run on a pnpm the
+# lockfile was not written by.
+RUN corepack enable && corepack prepare --activate
 RUN pnpm install --frozen-lockfile
 
 # Build the fully static output into /app/build.
