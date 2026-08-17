@@ -51,7 +51,7 @@ variables:
 #   - gitlab-release : une section de changelog absente publiait une release aux
 #     notes VIDES, definitivement et sans signal.
 include:
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-scan@v2.0.1
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-scan@v2.0.5
     inputs:
       stage: scan
       # Ce projet est publie sous MIT et distribue publiquement (GitHub, GHCR,
@@ -66,7 +66,7 @@ include:
       # toujours une reference immuable. Chaque miroir reste inerte tant que sa
       # variable de token est vide : ce sont les NOMS qui sont passes ici.
       mirrors: 'ghcr.io|ghcr.io/youkyi/pki-toolbox|GHCR_USER|GHCR_TOKEN docker.io|docker.io/youkyi/pki-toolbox|DOCKERHUB_USER|DOCKERHUB_TOKEN'
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitlab-release@v2.0.1
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitlab-release@v2.0.5
     inputs:
       stage: release
       release_name: 'pki-toolbox $CI_COMMIT_TAG'
