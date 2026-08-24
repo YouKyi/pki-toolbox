@@ -22,7 +22,7 @@ RUN pnpm build
 # ---- Stage 2: serve with nginx as a non-root user ----
 # Version- and digest-pinned for an immutable runtime base. Renovate keeps the
 # tag and the @sha256 digest in sync when a new nginx:1.31-alpine-slim ships.
-FROM nginx:1.31-alpine-slim@sha256:45b82ed5f285b90d63df07ba70430fdd8f25624b416617d9e6dc93412b2006dc
+FROM nginx:1.31-alpine-slim@sha256:1870de6d59aafee152589b64404556d2535922cdd998e6dac1c4888c938ed8f9
 
 # OCI image metadata. The defaults make a local `docker build` self-describing;
 # CI overrides SOURCE_URL/VCS_REF/BUILD_DATE with the real repository, commit
