@@ -12,7 +12,7 @@
 	 * certificates.
 	 */
 	import { goto } from '$app/navigation';
-	import { detectArtefact, RELATED } from '$lib/pki/detect';
+	import { detectArtefact, RELATED, stripPrivateKeyBlocks } from '$lib/pki/detect';
 	import { toolBySlug, type Tool } from '$lib/tools';
 	import { carry } from '$lib/handoff';
 
@@ -24,9 +24,10 @@
 	};
 
 	let { artefact, current }: Props = $props();
+	const carriedArtefact = $derived(stripPrivateKeyBlocks(artefact));
 
 	const others = $derived.by(() => {
-		const detected = detectArtefact(artefact);
+		const detected = detectArtefact(carriedArtefact);
 		if (!detected) return [] as Tool[];
 		return RELATED[detected.kind]
 			.filter((slug) => slug !== current)
@@ -35,7 +36,7 @@
 	});
 
 	function open(tool: Tool) {
-		carry(artefact);
+		carry(carriedArtefact);
 		goto(`/${tool.slug}`);
 	}
 </script>

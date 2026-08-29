@@ -58,6 +58,25 @@ describe('splitBlocks', () => {
 	it('returns an empty array when there is no armoured block', () => {
 		expect(splitBlocks('just some plain text')).toEqual([]);
 	});
+
+	it('still finds a complete block after an unterminated one', () => {
+		const input =
+			'-----BEGIN CERTIFICATE-----\n' +
+			'not closed\n' +
+			'-----BEGIN X509 CRL-----\nQQ==\n-----END X509 CRL-----';
+		expect(splitBlocks(input)).toEqual([
+			{
+				type: 'X509 CRL',
+				pem: '-----BEGIN X509 CRL-----\nQQ==\n-----END X509 CRL-----'
+			}
+		]);
+	});
+
+	it('handles repeated unterminated headers without quadratic backtracking', () => {
+		const hostile = '-----BEGIN CERTIFICATE-----\n'.repeat(40_000);
+		expect(splitBlocks(hostile)).toEqual([]);
+		expect(looksLikePem(hostile)).toBe(false);
+	}, 500);
 });
 
 describe('looksLikePem', () => {

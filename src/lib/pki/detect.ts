@@ -183,3 +183,25 @@ export function detectPrivateKey(input: string): Detected | null {
 	}
 	return null;
 }
+
+/**
+ * Remove complete private-key blocks before handing an artefact to another
+ * tool. A server bundle can still carry its certificate or CSR, but the key
+ * never follows it to a generic decoder or converter.
+ */
+export function stripPrivateKeyBlocks(input: string): string {
+	const blocks = splitBlocks(input);
+	const hasPrivateKey = blocks.some((block) => {
+		const kind = BY_LABEL[block.type.toUpperCase()];
+		return kind === 'private-key' || kind === 'encrypted-private-key';
+	});
+	if (!hasPrivateKey) return input;
+
+	return blocks
+		.filter((block) => {
+			const kind = BY_LABEL[block.type.toUpperCase()];
+			return kind !== 'private-key' && kind !== 'encrypted-private-key';
+		})
+		.map((block) => block.pem)
+		.join('\n');
+}

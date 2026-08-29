@@ -411,6 +411,17 @@ test('S13 a private key names itself the moment it lands', async ({ page }) => {
 	await page.getByRole('button', { name: 'Decode' }).click();
 	await expect(region(page).getByRole('heading', { name: 'ISRG Root X1', level: 2 })).toBeVisible();
 
+	// The certificate may move to a generic tool, but the adjacent key may not.
+	await region(page).getByRole('button', { name: 'Format conversion' }).click();
+	await expect(page).toHaveURL(/\/format-convert$/);
+	await expect(page.getByLabel('PKI artefact input')).toHaveValue(example);
+	await expect(page.getByLabel('PKI artefact input')).not.toHaveValue(/PRIVATE KEY/);
+
+	// A direct key paste is also stopped before the converter can render it in
+	// PEM, base64 or hexadecimal form.
+	await page.getByLabel('PKI artefact input').fill(key);
+	await expect(page.getByRole('button', { name: 'Convert' })).toBeDisabled();
+
 	// The signing page asks for a CA key on purpose. The veil still covers it,
 	// because key material is never displayed, but it stops scolding.
 	await page.goto('/sign-certificate');

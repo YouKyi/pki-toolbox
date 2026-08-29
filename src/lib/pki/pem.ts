@@ -36,27 +36,125 @@ export function assertInputSize(input: string): void {
 	}
 }
 
-/** Matches one `-----BEGIN X-----…-----END X-----` block. */
-const BLOCK_RE = /-----BEGIN ([A-Z0-9 #]+?)-----[\s\S]+?-----END \1-----/g;
+type PemMarker = {
+	kind: 'begin' | 'end';
+	/** The untrimmed label: END markers must match BEGIN markers byte for byte. */
+	label: string;
+	start: number;
+	end: number;
+};
+
+type PemBlockRange = {
+	type: string;
+	start: number;
+	end: number;
+};
+
+const BEGIN_PREFIX = '-----BEGIN ';
+const END_PREFIX = '-----END ';
+const MARKER_SUFFIX = '-----';
+
+function isLabelCharacter(code: number): boolean {
+	return (
+		(code >= 0x41 && code <= 0x5a) || // A-Z
+		(code >= 0x30 && code <= 0x39) || // 0-9
+		code === 0x20 || // space
+		code === 0x23 // #
+	);
+}
+
+/**
+ * Read BEGIN and END markers in one pass without scanning an unterminated
+ * block once for every BEGIN marker that precedes it.
+ */
+function scanMarkers(input: string): PemMarker[] {
+	const markers: PemMarker[] = [];
+	let cursor = 0;
+
+	while (cursor < input.length) {
+		const start = input.indexOf(MARKER_SUFFIX, cursor);
+		if (start === -1) break;
+
+		let kind: PemMarker['kind'];
+		let labelStart: number;
+		if (input.startsWith(BEGIN_PREFIX, start)) {
+			kind = 'begin';
+			labelStart = start + BEGIN_PREFIX.length;
+		} else if (input.startsWith(END_PREFIX, start)) {
+			kind = 'end';
+			labelStart = start + END_PREFIX.length;
+		} else {
+			// Move by one so an overlapping run of dashes cannot hide a marker.
+			cursor = start + 1;
+			continue;
+		}
+
+		let labelEnd = labelStart;
+		while (labelEnd < input.length && isLabelCharacter(input.charCodeAt(labelEnd))) {
+			labelEnd += 1;
+		}
+
+		if (labelEnd === labelStart || !input.startsWith(MARKER_SUFFIX, labelEnd)) {
+			cursor = start + 1;
+			continue;
+		}
+
+		const end = labelEnd + MARKER_SUFFIX.length;
+		markers.push({ kind, label: input.slice(labelStart, labelEnd), start, end });
+		cursor = end;
+	}
+
+	return markers;
+}
+
+function firstEndAfter(markers: PemMarker[], offset: number): PemMarker | null {
+	let low = 0;
+	let high = markers.length;
+	while (low < high) {
+		const middle = low + Math.floor((high - low) / 2);
+		if (markers[middle].start <= offset) low = middle + 1;
+		else high = middle;
+	}
+	return markers[low] ?? null;
+}
+
+/** Find complete, non-overlapping PEM blocks with leftmost-first semantics. */
+function blockRanges(input: string): PemBlockRange[] {
+	const markers = scanMarkers(input);
+	const endsByLabel = new Map<string, PemMarker[]>();
+	for (const marker of markers) {
+		if (marker.kind !== 'end') continue;
+		const ends = endsByLabel.get(marker.label);
+		if (ends) ends.push(marker);
+		else endsByLabel.set(marker.label, [marker]);
+	}
+
+	const ranges: PemBlockRange[] = [];
+	let consumedUntil = 0;
+	for (const marker of markers) {
+		if (marker.kind !== 'begin' || marker.start < consumedUntil) continue;
+		const closing = firstEndAfter(endsByLabel.get(marker.label) ?? [], marker.end);
+		if (!closing) continue;
+		ranges.push({ type: marker.label.trim(), start: marker.start, end: closing.end });
+		consumedUntil = closing.end;
+	}
+	return ranges;
+}
 
 /**
  * Split a PEM string into its individual armoured blocks, in document order.
  * Text outside of `BEGIN/END` markers is ignored.
  */
 export function splitBlocks(input: string): PemBlock[] {
-	const out: PemBlock[] = [];
-	let match: RegExpExecArray | null;
-	BLOCK_RE.lastIndex = 0;
-	while ((match = BLOCK_RE.exec(input)) !== null) {
-		out.push({ type: match[1].trim(), pem: match[0] });
-	}
-	return out;
+	return blockRanges(input).map((range) => ({
+		type: range.type,
+		pem: input.slice(range.start, range.end)
+	}));
 }
 
 /** True when the string contains at least one PEM armoured block. */
 export function looksLikePem(input: string): boolean {
-	BLOCK_RE.lastIndex = 0;
-	return BLOCK_RE.test(input);
+	return blockRanges(input).length > 0;
 }
 
 /** Decode a base64 string to bytes (works in browsers and Node). */

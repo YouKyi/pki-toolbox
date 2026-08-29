@@ -14,6 +14,8 @@ import {
 	ISRG_ROOT_X2
 } from '../fixtures/certs';
 
+const PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nMIIBVQIBADAN\n-----END PRIVATE KEY-----';
+
 describe('decodeCrl', () => {
 	it('decodes issuer, dates and revoked entries', () => {
 		const crl = decodeCrl(TEST_CRL);
@@ -78,6 +80,10 @@ describe('parseAsn1', () => {
 		const doubled = `-----BEGIN CERTIFICATE-----\n${body}${body}\n-----END CERTIFICATE-----`;
 		expect(() => parseAsn1(doubled)).toThrowError(/trailing byte/i);
 	});
+
+	it('rejects private-key blocks before parsing their structure', () => {
+		expect(() => parseAsn1(PRIVATE_KEY)).toThrowError(/private keys are not accepted/i);
+	});
 });
 
 describe('convertArtefact / buildPkcs7', () => {
@@ -99,6 +105,12 @@ describe('convertArtefact / buildPkcs7', () => {
 		const bundle = buildPkcs7(items.map((i) => i.der));
 		expect(bundle.length).toBeGreaterThan(0);
 		expect(bundle[0]).toBe(0x30); // ASN.1 SEQUENCE
+	});
+
+	it('rejects a private key even when it travels with a certificate', () => {
+		expect(() => convertArtefact(`${PRIVATE_KEY}\n${ISRG_ROOT_X2}`)).toThrowError(
+			/private keys are not accepted/i
+		);
 	});
 });
 
