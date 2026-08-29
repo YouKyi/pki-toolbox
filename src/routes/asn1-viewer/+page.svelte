@@ -40,10 +40,11 @@
 	errorId={flow.errorId}
 	summary={flow.summary}
 	loading={flow.loading}
+	rejectsPrivateKey
 	ondecode={() => flow.decode()}
 	decodeLabel="Parse"
 	example={ISRG_ROOT_X2}
-	placeholder="Paste a PEM or DER artefact (certificate, CSR, key, CRL…)…"
+	placeholder="Paste a PEM or DER artefact (certificate, CSR, CRL…)…"
 />
 
 <div bind:this={flow.region} id="result" tabindex="-1" class="mt-6 space-y-4 outline-none">

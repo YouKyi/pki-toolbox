@@ -9,6 +9,14 @@ are not listed individually here.
 
 ## [Unreleased]
 
+### Security
+
+- Replaced the PEM block regular expression with a bounded marker parser. A
+  paste containing many unterminated `BEGIN` headers can no longer trigger
+  quadratic backtracking and freeze the browser tab before decoding starts.
+- Private-key blocks are now rejected by generic format and ASN.1 tools, and
+  removed from artefacts handed from one tool to another.
+
 ## [2.2.0] - 2026-08-16
 
 ### Added

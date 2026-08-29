@@ -7,6 +7,7 @@ import * as asn1js from 'asn1js';
 import { pemToDer, assertInputSize } from './pem';
 import { bytesToHex } from './format';
 import { toArrayBuffer } from './engine';
+import { detectPrivateKey } from './detect';
 
 export type Asn1Node = {
 	/** Display tag, e.g. `SEQUENCE`, `INTEGER`, `[0]`. */
@@ -178,6 +179,9 @@ function walk(block: AnyBlock, offset: number, depth: number, budget: { count: n
  */
 export function parseAsn1(input: string): Asn1Node {
 	assertInputSize(input);
+	if (detectPrivateKey(input)) {
+		throw new Error('Private keys are not accepted by the ASN.1 viewer.');
+	}
 
 	let der: Uint8Array;
 	try {
