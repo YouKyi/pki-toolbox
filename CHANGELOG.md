@@ -9,6 +9,8 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-08-29
+
 ### Security
 
 - Replaced the PEM block regular expression with a bounded marker parser. A
@@ -16,6 +18,26 @@ are not listed individually here.
   quadratic backtracking and freeze the browser tab before decoding starts.
 - Private-key blocks are now rejected by generic format and ASN.1 tools, and
   removed from artefacts handed from one tool to another.
+- The public deployment sends the headers the image always promised.
+  `Permissions-Policy`, `Cross-Origin-Resource-Policy` and a `frame-ancestors`
+  policy are set in `nginx.conf`, which the Vercel deployment never reads, so
+  all three were absent from every response. `frame-ancestors` is the one that
+  mattered: SvelteKit emits its CSP in a meta tag, and a meta CSP ignores that
+  directive, leaving `X-Frame-Options` alone against framing.
+- The runtime image carries openssl 3.5.8-r0. `nginx:1.31-alpine-slim` still
+  ships 3.5.7-r0, vulnerable to CVE-2026-14456, and no rebuilt tag carries the
+  fix yet.
+
+The first two entries come from a contribution by
+[@duggytuxy](https://github.com/duggytuxy), opened on the GitHub mirror as
+[#1](https://github.com/YouKyi/pki-toolbox/pull/1).
+
+### Changed
+
+- The ASN.1 viewer and the format converter no longer read private keys at all.
+  Their action is disabled while a key is in the box, whatever else travels
+  with it, and the viewer stops offering keys in its placeholder. A key still
+  belongs on the signing page, which asks for one on purpose.
 
 ## [2.2.0] - 2026-08-16
 
@@ -302,7 +324,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.2.0...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.3.0...main
+[2.3.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.2.0...v2.3.0
 [2.2.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.1.0...v2.2.0
 [2.1.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.0.0...v2.1.0
 [2.0.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v1.1.0...v2.0.0
