@@ -3,7 +3,7 @@
 # ---- Stage 1: build the static site ----
 # Digest-pinned for a reproducible, immutable build base. Renovate keeps the
 # tag and the @sha256 digest in sync when a new node:24-alpine is published.
-FROM node:24-alpine@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43 AS builder
+FROM node:24-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS builder
 WORKDIR /app
 
 # Install dependencies against the committed lockfile first (better layer caching).
@@ -23,6 +23,14 @@ RUN pnpm build
 # Version- and digest-pinned for an immutable runtime base. Renovate keeps the
 # tag and the @sha256 digest in sync when a new nginx:1.31-alpine-slim ships.
 FROM nginx:1.31-alpine-slim@sha256:1870de6d59aafee152589b64404556d2535922cdd998e6dac1c4888c938ed8f9
+
+# Alpine ships a security fix before the nginx image is rebuilt around it, and
+# the scan gate reads the image, not the calendar: 1.31.4-alpine-slim is the
+# newest tag there is and it still carries openssl 3.5.7-r0, vulnerable to
+# CVE-2026-14456. Upgrading the two packages by name keeps the rest of the base
+# pinned to its digest. Drop this once an nginx:1.31-alpine-slim ships openssl
+# 3.5.8-r0 or later.
+RUN apk upgrade --no-cache libcrypto3 libssl3
 
 # OCI image metadata. The defaults make a local `docker build` self-describing;
 # CI overrides SOURCE_URL/VCS_REF/BUILD_DATE with the real repository, commit
