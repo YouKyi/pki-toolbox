@@ -5,6 +5,7 @@ import * as pkijs from 'pkijs';
 import { splitBlocks, pemToDer, derToPem, bytesToBase64, assertInputSize } from './pem';
 import { bytesToHex } from './format';
 import { ensurePkijsEngine, toArrayBuffer } from './engine';
+import { detectPrivateKey } from './detect';
 
 const OID_SIGNED_DATA = '1.2.840.113549.1.7.2';
 const OID_DATA = '1.2.840.113549.1.7.1';
@@ -56,6 +57,9 @@ function extractPkcs7(der: Uint8Array): Uint8Array[] {
  */
 export function convertArtefact(input: string): ConvertedItem[] {
 	assertInputSize(input);
+	if (detectPrivateKey(input)) {
+		throw new Error('Private keys are not accepted by the format converter.');
+	}
 	const blocks = splitBlocks(input);
 	const pkcs7 = blocks.find((b) => PKCS7_LABELS.has(b.type));
 	if (pkcs7) {

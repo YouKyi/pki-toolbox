@@ -35,7 +35,7 @@
 		"@tailwindcss/typography": "0.5.20",
 		"@tailwindcss/vite": "4.3.3",
 		"@types/node": "24.13.3",
-		"eslint": "10.9.0",
+		"eslint": "10.9.1",
 		"eslint-config-prettier": "10.1.8",
 		"eslint-plugin-svelte": "3.23.0",
 		"globals": "17.11.0",
@@ -50,9 +50,9 @@
 		"vite": "8.2.2",
 		"vitest": "4.1.11"
 	},
-	"packageManager": "pnpm@11.22.0",
+	"packageManager": "pnpm@11.24.0",
 	"engines": {
 		"node": ">=20",
-		"pnpm": "11.22.0"
+		"pnpm": "11.24.0"
 	}
 }

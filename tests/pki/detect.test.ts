@@ -5,7 +5,13 @@
  * what a dropped `.p12` used to become, and a private key, which no tool reads.
  */
 import { describe, it, expect } from 'vitest';
-import { detectArtefact, detectBytes, detectPrivateKey, isPkcs12 } from '$lib/pki/detect';
+import {
+	detectArtefact,
+	detectBytes,
+	detectPrivateKey,
+	isPkcs12,
+	stripPrivateKeyBlocks
+} from '$lib/pki/detect';
 import { base64ToBytes, derToPem } from '$lib/pki/pem';
 import {
 	ISRG_ROOT_X1,
@@ -97,6 +103,21 @@ describe('detectPrivateKey', () => {
 
 	it('says nothing when no key is in the paste', () => {
 		expect(detectPrivateKey(ISRG_ROOT_X1)).toBeNull();
+	});
+});
+
+describe('stripPrivateKeyBlocks', () => {
+	const KEY = '-----BEGIN PRIVATE KEY-----\nMIIBVQIBADAN\n-----END PRIVATE KEY-----';
+
+	it('keeps the certificate but removes the key from a server bundle', () => {
+		const safe = stripPrivateKeyBlocks(`${KEY}\n${ISRG_ROOT_X1}`);
+		expect(safe).toBe(ISRG_ROOT_X1);
+		expect(safe).not.toContain('PRIVATE KEY');
+	});
+
+	it('leaves an artefact without a key byte-for-byte unchanged', () => {
+		const input = `prefix\n${ISRG_ROOT_X1}\nsuffix`;
+		expect(stripPrivateKeyBlocks(input)).toBe(input);
 	});
 });
 

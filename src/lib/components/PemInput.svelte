@@ -48,6 +48,8 @@
 		 * appears: key material stays covered even where the key is wanted.
 		 */
 		acceptsPrivateKey?: boolean;
+		/** Prevents a generic tool from acting on private-key material. */
+		rejectsPrivateKey?: boolean;
 		/**
 		 * Half-height field, for a box that is a doorway rather than a workbench:
 		 * the home page only has to recognise what was pasted, not give the reader
@@ -77,6 +79,7 @@
 		invalid = false,
 		errorId,
 		acceptsPrivateKey = false,
+		rejectsPrivateKey = false,
 		compact = false,
 		decodeDisabled = false,
 		ondecode
@@ -144,6 +147,7 @@
 	 * discretion, not an alarm.
 	 */
 	const unwantedKey = $derived(Boolean(pastedKey) && !acceptsPrivateKey);
+	const actionDisabled = $derived(decodeDisabled || (rejectsPrivateKey && unwantedKey));
 
 	// Emptying the box, or replacing the key with something else, restores the
 	// veil for whatever lands next.
@@ -216,7 +220,7 @@
 	function onKeydown(event: KeyboardEvent) {
 		if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
 			event.preventDefault();
-			if (!decodeDisabled) ondecode?.();
+			if (!actionDisabled) ondecode?.();
 		}
 	}
 </script>
@@ -375,7 +379,7 @@
 			<button
 				type="button"
 				onclick={() => ondecode?.()}
-				disabled={loading || decodeDisabled || value.trim().length === 0}
+				disabled={loading || actionDisabled || value.trim().length === 0}
 				class="yk-pressable inline-flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 max-sm:min-h-11 dark:bg-teal-400 dark:text-[color:var(--yk-on-accent)] dark:hover:bg-teal-300"
 			>
 				{#if loading}

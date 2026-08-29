@@ -70,6 +70,7 @@
 	errorId={flow.errorId}
 	summary={flow.summary}
 	loading={flow.loading}
+	rejectsPrivateKey
 	ondecode={() => flow.decode()}
 	decodeLabel="Convert"
 	example={ISRG_ROOT_X2}
