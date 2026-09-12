@@ -16,7 +16,9 @@ node_modules
 Thumbs.db
 
 # Local Claude Code state (plans, memory, per-developer settings)
-.claude/
+.claude/*
+!.claude/skills/
+!.claude/skills/**
 
 # Env
 .env
