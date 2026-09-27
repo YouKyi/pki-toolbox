@@ -22,7 +22,7 @@ RUN pnpm build
 # ---- Stage 2: serve with nginx as a non-root user ----
 # Version- and digest-pinned for an immutable runtime base. Renovate keeps the
 # tag and the @sha256 digest in sync when a new nginx:1.31-alpine-slim ships.
-FROM nginx:1.31-alpine-slim@sha256:3b171d7224b669faa3cc2137fea0a65301791df1ec1f271ebd2a2b7461f7fade
+FROM nginx:1.31-alpine-slim@sha256:f761b94f2cb9e8e05e2943d5f773609596113ef69b54e2433a996d109a8f78b7
 
 # Alpine ships a security fix before the nginx image is rebuilt around it, and
 # the scan gate reads the image, not the calendar: 1.31.4-alpine-slim is the
