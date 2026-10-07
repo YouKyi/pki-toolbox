@@ -2,7 +2,6 @@ stages:
   - lint
   - test
   - e2e
-  - scan
   - docker
   - release
 
@@ -51,14 +50,22 @@ variables:
 #   - gitlab-release : une section de changelog absente publiait une release aux
 #     notes VIDES, definitivement et sans signal.
 include:
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-scan@v2.0.5
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitleaks-scan@v2.1.0
     inputs:
-      stage: scan
+      stage: lint
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-vuln@v2.1.0
+    inputs:
+      stage: lint
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-secret@v2.1.0
+    inputs:
+      stage: lint
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-license@v2.1.0
+    inputs:
+      stage: lint
       # Ce projet est publie sous MIT et distribue publiquement (GitHub, GHCR,
       # Docker Hub) : le controle de licences y a un objet juridique reel, ce qui
       # n'est pas le cas d'un depot prive non distribue.
-      license_scan: true
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/docker-build@v2.0.5
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/docker-build@v2.1.0
     inputs:
       stage: docker
       source_url: https://github.com/youkyi/pki-toolbox
@@ -66,7 +73,7 @@ include:
       # toujours une reference immuable. Chaque miroir reste inerte tant que sa
       # variable de token est vide : ce sont les NOMS qui sont passes ici.
       mirrors: 'ghcr.io|ghcr.io/youkyi/pki-toolbox|GHCR_USER|GHCR_TOKEN docker.io|docker.io/youkyi/pki-toolbox|DOCKERHUB_USER|DOCKERHUB_TOKEN'
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitlab-release@v2.0.5
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitlab-release@v2.1.0
     inputs:
       stage: release
       release_name: 'pki-toolbox $CI_COMMIT_TAG'
@@ -74,14 +81,14 @@ include:
 
 # Surcharges des composants. Les jobs sont redeclares par leur job_name ; rules,
 # needs et changes etant des tableaux, ces valeurs remplacent celles du composant.
-'catalog:trivy-scan':
-  needs: []
-
 'catalog:docker-build':
   needs:
     - lint
     - test
-    - 'catalog:trivy-scan'
+    - 'catalog:gitleaks-scan'
+    - 'catalog:trivy-vuln'
+    - 'catalog:trivy-secret'
+    - 'catalog:trivy-license'
     - job: e2e
       optional: true
   rules:
