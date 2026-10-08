@@ -1,0 +1,10 @@
+# Truncated dummy PEM fixture for private-key detection tests.
+tests/pki/detect.test.ts:private-key:58
+# Truncated dummy PEM fixture for private-key bundle routing tests.
+tests/pki/detect.test.ts:private-key:91
+# Generated RSA-PSS test key used only to verify unsupported CA key rejection.
+tests/pki/sign.test.ts:private-key:57
+# Historical truncated dummy PEM fixture for private-key bundle routing tests.
+ea3f2279c2f119a32b79441277f227c75fc9a2f7:tests/pki/detect.test.ts:private-key:58
+# Historical RSA-PSS test key used only to verify unsupported CA key rejection.
+39a42379974d5a498bad7fe8c5829f52e9d9116c:tests/pki/sign.test.ts:private-key:57
