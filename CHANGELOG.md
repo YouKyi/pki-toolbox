@@ -9,6 +9,21 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-10-08
+
+### Security
+
+- The runtime image upgrades PCRE2 from 10.48-r0 to 10.49-r0 to fix
+  CVE-2026-103111.
+
+### Changed
+
+- CI now requires the ci-catalog v2.1.0 `gitleaks-scan`, `trivy-vuln`,
+  `trivy-secret` and `trivy-license` scans in place of `trivy-scan`.
+- `.gitleaksignore` lists the exact fingerprints of dummy PEM and generated
+  RSA-PSS test fixtures in the working tree and Git history, with a reason
+  for each exception.
+
 ## [2.3.0] - 2026-08-29
 
 ### Security
@@ -324,7 +339,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.3.0...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.3.1...main
+[2.3.1]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.3.0...v2.3.1
 [2.3.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.2.0...v2.3.0
 [2.2.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.1.0...v2.2.0
 [2.1.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.0.0...v2.1.0

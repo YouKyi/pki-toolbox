@@ -24,13 +24,11 @@ RUN pnpm build
 # tag and the @sha256 digest in sync when a new nginx:1.31-alpine-slim ships.
 FROM nginx:1.31-alpine-slim@sha256:f761b94f2cb9e8e05e2943d5f773609596113ef69b54e2433a996d109a8f78b7
 
-# Alpine ships a security fix before the nginx image is rebuilt around it, and
-# the scan gate reads the image, not the calendar: 1.31.4-alpine-slim is the
-# newest tag there is and it still carries openssl 3.5.7-r0, vulnerable to
-# CVE-2026-14456. Upgrading the two packages by name keeps the rest of the base
-# pinned to its digest. Drop this once an nginx:1.31-alpine-slim ships openssl
-# 3.5.8-r0 or later.
-RUN apk upgrade --no-cache libcrypto3 libssl3
+# Alpine ships a security fix before the nginx image is rebuilt around it: the
+# pinned base carries pcre2 10.48-r0, vulnerable to CVE-2026-103111. Upgrading
+# the package by name keeps the rest of the base pinned to its digest. Drop this
+# once an nginx:1.31-alpine-slim ships pcre2 10.49-r0 or later.
+RUN apk upgrade --no-cache pcre2
 
 # OCI image metadata. The defaults make a local `docker build` self-describing;
 # CI overrides SOURCE_URL/VCS_REF/BUILD_DATE with the real repository, commit
