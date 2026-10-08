@@ -50,22 +50,22 @@ variables:
 #   - gitlab-release : une section de changelog absente publiait une release aux
 #     notes VIDES, definitivement et sans signal.
 include:
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitleaks-scan@v2.1.0
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitleaks-scan@v2.2.0
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-vuln@v2.1.0
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-vuln@v2.2.0
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-secret@v2.1.0
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-secret@v2.2.0
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-license@v2.1.0
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/trivy-license@v2.2.0
     inputs:
       stage: lint
       # Ce projet est publie sous MIT et distribue publiquement (GitHub, GHCR,
       # Docker Hub) : le controle de licences y a un objet juridique reel, ce qui
       # n'est pas le cas d'un depot prive non distribue.
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/docker-build@v2.1.0
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/docker-build@v2.2.0
     inputs:
       stage: docker
       source_url: https://github.com/youkyi/pki-toolbox
@@ -73,7 +73,7 @@ include:
       # toujours une reference immuable. Chaque miroir reste inerte tant que sa
       # variable de token est vide : ce sont les NOMS qui sont passes ici.
       mirrors: 'ghcr.io|ghcr.io/youkyi/pki-toolbox|GHCR_USER|GHCR_TOKEN docker.io|docker.io/youkyi/pki-toolbox|DOCKERHUB_USER|DOCKERHUB_TOKEN'
-  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitlab-release@v2.1.0
+  - component: $CI_SERVER_FQDN/YouKyi-Infra/ci-infrastructure/ci-catalog/gitlab-release@v2.2.0
     inputs:
       stage: release
       release_name: 'pki-toolbox $CI_COMMIT_TAG'
