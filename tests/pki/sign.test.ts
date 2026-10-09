@@ -145,7 +145,7 @@ describe('importCa', () => {
 		);
 	});
 
-	it('warns (non-blocking) when the certificate is not a CA', async () => {
+	it('refuses a signer that is not a CA', async () => {
 		const leaf = await generateSelfSigned({
 			commonName: 'not-a-ca.test',
 			keyAlgorithm: 'ec-p256',
@@ -153,8 +153,7 @@ describe('importCa', () => {
 			sans: [],
 			isCa: false
 		});
-		const ctx = await importCa(leaf.certificatePem, leaf.privateKeyPem);
-		expect(ctx.warnings.some((w) => /not marked as a CA/i.test(w))).toBe(true);
+		await expect(importCa(leaf.certificatePem, leaf.privateKeyPem)).rejects.toThrow(/not a CA/i);
 	});
 });
 
