@@ -79,8 +79,10 @@ function caAlgorithm(cert: X509Certificate): CaAlgo {
 
 /**
  * Parse the CA certificate, import its private key into WebCrypto and verify
- * that both belong together (sign/verify probe). Throws on any hard failure;
- * soft issues (certificate not marked as a CA) land in `warnings`.
+ * that both belong together (sign/verify probe). Throws on any hard failure,
+ * including a certificate that is not allowed to sign certificates
+ * (RFC 5280 4.2.1.9 and 4.2.1.3: cA must be set, and keyCertSign when Key
+ * Usage is present). `warnings` is kept for future soft issues.
  */
 export async function importCa(certPem: string, keyPem: string): Promise<CaContext> {
 	const crypto = webCrypto();
@@ -124,13 +126,21 @@ export async function importCa(certPem: string, keyPem: string): Promise<CaConte
 	}
 	if (!matches) throw new Error('The private key does not match the CA certificate.');
 
-	const warnings: string[] = [];
+	// Review F28: issuing from a non-CA used to be a warning, yet every
+	// conforming verifier rejects the resulting chain. Refuse instead.
 	const bc = cert.getExtension(BasicConstraintsExtension);
 	if (!bc?.ca) {
-		warnings.push(
-			'This certificate is not marked as a CA (Basic Constraints cA is not set); verifiers may reject certificates it signs.'
+		throw new Error(
+			'This certificate is not a CA (Basic Constraints cA is not set): it cannot issue certificates. Import a CA certificate and its key.'
 		);
 	}
+	const ku = cert.getExtension(KeyUsagesExtension);
+	if (ku && !(ku.usages & KeyUsageFlags.keyCertSign)) {
+		throw new Error(
+			'This CA certificate does not allow certificate signing (Key Usage lacks keyCertSign): it cannot issue certificates.'
+		);
+	}
+	const warnings: string[] = [];
 
 	return { cert, key, signingAlgorithm: algo.sign, warnings };
 }
