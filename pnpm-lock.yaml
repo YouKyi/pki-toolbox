@@ -177,7 +177,7 @@ importers:
         version: 3.1.0
       pkijs:
         specifier: ^3.2.5
-        version: 3.4.2
+        version: 3.4.3
     devDependencies:
       '@eslint/compat':
         specifier: 2.1.1
@@ -1280,8 +1280,8 @@ packages:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
 
-  pkijs@3.4.2:
-    resolution: {integrity: sha512-LIy5RqLEzlliax2ANQNWvDLvhJ2CtlpJahiSvKtXnpMdKHhXXoLdpdnWqae/uaTyF3U5l5ARweW0kZp9B0s2VA==}
+  pkijs@3.4.3:
+    resolution: {integrity: sha512-V9kOzaItwDgqlryhXysQsAXUEKi5O7kqWUaP3dXI7MLvkPqWWMb4wVb1QAtmEDCKI+XIAINsZoNKMFF7sZb1eg==}
     engines: {node: '>=16.0.0'}
 
   playwright-core@1.64.1:
@@ -2596,7 +2596,7 @@ snapshots:
 
   picomatch@4.0.7: {}
 
-  pkijs@3.4.2:
+  pkijs@3.4.3:
     dependencies:
       '@noble/hashes': 1.8.0
       asn1js: 3.1.0
