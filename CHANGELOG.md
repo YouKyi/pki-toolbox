@@ -9,6 +9,16 @@ are not listed individually here.
 
 ## [Unreleased]
 
+### Changed
+
+- CI moves to the ci-catalog v3.0.0 `container-image` chain: the image is
+  pushed as a `candidate-*` tag, scanned by digest, and only that digest is
+  promoted to `:<sha>`, `latest` or the version tag and to the mirrors. Lint,
+  tests, end-to-end tests and the repository scans now gate the promotion
+  instead of the build. The GitLab Release notes carry the image digest.
+- CI runs the ci-catalog `ggshield-scan` component next to `gitleaks-scan`,
+  and its result gates the image promotion too.
+
 ## [2.3.1] - 2026-10-08
 
 ### Security

@@ -181,8 +181,10 @@ docker run -p 8080:8080 pki-toolbox
 - **Supply chain.** Both base images are pinned to immutable digests kept
   current by Renovate. CI fails on a fixable HIGH/CRITICAL finding, both on the
   repository (`trivy fs`) and on the freshly built image, which is also
-  rejected when its base OS is end-of-life, so a vulnerable image is never
-  pushed. Licences are scanned in a separate, non-blocking pass.
+  rejected when its base OS is end-of-life. The image is pushed as an untagged
+  candidate, scanned by digest, and only that scanned digest is promoted, so a
+  vulnerable image never receives a version tag. Licences are scanned in a
+  separate, non-blocking pass.
 - **Accessibility.** The interface meets WCAG 2.2 AA.
 
 ## Versioning & releases
@@ -211,12 +213,13 @@ are recorded in [`CHANGELOG.md`](./CHANGELOG.md). Contribution rules live in
 
 Lint, unit tests and end-to-end tests run on every push. The scan, build and
 release stages come from the shared `YouKyi-Infra/ci-infrastructure/ci-catalog`
-components (`trivy-scan`, `docker-build`, `gitlab-release`), pinned by version
-in [`.gitlab-ci.yml`](./.gitlab-ci.yml).
+components (`gitleaks-scan`, `ggshield-scan`, `trivy-vuln`, `trivy-secret`,
+`trivy-license`, `container-image`, `gitlab-release`), pinned by version in
+[`.gitlab-ci.yml`](./.gitlab-ci.yml).
 
-A `vX.Y.Z` tag runs the whole chain: scan, image build, image scan, push of
-`vX.Y.Z` to the GitLab registry and to the public mirrors (ghcr.io, Docker
-Hub), then a **GitLab Release whose notes are the matching `## [X.Y.Z]` section
+A `vX.Y.Z` tag runs the whole chain: repository scans, image build pushed as a
+`candidate-*` tag, image scan by digest, promotion of that digest to `vX.Y.Z`
+in the GitLab registry and to the public mirrors (ghcr.io, Docker Hub), then a **GitLab Release whose notes are the matching `## [X.Y.Z]` section
 extracted from `CHANGELOG.md`** (an empty section fails the job rather than
 publishing empty notes).
 
