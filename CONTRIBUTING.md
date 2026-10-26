@@ -71,16 +71,16 @@ GitLab Release.
 The pipeline (`.gitlab-ci.yml`) has five stages: `lint`, `test`, `scan`,
 `docker`, and `release`.
 
-| Stage     | Jobs                                                                                                          | When                                                                            |
-| --------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `lint`    | `pnpm lint`, `pnpm check`                                                                                     | Every pipeline                                                                  |
-| `test`    | `pnpm test`                                                                                                   | Every pipeline                                                                  |
-| `scan`    | `supply-chain` (Trivy filesystem scan: dependencies, secrets, licenses, CycloneDX SBOM)                       | Every pipeline                                                                  |
-| `docker`  | Build via the multi-stage Dockerfile (which runs `pnpm build` internally), Trivy image scan, push to registry | Tags unconditionally; branches and MRs only when a build-affecting file changed |
-| `release` | Publish a GitLab Release from the matching `CHANGELOG.md` section                                             | `vX.Y.Z` tags only                                                              |
+| Stage     | Jobs                                                                                                   | When                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| `lint`    | `pnpm lint`, `pnpm check`                                                                              | Every pipeline                                                                  |
+| `test`    | `pnpm test`                                                                                            | Every pipeline                                                                  |
+| `scan`    | `supply-chain` (Trivy filesystem scan: dependencies, secrets, licenses, CycloneDX SBOM)                | Every pipeline                                                                  |
+| `docker`  | `container-image` chain: build and push of a candidate, Trivy scan by digest, promotion of that digest | Tags unconditionally; branches and MRs only when a build-affecting file changed |
+| `release` | Publish a GitLab Release from the matching `CHANGELOG.md` section                                      | `vX.Y.Z` tags only                                                              |
 
 There is no separate `build` stage: the build runs inside the `docker` job's
-multi-stage Dockerfile. The `supply-chain` job runs in the `scan` stage on
-every pipeline and gates the `docker` job, a fixable HIGH/CRITICAL CVE, a
-committed secret or a restricted license blocks the image build. The `docker`
-job is gated on `lint`, `test` and `supply-chain` passing.
+multi-stage Dockerfile. The image build starts right away and pushes an
+untagged candidate; the promotion, which sets `:<sha>`, `latest` or the
+version tag, waits for `lint`, `test`, `e2e`, the repository scans and the
+image scan. An MR pipeline verifies the chain without tagging anything.
