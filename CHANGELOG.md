@@ -9,8 +9,24 @@ are not listed individually here.
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-10-28
+
+The site looks and behaves as in 2.3.1: same pages, same addresses, same
+static image served by nginx. The framework and the build toolchain moved a
+generation ahead underneath.
+
 ### Changed
 
+- The site is built with SvelteKit 3 and `@sveltejs/adapter-static` 4. The
+  output is still a fully static site whose Content-Security-Policy is
+  emitted as a meta tag in hash mode. The configuration moved from
+  `svelte.config.js` into `vite.config.ts`, and `$lib` imports became the
+  `#lib/*` subpath import declared in `package.json`.
+- The image is built on Node 26. pnpm is installed at the exact
+  `packageManager` version with `npm install -g`, in the Dockerfile and in CI,
+  because Node no longer bundles corepack from version 25 on. A local build
+  uses the same command in place of `corepack enable`.
+- The certificate parsing libraries move to pkijs 4 and asn1js 4.
 - CI moves to the ci-catalog v3.0.0 `container-image` chain: the image is
   pushed as a `candidate-*` tag, scanned by digest, and only that digest is
   promoted to `:<sha>`, `latest` or the version tag and to the mirrors. Lint,
@@ -18,6 +34,17 @@ are not listed individually here.
   instead of the build. The GitLab Release notes carry the image digest.
 - CI runs the ci-catalog `ggshield-scan` component next to `gitleaks-scan`,
   and its result gates the image promotion too.
+- `AGENTS.md` is the canonical instruction file for coding agents:
+  `CLAUDE.md` only points to it, and the `release` skill lives under
+  `.agents/skills/`.
+
+### Fixed
+
+- **The signing page refuses a signer that is not a CA.** A certificate
+  without the Basic Constraints `cA` flag only raised a warning on import,
+  then issued certificates that every conforming verifier rejects (RFC 5280,
+  section 4.2.1.9). The import now fails, and also when Key Usage is present
+  without `keyCertSign` (section 4.2.1.3).
 
 ## [2.3.1] - 2026-10-08
 
@@ -349,7 +376,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.3.1...main
+[Unreleased]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.4.0...main
+[2.4.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.3.1...v2.4.0
 [2.3.1]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.3.0...v2.3.1
 [2.3.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.2.0...v2.3.0
 [2.2.0]: https://gitlab.int.youkyi.net/YouKyi-Infra/pki-toolbox/-/compare/v2.1.0...v2.2.0
