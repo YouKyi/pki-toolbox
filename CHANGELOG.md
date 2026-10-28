@@ -5,9 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Dependency bumps are managed by [Renovate](https://docs.renovatebot.com/) and
-are not listed individually here.
+listed by CI in the Dependencies section of each release, one line per
+dependency at its latest version.
 
 ## [Unreleased]
+
+### Changed
+
+- Releases take one click, through the ci-catalog `auto-release` component.
+  CI computes the next version from the Conventional Commits, writes the
+  changelog section, opens the release merge request and merges it once green,
+  then tags its head, signed with the CI release key (SSH, `allowed_signers` at
+  the root). The GitLab Release notes say how the tag is
+  signed and how to verify it.
 
 ## [2.4.0] - 2026-10-28
 

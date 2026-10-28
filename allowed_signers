@@ -1,0 +1,3 @@
+# Public key of the CI release key, which signs the vX.Y.Z tags.
+# Verify a tag: git -c gpg.ssh.allowedSignersFile=allowed_signers verify-tag vX.Y.Z
+# Format: release-bot@gitlab.int.youkyi.net namespaces="git" ssh-ed25519 AAAA...

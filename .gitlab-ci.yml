@@ -97,23 +97,49 @@ include:
         - { job: 'catalog:trivy-vuln', artifacts: false }
         - { job: 'catalog:trivy-secret', artifacts: false }
         - { job: 'catalog:trivy-license', artifacts: false }
+  # Release en un clic (ci-catalog#6) : apercu sur les MR et main, clic manuel
+  # catalog:release qui ouvre la MR de release et la passe en auto-merge, tag signe
+  # SSH par la cle du bot apres les memes gates que la promotion, provenance du tag
+  # verifiee dans son pipeline. Epingle sur le SHA de ci-catalog!64 tant que la
+  # version n'est pas publiee. Prerequis : RELEASE_TOKEN et RELEASE_SIGNING_KEY,
+  # portees sur l'environnement release, et la cle publique dans allowed_signers.
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/auto-release@3aaa35dab0c14fe9607359c564bb135d66a3c2bc
+    inputs:
+      version_files: package.json
+      tag_needs:
+        - { job: lint, artifacts: false }
+        - { job: test, artifacts: false }
+        - { job: e2e, artifacts: false }
+        - { job: 'catalog:gitleaks-scan', artifacts: false }
+        - { job: 'catalog:ggshield-scan', artifacts: false }
+        - { job: 'catalog:trivy-vuln', artifacts: false }
+        - { job: 'catalog:trivy-secret', artifacts: false }
+        - { job: 'catalog:trivy-license', artifacts: false }
   - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/gitlab-release@v3.0.1
     inputs:
       stage: release
       release_name: 'pki-toolbox $CI_COMMIT_TAG'
-      extra_notes: 'Container image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG ($IMAGE_DIGEST)'
+      # RELEASE_PROVENANCE (dotenv de catalog:release-provenance) dit comment le tag
+      # est signe et comment le verifier.
+      extra_notes: 'Container image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG ($IMAGE_DIGEST). $RELEASE_PROVENANCE'
 
 # Surcharge du composant gitlab-release : il pose dependencies: [], sans lequel
-# IMAGE_DIGEST (dotenv de la promotion) arriverait vide dans les notes.
+# IMAGE_DIGEST (dotenv de la promotion) et RELEASE_PROVENANCE (dotenv de la
+# provenance) arriveraient vides dans les notes. Pas de release sur un tag dont la
+# signature n'est pas verifiee.
 'catalog:gitlab-release':
-  needs: ['catalog:image-promote']
-  dependencies: ['catalog:image-promote']
+  needs: ['catalog:image-promote', 'catalog:release-provenance']
+  dependencies: ['catalog:image-promote', 'catalog:release-provenance']
 
 # Run exactly one pipeline per change: a merge-request pipeline when an MR is
 # open, otherwise a branch pipeline, plus tag pipelines. The default branch keeps
 # its pipeline even when an MR starts from it, otherwise nothing gets promoted.
 workflow:
   rules:
+    # Le commit de release (API Commits) arrive sur release/* avant sa MR : le
+    # pipeline de MR suffit, pas de pipeline de branche ni d'image candidate en plus.
+    - if: $CI_COMMIT_BRANCH =~ /^release\// && $CI_PIPELINE_SOURCE == "push"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
