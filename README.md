@@ -229,7 +229,7 @@ job runs only when a file affecting the build changed, so a docs- or
 config-only push does not rebuild the image.
 
 Dependencies are kept up to date by [Renovate](https://docs.renovatebot.com/),
-which extends the shared `Renovate-Bot/renovate-config` preset
+which extends the shared `YouKyi-Infra/ci-infrastructure/renovate-config` preset
 (see [`renovate.json`](./renovate.json)).
 
 ## License
