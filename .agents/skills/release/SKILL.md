@@ -57,6 +57,7 @@ GitLab Release, so the goal is a clean, correct tag on `main`.
    If it fails, run `prettier --write` on those files, then re-check.
 
 7. **Commit, tag, push.**
+
    ```sh
    git add CHANGELOG.md package.json
    git commit -m "chore(release): X.Y.Z"
