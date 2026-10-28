@@ -118,9 +118,10 @@ non-privileged port **8080** and runs as a **non-root** user.
 
 ## Local development
 
-Requires **Node 24** (the version the image and CI build with) and **pnpm 11**.
+Requires **Node 24** (the version the image and CI build with) and **pnpm 12**.
 The exact pnpm version is pinned by the `packageManager` field of
-`package.json`, so `corepack enable` is enough to get it.
+`package.json`: `npm install -g "$(node -p "require('./package.json').packageManager")"`
+installs it (corepack also works up to Node 24, Node 25 no longer ships it).
 
 ```sh
 pnpm install
