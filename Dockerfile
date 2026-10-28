@@ -8,11 +8,12 @@ WORKDIR /app
 
 # Install dependencies against the committed lockfile first (better layer caching).
 COPY package.json pnpm-lock.yaml ./
-# Activate the exact pnpm version from package.json's `packageManager` field
+# Install the exact pnpm version from package.json's `packageManager` field
 # (hence after the COPY): a version hardcoded here drifts silently every time
 # Renovate bumps that field, and the build would then run on a pnpm the
-# lockfile was not written by.
-RUN corepack enable && corepack prepare --activate
+# lockfile was not written by. npm rather than corepack, which Node no longer
+# bundles from v25 on.
+RUN npm install -g --no-fund --no-audit "$(node -p "require('./package.json').packageManager")"
 RUN pnpm install --frozen-lockfile
 
 # Build the fully static output into /app/build.

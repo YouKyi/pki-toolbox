@@ -5,10 +5,10 @@ bar and the workflow.
 
 ## Getting started
 
-Requirements: **Node 20 LTS** and **pnpm** (via Corepack).
+Requirements: **Node 24** and the **pnpm** version pinned by `packageManager`.
 
 ```sh
-corepack enable
+npm install -g "$(node -p "require('./package.json').packageManager")"
 pnpm install
 pnpm dev          # dev server on http://localhost:5173
 ```
