@@ -22,7 +22,7 @@
 	"dependencies": {
 		"@abraham/reflection": "^0.13.0",
 		"@peculiar/x509": "^2.0.0",
-		"asn1js": "^3.0.6",
+		"asn1js": "^4.0.0",
 		"pkijs": "^3.2.5"
 	},
 	"devDependencies": {
