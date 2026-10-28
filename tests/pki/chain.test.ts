@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { decodeChain, validateChain } from '$lib/pki/chain';
-import { decodeCertificate } from '$lib/pki/parse';
+import { decodeChain, validateChain } from '#lib/pki/chain.js';
+import { decodeCertificate } from '#lib/pki/parse.js';
 import { TEST_LEAF, TEST_INTERMEDIATE, TEST_ROOT, TEST_CHAIN } from '../fixtures/certs';
 
 describe('validateChain', () => {

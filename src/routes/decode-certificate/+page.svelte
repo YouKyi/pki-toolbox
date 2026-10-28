@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { requireTool } from '$lib/tools';
-	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
-	import { decodeCertificate, type DecodedCertificate } from '$lib/pki/parse';
-	import { ISRG_ROOT_X1 } from '$lib/samples';
-	import ToolHeader from '$lib/components/ToolHeader.svelte';
-	import PemInput from '$lib/components/PemInput.svelte';
-	import CertCard from '$lib/components/CertCard.svelte';
-	import DecodeError from '$lib/components/DecodeError.svelte';
-	import CarryTo from '$lib/components/CarryTo.svelte';
-	import FirstOfMany from '$lib/components/FirstOfMany.svelte';
-	import StatusLine from '$lib/components/StatusLine.svelte';
+	import { requireTool } from '#lib/tools.js';
+	import { createDecodeFlow } from '#lib/decodeFlow.svelte.js';
+	import { decodeCertificate, type DecodedCertificate } from '#lib/pki/parse.js';
+	import { ISRG_ROOT_X1 } from '#lib/samples.js';
+	import ToolHeader from '#lib/components/ToolHeader.svelte';
+	import PemInput from '#lib/components/PemInput.svelte';
+	import CertCard from '#lib/components/CertCard.svelte';
+	import DecodeError from '#lib/components/DecodeError.svelte';
+	import CarryTo from '#lib/components/CarryTo.svelte';
+	import FirstOfMany from '#lib/components/FirstOfMany.svelte';
+	import StatusLine from '#lib/components/StatusLine.svelte';
 
 	const tool = requireTool('decode-certificate');
 

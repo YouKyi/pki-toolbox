@@ -12,9 +12,9 @@
 	 * certificates.
 	 */
 	import { goto } from '$app/navigation';
-	import { detectArtefact, RELATED, stripPrivateKeyBlocks } from '$lib/pki/detect';
-	import { toolBySlug, type Tool } from '$lib/tools';
-	import { carry } from '$lib/handoff';
+	import { detectArtefact, RELATED, stripPrivateKeyBlocks } from '#lib/pki/detect.js';
+	import { toolBySlug, type Tool } from '#lib/tools.js';
+	import { carry } from '#lib/handoff.js';
 
 	type Props = {
 		/** What was decoded, as the next tool would receive it. */

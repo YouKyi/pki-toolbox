@@ -11,7 +11,7 @@ import {
 	daysBetween,
 	humanKeyAlgorithm,
 	humanSignatureAlgorithm
-} from '$lib/pki/format';
+} from '#lib/pki/format.js';
 
 describe('bytesToHex', () => {
 	it('encodes bytes as lowercase hex with no separators', () => {

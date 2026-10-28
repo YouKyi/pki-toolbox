@@ -1,10 +1,10 @@
 <script lang="ts">
 	/** Renders one decoded X.509 certificate as a sectioned card. */
 	import type { Snippet } from 'svelte';
-	import type { DecodedCertificate } from '$lib/pki/parse';
-	import type { ChainRole } from '$lib/pki/chain';
-	import { formatDate, formatSerial, hexWithColons } from '$lib/pki/format';
-	import { writeToClipboard } from '$lib/clipboard';
+	import type { DecodedCertificate } from '#lib/pki/parse.js';
+	import type { ChainRole } from '#lib/pki/chain.js';
+	import { formatDate, formatSerial, hexWithColons } from '#lib/pki/format.js';
+	import { writeToClipboard } from '#lib/clipboard.js';
 	import Icon from './Icon.svelte';
 	import RowList, { type Row } from './RowList.svelte';
 	import Badge, { type BadgeTone } from './Badge.svelte';

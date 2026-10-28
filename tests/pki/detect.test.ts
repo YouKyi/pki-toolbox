@@ -11,8 +11,8 @@ import {
 	detectPrivateKey,
 	isPkcs12,
 	stripPrivateKeyBlocks
-} from '$lib/pki/detect';
-import { base64ToBytes, derToPem } from '$lib/pki/pem';
+} from '#lib/pki/detect.js';
+import { base64ToBytes, derToPem } from '#lib/pki/pem.js';
 import {
 	ISRG_ROOT_X1,
 	TEST_CHAIN,
@@ -20,7 +20,7 @@ import {
 	TEST_CSR,
 	TEST_PKCS7,
 	TEST_PKCS12
-} from '$lib/samples';
+} from '#lib/samples.js';
 
 describe('detectArtefact: PEM labels', () => {
 	it('names a certificate and routes it to the certificate decoder', () => {

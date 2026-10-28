@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { generateSelfSigned } from '$lib/pki/generate';
-import { importCa, issueCertificate } from '$lib/pki/sign';
+import { generateSelfSigned } from '#lib/pki/generate.js';
+import { importCa, issueCertificate } from '#lib/pki/sign.js';
 import {
 	X509Certificate,
 	Pkcs10CertificateRequest,
@@ -9,8 +9,8 @@ import {
 	KeyUsagesExtension,
 	KeyUsageFlags
 } from '@peculiar/x509';
-import { decodeCertificate } from '$lib/pki/parse';
-import { derToPem } from '$lib/pki/pem';
+import { decodeCertificate } from '#lib/pki/parse.js';
+import { derToPem } from '#lib/pki/pem.js';
 import { TEST_CSR } from '../fixtures/certs';
 
 /**

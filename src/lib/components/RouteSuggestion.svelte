@@ -8,9 +8,9 @@
 	 */
 	import { goto } from '$app/navigation';
 	import Icon from './Icon.svelte';
-	import type { Detected } from '$lib/pki/detect';
-	import { toolBySlug } from '$lib/tools';
-	import { carry } from '$lib/handoff';
+	import type { Detected } from '#lib/pki/detect.js';
+	import { toolBySlug } from '#lib/tools.js';
+	import { carry } from '#lib/handoff.js';
 
 	type Props = {
 		detected: Detected;

@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { requireTool } from '$lib/tools';
-	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
-	import { decodeCsr, type DecodedCsr } from '$lib/pki/parse';
-	import { TEST_CSR } from '$lib/samples';
-	import ToolHeader from '$lib/components/ToolHeader.svelte';
-	import PemInput from '$lib/components/PemInput.svelte';
-	import DecodeError from '$lib/components/DecodeError.svelte';
-	import CarryTo from '$lib/components/CarryTo.svelte';
-	import StatusLine from '$lib/components/StatusLine.svelte';
-	import RowList from '$lib/components/RowList.svelte';
-	import Badge from '$lib/components/Badge.svelte';
-	import VerdictBand from '$lib/components/VerdictBand.svelte';
+	import { requireTool } from '#lib/tools.js';
+	import { createDecodeFlow } from '#lib/decodeFlow.svelte.js';
+	import { decodeCsr, type DecodedCsr } from '#lib/pki/parse.js';
+	import { TEST_CSR } from '#lib/samples.js';
+	import ToolHeader from '#lib/components/ToolHeader.svelte';
+	import PemInput from '#lib/components/PemInput.svelte';
+	import DecodeError from '#lib/components/DecodeError.svelte';
+	import CarryTo from '#lib/components/CarryTo.svelte';
+	import StatusLine from '#lib/components/StatusLine.svelte';
+	import RowList from '#lib/components/RowList.svelte';
+	import Badge from '#lib/components/Badge.svelte';
+	import VerdictBand from '#lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-csr');
 

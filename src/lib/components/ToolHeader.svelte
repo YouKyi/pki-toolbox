@@ -1,6 +1,6 @@
 <script lang="ts">
 	/** Standard title block shown at the top of every tool page. */
-	import type { Tool } from '$lib/tools';
+	import type { Tool } from '#lib/tools.js';
 	import Icon from './Icon.svelte';
 	import Badge from './Badge.svelte';
 

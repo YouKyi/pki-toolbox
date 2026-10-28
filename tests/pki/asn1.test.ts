@@ -15,8 +15,8 @@
  * over-large structures throw; structures within the limit parse correctly.
  */
 import { describe, it, expect } from 'vitest';
-import { parseAsn1 } from '$lib/pki/asn1';
-import { derToPem } from '$lib/pki/pem';
+import { parseAsn1 } from '#lib/pki/asn1.js';
+import { derToPem } from '#lib/pki/pem.js';
 
 // ---------------------------------------------------------------------------
 // DER construction helpers

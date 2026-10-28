@@ -11,7 +11,7 @@
 	 */
 	import Alert from './Alert.svelte';
 	import RouteSuggestion from './RouteSuggestion.svelte';
-	import { detectArtefact } from '$lib/pki/detect';
+	import { detectArtefact } from '#lib/pki/detect.js';
 
 	type Props = {
 		id?: string;

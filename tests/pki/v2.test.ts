@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { decodeCrl } from '$lib/pki/crl';
-import { decodePkcs7 } from '$lib/pki/pkcs7';
-import { decodePkcs12 } from '$lib/pki/pkcs12';
-import { parseAsn1 } from '$lib/pki/asn1';
-import { convertArtefact, buildPkcs7 } from '$lib/pki/convert';
-import { generateSelfSigned } from '$lib/pki/generate';
-import { decodeCertificate } from '$lib/pki/parse';
+import { decodeCrl } from '#lib/pki/crl.js';
+import { decodePkcs7 } from '#lib/pki/pkcs7.js';
+import { decodePkcs12 } from '#lib/pki/pkcs12.js';
+import { parseAsn1 } from '#lib/pki/asn1.js';
+import { convertArtefact, buildPkcs7 } from '#lib/pki/convert.js';
+import { generateSelfSigned } from '#lib/pki/generate.js';
+import { decodeCertificate } from '#lib/pki/parse.js';
 import {
 	TEST_CRL,
 	TEST_PKCS7,
