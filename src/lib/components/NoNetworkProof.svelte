@@ -11,7 +11,7 @@
 	 * pasted; and a live attempt that the browser refuses in front of them.
 	 */
 	import Icon from './Icon.svelte';
-	import { connectSrc, network } from '$lib/network.svelte';
+	import { connectSrc, network } from '#lib/network.svelte.js';
 
 	let open = $state(false);
 	let directive = $state('');

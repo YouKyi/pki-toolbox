@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { requireTool } from '$lib/tools';
+	import { requireTool } from '#lib/tools.js';
 	import {
 		generateSelfSigned,
 		KEY_ALGORITHM_LABELS,
 		type KeyAlgorithmChoice
-	} from '$lib/pki/generate';
-	import { decodeCertificate, type DecodedCertificate } from '$lib/pki/parse';
-	import ToolHeader from '$lib/components/ToolHeader.svelte';
-	import CertCard from '$lib/components/CertCard.svelte';
-	import Alert from '$lib/components/Alert.svelte';
-	import StatusLine from '$lib/components/StatusLine.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import PemOutput from '$lib/components/PemOutput.svelte';
+	} from '#lib/pki/generate.js';
+	import { decodeCertificate, type DecodedCertificate } from '#lib/pki/parse.js';
+	import ToolHeader from '#lib/components/ToolHeader.svelte';
+	import CertCard from '#lib/components/CertCard.svelte';
+	import Alert from '#lib/components/Alert.svelte';
+	import StatusLine from '#lib/components/StatusLine.svelte';
+	import Icon from '#lib/components/Icon.svelte';
+	import PemOutput from '#lib/components/PemOutput.svelte';
 
 	const tool = requireTool('generate-selfsigned');
 

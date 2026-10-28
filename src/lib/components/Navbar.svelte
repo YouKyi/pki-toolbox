@@ -13,7 +13,7 @@
 	 */
 	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';
-	import { categories, toolsByCategory, toolBySlug, type ToolCategory } from '$lib/tools';
+	import { categories, toolsByCategory, toolBySlug, type ToolCategory } from '#lib/tools.js';
 	import Icon from './Icon.svelte';
 	import Badge from './Badge.svelte';
 	import {
@@ -24,7 +24,7 @@
 		THEME_LABEL,
 		THEME_MODES,
 		type ThemeMode
-	} from '$lib/theme.svelte';
+	} from '#lib/theme.svelte.js';
 	import { onMount } from 'svelte';
 
 	onMount(initTheme);
@@ -60,7 +60,9 @@
 	}
 
 	// Any navigation closes the open folder and the mobile panel.
-	afterNavigate(() => {
+	afterNavigate(({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
+
 		openCat = null;
 		mobileOpen = false;
 		themeOpen = false;
@@ -158,7 +160,7 @@
 										stroke="currentColor"
 										stroke-width="1.6"
 										stroke-linecap="square"
-									/>
+									></polyline>
 								</svg>
 							</button>
 
@@ -260,7 +262,7 @@
 								stroke="currentColor"
 								stroke-width="1.6"
 								stroke-linecap="square"
-							/>
+							></polyline>
 						</svg>
 					</button>
 

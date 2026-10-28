@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { requireTool } from '$lib/tools';
-	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
-	import { decodePkcs12, type DecodedPkcs12 } from '$lib/pki/pkcs12';
-	import { TEST_PKCS12, TEST_PKCS12_PASSWORD } from '$lib/samples';
-	import ToolHeader from '$lib/components/ToolHeader.svelte';
-	import PemInput from '$lib/components/PemInput.svelte';
-	import CertCard from '$lib/components/CertCard.svelte';
-	import DecodeError from '$lib/components/DecodeError.svelte';
-	import CarryTo from '$lib/components/CarryTo.svelte';
-	import StatusLine from '$lib/components/StatusLine.svelte';
-	import Badge from '$lib/components/Badge.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import VerdictBand from '$lib/components/VerdictBand.svelte';
+	import { requireTool } from '#lib/tools.js';
+	import { createDecodeFlow } from '#lib/decodeFlow.svelte.js';
+	import { decodePkcs12, type DecodedPkcs12 } from '#lib/pki/pkcs12.js';
+	import { TEST_PKCS12, TEST_PKCS12_PASSWORD } from '#lib/samples.js';
+	import ToolHeader from '#lib/components/ToolHeader.svelte';
+	import PemInput from '#lib/components/PemInput.svelte';
+	import CertCard from '#lib/components/CertCard.svelte';
+	import DecodeError from '#lib/components/DecodeError.svelte';
+	import CarryTo from '#lib/components/CarryTo.svelte';
+	import StatusLine from '#lib/components/StatusLine.svelte';
+	import Badge from '#lib/components/Badge.svelte';
+	import Icon from '#lib/components/Icon.svelte';
+	import VerdictBand from '#lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-pkcs12');
 

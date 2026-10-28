@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { decodeCertificate, decodeCsr } from '$lib/pki/parse';
+import { decodeCertificate, decodeCsr } from '#lib/pki/parse.js';
 import {
 	ISRG_ROOT_X1,
 	ISRG_ROOT_X1_SHA256,

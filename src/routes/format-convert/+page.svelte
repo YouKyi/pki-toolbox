@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { requireTool } from '$lib/tools';
-	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
-	import { convertArtefact, buildPkcs7, type ConvertedItem } from '$lib/pki/convert';
-	import { hexWithColons } from '$lib/pki/format';
-	import { downloadBytes } from '$lib/download';
-	import { ISRG_ROOT_X2 } from '$lib/samples';
-	import ToolHeader from '$lib/components/ToolHeader.svelte';
-	import PemInput from '$lib/components/PemInput.svelte';
-	import DecodeError from '$lib/components/DecodeError.svelte';
-	import CarryTo from '$lib/components/CarryTo.svelte';
-	import StatusLine from '$lib/components/StatusLine.svelte';
-	import VerdictBand from '$lib/components/VerdictBand.svelte';
-	import PemOutput from '$lib/components/PemOutput.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import { requireTool } from '#lib/tools.js';
+	import { createDecodeFlow } from '#lib/decodeFlow.svelte.js';
+	import { convertArtefact, buildPkcs7, type ConvertedItem } from '#lib/pki/convert.js';
+	import { hexWithColons } from '#lib/pki/format.js';
+	import { downloadBytes } from '#lib/download.js';
+	import { ISRG_ROOT_X2 } from '#lib/samples.js';
+	import ToolHeader from '#lib/components/ToolHeader.svelte';
+	import PemInput from '#lib/components/PemInput.svelte';
+	import DecodeError from '#lib/components/DecodeError.svelte';
+	import CarryTo from '#lib/components/CarryTo.svelte';
+	import StatusLine from '#lib/components/StatusLine.svelte';
+	import VerdictBand from '#lib/components/VerdictBand.svelte';
+	import PemOutput from '#lib/components/PemOutput.svelte';
+	import Icon from '#lib/components/Icon.svelte';
 
 	const tool = requireTool('format-convert');
 

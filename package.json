@@ -27,10 +27,11 @@
 	},
 	"devDependencies": {
 		"@eslint/compat": "2.1.1",
-		"@playwright/test": "1.64.1",
 		"@eslint/js": "10.0.1",
-		"@sveltejs/adapter-static": "3.0.10",
-		"@sveltejs/kit": "2.70.3",
+		"@playwright/test": "1.64.1",
+		"@sveltejs/adapter-static": "4.0.0",
+		"@sveltejs/kit": "3.1.0",
+		"@sveltejs/load-config": "0.2.3",
 		"@sveltejs/vite-plugin-svelte": "7.3.1",
 		"@tailwindcss/typography": "0.5.20",
 		"@tailwindcss/vite": "4.3.3",
@@ -54,5 +55,8 @@
 	"engines": {
 		"node": ">=20",
 		"pnpm": "12.15.0"
+	},
+	"imports": {
+		"#lib/*": "./src/lib/*"
 	}
 }

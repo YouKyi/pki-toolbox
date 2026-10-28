@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { categories, toolsByCategory } from '$lib/tools';
-	import { detectArtefact } from '$lib/pki/detect';
-	import { carry } from '$lib/handoff';
-	import { ISRG_ROOT_X1 } from '$lib/samples';
-	import Icon from '$lib/components/Icon.svelte';
-	import Badge from '$lib/components/Badge.svelte';
-	import PemInput from '$lib/components/PemInput.svelte';
-	import Alert from '$lib/components/Alert.svelte';
-	import StatusLine from '$lib/components/StatusLine.svelte';
+	import { categories, toolsByCategory } from '#lib/tools.js';
+	import { detectArtefact } from '#lib/pki/detect.js';
+	import { carry } from '#lib/handoff.js';
+	import { ISRG_ROOT_X1 } from '#lib/samples.js';
+	import Icon from '#lib/components/Icon.svelte';
+	import Badge from '#lib/components/Badge.svelte';
+	import PemInput from '#lib/components/PemInput.svelte';
+	import Alert from '#lib/components/Alert.svelte';
+	import StatusLine from '#lib/components/StatusLine.svelte';
 
 	/**
 	 * The page used to be a directory: eleven equal cards and no admission that

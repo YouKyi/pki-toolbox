@@ -8,8 +8,8 @@
 	 * page claire (façon capture), spec brand/terminal-block.md.
 	 */
 	import Icon from './Icon.svelte';
-	import { writeToClipboard } from '$lib/clipboard';
-	import { downloadBytes, downloadText } from '$lib/download';
+	import { writeToClipboard } from '#lib/clipboard.js';
+	import { downloadBytes, downloadText } from '#lib/download.js';
 
 	type Props = {
 		title: string;

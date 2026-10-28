@@ -9,9 +9,9 @@
 	import Alert from './Alert.svelte';
 	import NoNetworkProof from './NoNetworkProof.svelte';
 	import RouteSuggestion from './RouteSuggestion.svelte';
-	import { network } from '$lib/network.svelte';
-	import { bytesToBase64, derToPem, MAX_INPUT_BYTES } from '$lib/pki/pem';
-	import { detectBytes, detectPrivateKey, type Detected } from '$lib/pki/detect';
+	import { network } from '#lib/network.svelte.js';
+	import { bytesToBase64, derToPem, MAX_INPUT_BYTES } from '#lib/pki/pem.js';
+	import { detectBytes, detectPrivateKey, type Detected } from '#lib/pki/detect.js';
 
 	type Props = {
 		value: string;

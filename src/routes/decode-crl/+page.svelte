@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { requireTool } from '$lib/tools';
-	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
-	import { decodeCrl, type DecodedCrl } from '$lib/pki/crl';
-	import { formatDate } from '$lib/pki/format';
-	import { TEST_CRL } from '$lib/samples';
-	import ToolHeader from '$lib/components/ToolHeader.svelte';
-	import PemInput from '$lib/components/PemInput.svelte';
-	import DecodeError from '$lib/components/DecodeError.svelte';
-	import CarryTo from '$lib/components/CarryTo.svelte';
-	import StatusLine from '$lib/components/StatusLine.svelte';
-	import RowList from '$lib/components/RowList.svelte';
-	import Badge from '$lib/components/Badge.svelte';
-	import VerdictBand from '$lib/components/VerdictBand.svelte';
+	import { requireTool } from '#lib/tools.js';
+	import { createDecodeFlow } from '#lib/decodeFlow.svelte.js';
+	import { decodeCrl, type DecodedCrl } from '#lib/pki/crl.js';
+	import { formatDate } from '#lib/pki/format.js';
+	import { TEST_CRL } from '#lib/samples.js';
+	import ToolHeader from '#lib/components/ToolHeader.svelte';
+	import PemInput from '#lib/components/PemInput.svelte';
+	import DecodeError from '#lib/components/DecodeError.svelte';
+	import CarryTo from '#lib/components/CarryTo.svelte';
+	import StatusLine from '#lib/components/StatusLine.svelte';
+	import RowList from '#lib/components/RowList.svelte';
+	import Badge from '#lib/components/Badge.svelte';
+	import VerdictBand from '#lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-crl');
 

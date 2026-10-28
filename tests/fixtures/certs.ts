@@ -18,7 +18,7 @@ export {
 	TEST_PKCS7,
 	TEST_PKCS12,
 	TEST_PKCS12_PASSWORD
-} from '$lib/samples';
+} from '#lib/samples.js';
 
 /** Known-good SHA-256 fingerprint of ISRG Root X1 (lowercase hex, no colons). */
 export const ISRG_ROOT_X1_SHA256 =

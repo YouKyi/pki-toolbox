@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import type { Asn1Node } from '$lib/pki/asn1';
+	import type { Asn1Node } from '#lib/pki/asn1.js';
 
 	/** Tailwind text colour for a given ASN.1 tag. */
 	function tagColor(node: Asn1Node): string {

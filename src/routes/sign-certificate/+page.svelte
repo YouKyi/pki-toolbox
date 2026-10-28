@@ -1,21 +1,21 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { requireTool } from '$lib/tools';
-	import { revealResult } from '$lib/reveal';
-	import { importCa, issueCertificate, type CaContext } from '$lib/pki/sign';
+	import { requireTool } from '#lib/tools.js';
+	import { revealResult } from '#lib/reveal.js';
+	import { importCa, issueCertificate, type CaContext } from '#lib/pki/sign.js';
 	import {
 		generateSelfSigned,
 		KEY_ALGORITHM_LABELS,
 		type KeyAlgorithmChoice
-	} from '$lib/pki/generate';
-	import { decodeCsr } from '$lib/pki/parse';
-	import type { IssuedCertificate } from '$lib/pki/sign';
-	import ToolHeader from '$lib/components/ToolHeader.svelte';
-	import PemInput from '$lib/components/PemInput.svelte';
-	import PemOutput from '$lib/components/PemOutput.svelte';
-	import Alert from '$lib/components/Alert.svelte';
-	import StatusLine from '$lib/components/StatusLine.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	} from '#lib/pki/generate.js';
+	import { decodeCsr } from '#lib/pki/parse.js';
+	import type { IssuedCertificate } from '#lib/pki/sign.js';
+	import ToolHeader from '#lib/components/ToolHeader.svelte';
+	import PemInput from '#lib/components/PemInput.svelte';
+	import PemOutput from '#lib/components/PemOutput.svelte';
+	import Alert from '#lib/components/Alert.svelte';
+	import StatusLine from '#lib/components/StatusLine.svelte';
+	import Icon from '#lib/components/Icon.svelte';
 
 	const tool = requireTool('sign-certificate');
 

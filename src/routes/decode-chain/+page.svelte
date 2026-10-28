@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { requireTool } from '$lib/tools';
-	import { createDecodeFlow } from '$lib/decodeFlow.svelte';
-	import { decodeChain, type DecodedChain } from '$lib/pki/chain';
-	import { TEST_CHAIN } from '$lib/samples';
-	import ToolHeader from '$lib/components/ToolHeader.svelte';
-	import PemInput from '$lib/components/PemInput.svelte';
-	import CertCard from '$lib/components/CertCard.svelte';
-	import Alert from '$lib/components/Alert.svelte';
-	import DecodeError from '$lib/components/DecodeError.svelte';
-	import CarryTo from '$lib/components/CarryTo.svelte';
-	import StatusLine from '$lib/components/StatusLine.svelte';
-	import Badge from '$lib/components/Badge.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import VerdictBand from '$lib/components/VerdictBand.svelte';
+	import { requireTool } from '#lib/tools.js';
+	import { createDecodeFlow } from '#lib/decodeFlow.svelte.js';
+	import { decodeChain, type DecodedChain } from '#lib/pki/chain.js';
+	import { TEST_CHAIN } from '#lib/samples.js';
+	import ToolHeader from '#lib/components/ToolHeader.svelte';
+	import PemInput from '#lib/components/PemInput.svelte';
+	import CertCard from '#lib/components/CertCard.svelte';
+	import Alert from '#lib/components/Alert.svelte';
+	import DecodeError from '#lib/components/DecodeError.svelte';
+	import CarryTo from '#lib/components/CarryTo.svelte';
+	import StatusLine from '#lib/components/StatusLine.svelte';
+	import Badge from '#lib/components/Badge.svelte';
+	import Icon from '#lib/components/Icon.svelte';
+	import VerdictBand from '#lib/components/VerdictBand.svelte';
 
 	const tool = requireTool('decode-chain');
 

@@ -14,7 +14,7 @@
  * `<html>`; `src/app.html` mirrors this resolution in a pre-paint script so
  * there is no flash on first load.
  */
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 
 export type ThemeMode = 'auto' | 'light' | 'dark';
 export type Theme = 'light' | 'dark';

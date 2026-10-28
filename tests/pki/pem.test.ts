@@ -12,7 +12,7 @@ import {
 	derToPem,
 	assertInputSize,
 	MAX_INPUT_BYTES
-} from '$lib/pki/pem';
+} from '#lib/pki/pem.js';
 import { ISRG_ROOT_X1, TEST_CHAIN } from '../fixtures/certs';
 
 describe('base64ToBytes / bytesToBase64', () => {

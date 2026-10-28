@@ -9,7 +9,7 @@
 	 * offers the tool that reads them all.
 	 */
 	import Icon from './Icon.svelte';
-	import { splitBlocks } from '$lib/pki/pem';
+	import { splitBlocks } from '#lib/pki/pem.js';
 
 	type Props = {
 		/** What was decoded, as it was pasted. */
