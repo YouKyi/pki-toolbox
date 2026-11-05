@@ -52,19 +52,22 @@ scope, e.g. `fix(chain): verify signatures, not just DN strings`.
 
 1. Branch off `main`.
 2. Make the change, keep the quality checks green.
-3. Add an entry under `## [Unreleased]` in [`CHANGELOG.md`](./CHANGELOG.md)
-   describing the change (skip this for pure dependency bumps, which Renovate
-   handles).
+3. Use a Conventional Commit message: `feat`, `fix` and `perf` commits feed the
+   next release and its changelog. Add an entry under `## [Unreleased]` in
+   [`CHANGELOG.md`](./CHANGELOG.md) when the change deserves more than its
+   commit subject: written entries are published as is. Skip this for
+   dependency bumps, which CI lists on its own.
 4. Open a merge request against `main`. The MR pipeline always runs lint and
    test (including the supply-chain scan); the `docker` job runs only when a
    build-affecting file changed.
 
 ## Releases
 
-The release procedure (changelog, version bump, tag) is documented in the
+Releases take one click on the manual `catalog:release` job of a `main`
+pipeline, documented in the
 [Versioning & releases](./README.md#versioning--releases) section of the
-README. A `vX.Y.Z` tag is the only thing that publishes an image and a
-GitLab Release.
+README. A `vX.Y.Z` tag is still the only thing that publishes an image and a
+GitLab Release; CI sets it, signed, once the release merge request is merged.
 
 ## Continuous integration
 

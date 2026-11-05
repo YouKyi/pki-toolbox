@@ -197,25 +197,43 @@ are recorded in [`CHANGELOG.md`](./CHANGELOG.md). Contribution rules live in
 
 ### Cutting a release
 
-1. In [`CHANGELOG.md`](./CHANGELOG.md), rename the `## [Unreleased]` heading to
-   the new version with today's date, e.g. `## [1.2.3] - 2026-06-01`, add a
-   fresh empty `## [Unreleased]` above it, and update the link references at
-   the bottom of the file.
-2. Bump `"version"` in `package.json` to the same number.
-3. Commit on `main` (a conventional commit, e.g. `chore(release): 1.2.3`) and
-   push.
-4. Tag the commit and push the tag:
-   ```sh
-   git tag -a v1.2.3 -m "pki-toolbox v1.2.3"
-   git push origin v1.2.3
-   ```
+Releases take one click, through the ci-catalog `auto-release` component:
+
+1. Every `main` pipeline runs `catalog:release-preview`: the next version,
+   computed from the Conventional Commits since the last tag, and the
+   `CHANGELOG.md` section it would publish (job log and artifact).
+2. Run the manual `catalog:release` job of the latest `main` pipeline. It
+   commits the release (`CHANGELOG.md` and `package.json`) on a
+   `release/vX.Y.Z` branch, opens the `chore(release): X.Y.Z` merge request and
+   sets it to merge once its pipeline is green. Set `RELEASE_VERSION=X.Y.Z` in
+   the job form to force a version.
+3. Once merged, the `main` pipeline runs `catalog:release-tag`: after lint,
+   tests and scans, it tags the head of the release merge request `vX.Y.Z`,
+   signed with the CI release key (SSH). The tag pipeline then verifies the
+   signature, promotes the image and publishes the GitLab Release, with no
+   further step.
+
+What lands in the section: whatever is written under `## [Unreleased]` is
+published as is; when it is empty, CI writes it from the `feat`, `fix` and
+`perf` commits. Dependency updates are always added, one line per dependency
+at its latest version.
+
+Verify a release tag with the public key committed in this repository:
+
+```sh
+git -c gpg.ssh.allowedSignersFile=allowed_signers verify-tag v1.2.3
+```
+
+The manual path still works: a tag signed by hand and pushed before
+`catalog:release-tag` runs makes it a no-op, and the release notes say the tag
+carries a GPG signature.
 
 ### The pipeline
 
 Lint, unit tests and end-to-end tests run on every push. The scan, build and
-release stages come from the shared `YouKyi-Infra/ci-infrastructure/ci-catalog`
+release stages come from the shared `youkyi-hq/platform/ci/ci-catalog`
 components (`gitleaks-scan`, `ggshield-scan`, `trivy-vuln`, `trivy-secret`,
-`trivy-license`, `container-image`, `gitlab-release`), pinned by version in
+`trivy-license`, `container-image`, `auto-release`, `gitlab-release`), pinned in
 [`.gitlab-ci.yml`](./.gitlab-ci.yml).
 
 A `vX.Y.Z` tag runs the whole chain: repository scans, image build pushed as a
