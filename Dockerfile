@@ -23,7 +23,7 @@ RUN pnpm build
 # ---- Stage 2: serve with nginx as a non-root user ----
 # Version- and digest-pinned for an immutable runtime base. Renovate keeps the
 # tag and the @sha256 digest in sync when a new nginx:1.31-alpine-slim ships.
-FROM nginx:1.31-alpine-slim@sha256:85b20e8c636603182adb204a12c7def4ebc6de9a0d686d03af5cbce344f2ed93
+FROM nginx:1.31-alpine-slim@sha256:9c68ad4f28e7dee4b9484a7859bf451da39ef661bcd038ef62e87593fcd91c86
 
 # Alpine ships a security fix before the nginx image is rebuilt around it: the
 # pinned base carries pcre2 10.48-r0, vulnerable to CVE-2026-103111. Upgrading
