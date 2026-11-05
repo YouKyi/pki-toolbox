@@ -231,7 +231,7 @@ carries a GPG signature.
 ### The pipeline
 
 Lint, unit tests and end-to-end tests run on every push. The scan, build and
-release stages come from the shared `YouKyi-Infra/ci-infrastructure/ci-catalog`
+release stages come from the shared `youkyi-hq/platform/ci/ci-catalog`
 components (`gitleaks-scan`, `ggshield-scan`, `trivy-vuln`, `trivy-secret`,
 `trivy-license`, `container-image`, `auto-release`, `gitlab-release`), pinned in
 [`.gitlab-ci.yml`](./.gitlab-ci.yml).
