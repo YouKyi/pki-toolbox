@@ -130,6 +130,16 @@ include:
   needs: ['catalog:image-promote', 'catalog:release-provenance']
   dependencies: ['catalog:image-promote', 'catalog:release-provenance']
 
+# Surcharge de la promotion : seul job a lire GHCR_* et DOCKERHUB_*, protegees et
+# portees sur l'environnement image-promote (action prepare, aucun deploiement).
+# Portees sur *, elles atteignaient lint, test et e2e sur main et sur les tags,
+# apres un pnpm install qui execute le code des dependances. Redondante des que le
+# catalog apporte l'input promote_environment de container-image (meme defaut).
+'catalog:image-promote':
+  environment:
+    name: image-promote
+    action: prepare
+
 # Run exactly one pipeline per change: a merge-request pipeline when an MR is
 # open, otherwise a branch pipeline, plus tag pipelines. The default branch keeps
 # its pipeline even when an MR starts from it, otherwise nothing gets promoted.
