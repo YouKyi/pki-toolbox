@@ -167,8 +167,8 @@ importers:
   .:
     dependencies:
       '@abraham/reflection':
-        specifier: ^0.13.0
-        version: 0.13.0
+        specifier: ^0.14.0
+        version: 0.14.0
       '@peculiar/x509':
         specifier: ^2.0.0
         version: 2.2.0
@@ -254,8 +254,9 @@ importers:
 
 packages:
 
-  '@abraham/reflection@0.13.0':
-    resolution: {integrity: sha512-sQYhhraGPPRP6zoqpqpSaoYL+XY5KNmQCcoB3IuQh1z1aWmkHXcxwyTxRkTJ60L2aUjrbiqIqoYkrB/1c7kjQA==}
+  '@abraham/reflection@0.14.0':
+    resolution: {integrity: sha512-fk3FHamRhh46mA61gTzCj01rij4Qi6Dny9EcfQOz+V0whD1KPyhP96JXQONYmqPYg67zbAWd62W3hq/xm6lT9g==}
+    engines: {node: '>=22'}
 
   '@cacheable/memory@2.2.0':
     resolution: {integrity: sha512-CTLKqLItRCEixEAewD3/j9DB3/o96gpTPD4eJ1v+DGOlxZRZncRQkGYqqnAGCscYd6RNeXfGeiuCphsPtqyIfQ==}
@@ -1663,7 +1664,7 @@ packages:
 
 snapshots:
 
-  '@abraham/reflection@0.13.0': {}
+  '@abraham/reflection@0.14.0': {}
 
   '@cacheable/memory@2.2.0':
     dependencies:
