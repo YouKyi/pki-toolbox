@@ -10,6 +10,8 @@ dependency at its latest version.
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-11-06
+
 ### Changed
 
 - Releases take one click, through the ci-catalog `auto-release` component.
@@ -18,6 +20,25 @@ dependency at its latest version.
   then tags its head, signed with the CI release key (SSH, `allowed_signers` at
   the root). The GitLab Release notes say how the tag is
   signed and how to verify it.
+
+### Dependencies
+
+- [@abraham/reflection to ^0.14.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/620ef1cd) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/351))
+- [@peculiar/x509 to v3](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/f92c82dd) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/333))
+- [@sveltejs/adapter-static to v4.0.1](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/a9b77187) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/337))
+- [@sveltejs/kit to v3.1.1](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/8c4b6083) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/338))
+- [@types/node to v26.6.6](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/27384d28) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/334))
+- [eslint to v10.14.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/a61ec176) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/339))
+- [globals to v17.14.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/563f8e3d) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/340))
+- [lock file maintenance](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/4462dfdf) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/336))
+- [mcr.microsoft.com/playwright:v1.64.1-noble docker digest to 2f05f8a](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/f970d655) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/335))
+- [nginx:1.31-alpine-slim docker digest to 9c68ad4](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/6cf192ab) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/347))
+- [node.js to 8996bb5](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/413df13b) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/349))
+- [pnpm to v12.17.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/38520b84) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/350))
+- [svelte to v5.57.3](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/60b8f976) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/329))
+- [svelte-check to v4.7.8](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/8322d74a) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/345))
+- [typescript-eslint to v8.72.1](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/b340d6c2) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/330))
+- [youkyi-hq/platform/ci/ci-catalog to v3.0.1](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/ed0cf5bc) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/343))
 
 ## [2.4.0] - 2026-10-28
 
@@ -386,7 +407,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.0...main
+[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.1...main
+[2.4.1]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.0...v2.4.1
 [2.4.0]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.3.1...v2.4.0
 [2.3.1]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.3.0...v2.3.1
 [2.3.0]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.2.0...v2.3.0
