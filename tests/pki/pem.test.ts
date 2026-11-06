@@ -73,10 +73,35 @@ describe('splitBlocks', () => {
 	});
 
 	it('handles repeated unterminated headers without quadratic backtracking', () => {
-		const hostile = '-----BEGIN CERTIFICATE-----\n'.repeat(40_000);
-		expect(splitBlocks(hostile)).toEqual([]);
-		expect(looksLikePem(hostile)).toBe(false);
-	}, 500);
+		const header = '-----BEGIN CERTIFICATE-----\n';
+		const factor = 16;
+		const small = header.repeat(200);
+		const large = header.repeat(200 * factor);
+		expect(splitBlocks(large)).toEqual([]);
+		expect(looksLikePem(large)).toBe(false);
+
+		// Compare growth, not duration, so a slow runner cannot fail the test.
+		// Process CPU time ignores waiting for a busy CPU (the forks pool runs
+		// one file per process); equal work per sample exposes both sizes to the
+		// same noise; the best of interleaved samples drops what noise remains.
+		const cpuMicros = (input: string, calls: number) => {
+			const before = process.cpuUsage();
+			for (let call = 0; call < calls; call++) {
+				splitBlocks(input);
+				looksLikePem(input);
+			}
+			const { user, system } = process.cpuUsage(before);
+			return user + system;
+		};
+		let smallBest = Infinity;
+		let largeBest = Infinity;
+		for (let sample = 0; sample < 10; sample++) {
+			smallBest = Math.min(smallBest, cpuMicros(small, factor));
+			largeBest = Math.min(largeBest, cpuMicros(large, 1));
+		}
+		// Measured ratio: 0.6 to 1.7 when linear, about 16 when quadratic.
+		expect(largeBest / smallBest).toBeLessThan(4);
+	});
 });
 
 describe('looksLikePem', () => {
