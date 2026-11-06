@@ -3,7 +3,7 @@
 # ---- Stage 1: build the static site ----
 # Digest-pinned for a reproducible, immutable build base. Renovate keeps the
 # tag and the @sha256 digest in sync when a new node:24-alpine is published.
-FROM node:26-alpine@sha256:7ed4edf2b680417bf06d3f465de09bb113f877ff265b15f72a27a4c6fb76fb04 AS builder
+FROM node:26-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS builder
 WORKDIR /app
 
 # Install dependencies against the committed lockfile first (better layer caching).
