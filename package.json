@@ -20,7 +20,7 @@
 		"test:e2e:ui": "playwright test --ui"
 	},
 	"dependencies": {
-		"@abraham/reflection": "^0.13.0",
+		"@abraham/reflection": "^0.14.0",
 		"@peculiar/x509": "^2.0.0",
 		"asn1js": "^4.0.0",
 		"pkijs": "^4.0.0"
