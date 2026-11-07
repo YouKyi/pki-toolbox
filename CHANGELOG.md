@@ -10,6 +10,12 @@ dependency at its latest version.
 
 ## [Unreleased]
 
+## [2.4.3] - 2026-11-07
+
+### Dependencies
+
+- [eslint-plugin-svelte to v3.24.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/bb47cd2d) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/364))
+
 ## [2.4.2] - 2026-11-07
 
 ### Dependencies
@@ -415,7 +421,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.2...main
+[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.3...main
+[2.4.3]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.2...v2.4.3
 [2.4.2]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.1...v2.4.2
 [2.4.1]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.0...v2.4.1
 [2.4.0]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.3.1...v2.4.0
