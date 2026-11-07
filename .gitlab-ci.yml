@@ -97,9 +97,12 @@ include:
   # SSH par la cle du bot apres les memes gates que la promotion, provenance du tag
   # verifiee dans son pipeline. Prerequis : RELEASE_TOKEN et RELEASE_SIGNING_KEY,
   # portees sur l'environnement release, et la cle publique dans allowed_signers.
+  # Tag signe a la main, chaque mainteneur selon ses outils : OpenPGP (YubiKey)
+  # contre release-signers.asc, SSH contre allowed_signers, a cote de la cle du bot.
   - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/auto-release@v4.0.0
     inputs:
       version_files: package.json
+      gpg_public_keys: release-signers.asc
       tag_needs:
         - { job: lint, artifacts: false }
         - { job: test, artifacts: false }

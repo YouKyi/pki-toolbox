@@ -73,5 +73,6 @@ To sign a release with the YubiKey instead, tag the head of the release MR
 `catalog:release-tag` runs, which waits for lint, tests and scans of the merge
 pipeline:
 `git tag -s vX.Y.Z -m "pki-toolbox vX.Y.Z" <release commit>` and
-`git push origin vX.Y.Z`. CI sees the tag and does nothing; the release notes
-say the tag carries a GPG signature.
+`git push origin vX.Y.Z`. CI sees the tag and does nothing; the tag pipeline
+verifies it against `release-signers.asc` (OpenPGP) or `allowed_signers` (SSH),
+and refuses a key listed in neither.

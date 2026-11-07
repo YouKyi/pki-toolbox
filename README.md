@@ -225,8 +225,11 @@ git -c gpg.ssh.allowedSignersFile=allowed_signers verify-tag v1.2.3
 ```
 
 The manual path still works: a tag signed by hand and pushed before
-`catalog:release-tag` runs makes it a no-op, and the release notes say the tag
-carries a GPG signature.
+`catalog:release-tag` runs makes it a no-op. Its signature is checked like the
+bot's, each maintainer with their own tools: OpenPGP (YubiKey) against the keys
+in `release-signers.asc`, SSH against `allowed_signers`, next to the CI key. A
+tag signed by any other key is refused. Keys are added by merge request; a key
+that is still valid is never removed.
 
 ### The pipeline
 
