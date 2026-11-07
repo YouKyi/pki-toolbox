@@ -52,19 +52,19 @@ variables:
 #   - gitlab-release : une section de changelog absente publiait une release aux
 #     notes VIDES, definitivement et sans signal.
 include:
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/gitleaks-scan@v4.0.0
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/gitleaks-scan@v5.0.0
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/ggshield-scan@v4.0.0
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/ggshield-scan@v5.0.0
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-vuln@v4.0.0
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-vuln@v5.0.0
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-secret@v4.0.0
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-secret@v5.0.0
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-license@v4.0.0
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-license@v5.0.0
     inputs:
       stage: lint
       # Ce projet est publie sous MIT et distribue publiquement (GitHub, GHCR,
@@ -73,16 +73,23 @@ include:
   # Chaine image v3 : build d'un candidat, scan Trivy par digest, puis promotion de
   # ce seul digest. Rien de non scanne ne recoit :<sha>, latest ni la version.
   # Les gates attendus par la v2 avant le build attendent desormais la promotion.
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/container-image@v4.0.0
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/container-image@v5.0.0
     inputs:
       stage: docker
       rules: *image-rules
       source_url: https://github.com/youkyi/pki-toolbox
       # Republication vers les registres publics, sur tag git uniquement, donc
       # toujours une reference immuable. Chaque miroir reste inerte tant que sa
-      # variable de token est vide : ce sont les NOMS qui sont passes ici.
+      # variable de token est vide : ce sont les NOMS qui sont passes ici. La
+      # promotion tourne dans l'environnement image-promote (defaut de
+      # promote_environment, action prepare) : GHCR_* et DOCKERHUB_*, protegees et
+      # portees sur lui, n'atteignent ni lint, ni test, ni e2e.
       mirrors: 'ghcr.io|ghcr.io/youkyi/pki-toolbox|GHCR_USER|GHCR_TOKEN docker.io|docker.io/youkyi/pki-toolbox|DOCKERHUB_USER|DOCKERHUB_TOKEN'
       promote_needs:
+        # Sur un tag, rien ne part vers le registre ni les miroirs avant la signature
+        # verifiee. optional : la provenance n'existe que sur les pipelines de tag,
+        # ou elle est toujours creee.
+        - { job: 'catalog:release-provenance', artifacts: false, optional: true }
         - { job: lint, artifacts: false }
         - { job: test, artifacts: false }
         # Needs dur : les rules d'e2e (MR, branche, tag) couvrent celles de l'image.
@@ -92,14 +99,18 @@ include:
         - { job: 'catalog:trivy-vuln', artifacts: false }
         - { job: 'catalog:trivy-secret', artifacts: false }
         - { job: 'catalog:trivy-license', artifacts: false }
-  # Release en un clic (ci-catalog#6) : apercu sur les MR et main, clic manuel
-  # catalog:release qui ouvre la MR de release et la passe en auto-merge, tag signe
-  # SSH par la cle du bot apres les memes gates que la promotion, provenance du tag
-  # verifiee dans son pipeline. Prerequis : RELEASE_TOKEN et RELEASE_SIGNING_KEY,
-  # portees sur l'environnement release, et la cle publique dans allowed_signers.
-  # Tag signe a la main, chaque mainteneur selon ses outils : OpenPGP (YubiKey)
-  # contre release-signers.asc, SSH contre allowed_signers, a cote de la cle du bot.
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/auto-release@v4.0.0
+  # Release v5 (decision 24 du catalog) : a chaque push sur main, la CI tient a jour
+  # la branche release/next et sa MR chore(release): X.Y.Z, jamais en auto-merge. Un
+  # humain la merge ; le pipeline suivant de main pose le tag, signe SSH par la cle
+  # du bot, apres les memes gates que la promotion. Dans le pipeline du tag, la
+  # provenance verifie la signature avant la promotion et la release. Ne rien pousser
+  # sur release/next : les notes s'ecrivent dans [Unreleased] du CHANGELOG, par MR.
+  # Prerequis : RELEASE_TOKEN et RELEASE_SIGNING_KEY portees sur l'environnement
+  # release, la cle publique du bot dans allowed_signers ; projet en merge commit,
+  # pipeline vert exige, pipeline ignore refuse. Tag signe a la main, chaque
+  # mainteneur selon ses outils : OpenPGP (YubiKey) contre release-signers.asc, SSH
+  # contre allowed_signers, a cote de la cle du bot.
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/auto-release@v5.0.0
     inputs:
       version_files: package.json
       gpg_public_keys: release-signers.asc
@@ -112,7 +123,7 @@ include:
         - { job: 'catalog:trivy-vuln', artifacts: false }
         - { job: 'catalog:trivy-secret', artifacts: false }
         - { job: 'catalog:trivy-license', artifacts: false }
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/gitlab-release@v4.0.0
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/gitlab-release@v5.0.0
     inputs:
       stage: release
       release_name: 'pki-toolbox $CI_COMMIT_TAG'
@@ -127,16 +138,6 @@ include:
 'catalog:gitlab-release':
   needs: ['catalog:image-promote', 'catalog:release-provenance']
   dependencies: ['catalog:image-promote', 'catalog:release-provenance']
-
-# Surcharge de la promotion : seul job a lire GHCR_* et DOCKERHUB_*, protegees et
-# portees sur l'environnement image-promote (action prepare, aucun deploiement).
-# Portees sur *, elles atteignaient lint, test et e2e sur main et sur les tags,
-# apres un pnpm install qui execute le code des dependances. Redondante des que le
-# catalog apporte l'input promote_environment de container-image (meme defaut).
-'catalog:image-promote':
-  environment:
-    name: image-promote
-    action: prepare
 
 # Run exactly one pipeline per change: a merge-request pipeline when an MR is
 # open, otherwise a branch pipeline, plus tag pipelines. The default branch keeps

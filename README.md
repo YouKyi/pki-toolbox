@@ -197,21 +197,28 @@ are recorded in [`CHANGELOG.md`](./CHANGELOG.md). Contribution rules live in
 
 ### Cutting a release
 
-Releases take one click, through the ci-catalog `auto-release` component:
+Releases go through the ci-catalog `auto-release` component (v5). A release
+merge request is always ready; merging it is the only human step:
 
-1. Every `main` pipeline runs `catalog:release-preview`: the next version,
-   computed from the Conventional Commits since the last tag, and the
-   `CHANGELOG.md` section it would publish (job log and artifact).
-2. Run the manual `catalog:release` job of the latest `main` pipeline. It
-   commits the release (`CHANGELOG.md` and `package.json`) on a
-   `release/vX.Y.Z` branch, opens the `chore(release): X.Y.Z` merge request and
-   sets it to merge once its pipeline is green. Set `RELEASE_VERSION=X.Y.Z` in
-   the job form to force a version.
-3. Once merged, the `main` pipeline runs `catalog:release-tag`: after lint,
-   tests and scans, it tags the head of the release merge request `vX.Y.Z`,
-   signed with the CI release key (SSH). The tag pipeline then verifies the
-   signature, promotes the image and publishes the GitLab Release, with no
-   further step.
+1. Every merge request and `main` pipeline runs `catalog:release-preview`: the
+   next version, computed from the Conventional Commits since the last tag,
+   and the `CHANGELOG.md` section it would publish (job log and artifact).
+2. Every `main` pipeline also runs `catalog:release-prepare`. It keeps the
+   `release/next` branch and its `chore(release): X.Y.Z` merge request
+   (`CHANGELOG.md` and `package.json`) in step with `main`. The merge request
+   keeps its number when the version changes and is never set to auto-merge.
+3. Review it and merge it. The next `main` pipeline runs `catalog:release-tag`:
+   after lint, tests and scans, it tags the head of the release merge request
+   `vX.Y.Z`, signed with the CI release key (SSH). The tag pipeline verifies
+   the signature first, then promotes the image and publishes the GitLab
+   Release, with no further step.
+
+Never push to `release/next`: CI rewrites it. Better notes go under
+`## [Unreleased]` on `main`, through a regular merge request, and the release
+merge request follows. Prefix its title with `Draft:` to hold a release. To
+force a version, write its `## [X.Y.Z]` section by hand in a regular merge
+request. The project merges with merge commits, requires a green pipeline and
+refuses skipped pipelines: the preparation and the tag check these settings.
 
 What lands in the section: whatever is written under `## [Unreleased]` is
 published as is; when it is empty, CI writes it from the `feat`, `fix` and
@@ -224,8 +231,9 @@ Verify a release tag with the public key committed in this repository:
 git -c gpg.ssh.allowedSignersFile=allowed_signers verify-tag v1.2.3
 ```
 
-The manual path still works: a tag signed by hand and pushed before
-`catalog:release-tag` runs makes it a no-op. Its signature is checked like the
+The manual path still works: a tag signed by hand on the head of the release
+merge request, pushed after the merge and before `catalog:release-tag` runs,
+makes that job a no-op. Its signature is checked like the
 bot's, each maintainer with their own tools: OpenPGP (YubiKey) against the keys
 in `release-signers.asc`, SSH against `allowed_signers`, next to the CI key. A
 tag signed by any other key is refused. Keys are added by merge request; a key

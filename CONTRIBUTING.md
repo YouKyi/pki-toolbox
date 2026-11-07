@@ -63,11 +63,12 @@ scope, e.g. `fix(chain): verify signatures, not just DN strings`.
 
 ## Releases
 
-Releases take one click on the manual `catalog:release` job of a `main`
-pipeline, documented in the
-[Versioning & releases](./README.md#versioning--releases) section of the
-README. A `vX.Y.Z` tag is still the only thing that publishes an image and a
-GitLab Release; CI sets it, signed, once the release merge request is merged.
+CI keeps a release merge request ready on every `main` pipeline
+(`release/next`, `chore(release): X.Y.Z`); merging it publishes the release, as
+documented in the [Versioning & releases](./README.md#versioning--releases)
+section of the README. A `vX.Y.Z` tag is still the only thing that publishes an
+image and a GitLab Release; CI sets it, signed, once the release merge request
+is merged, and the tag pipeline verifies that signature before publishing.
 
 ## Continuous integration
 
