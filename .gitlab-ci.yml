@@ -8,7 +8,7 @@ stages:
 variables:
   IMAGE: $CI_REGISTRY_IMAGE
   TAG_SHA: $CI_COMMIT_SHORT_SHA
-  TRIVY_VERSION: '0.76.1'
+  TRIVY_VERSION: '0.76.2'
   # Canonical public source repository, stamped into the image OCI labels.
   SOURCE_URL: https://github.com/youkyi/pki-toolbox
 
