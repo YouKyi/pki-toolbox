@@ -52,19 +52,19 @@ variables:
 #   - gitlab-release : une section de changelog absente publiait une release aux
 #     notes VIDES, definitivement et sans signal.
 include:
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/gitleaks-scan@v5.1.3
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/gitleaks-scan@v5.1.4
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/ggshield-scan@v5.1.3
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/ggshield-scan@v5.1.4
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-vuln@v5.1.3
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-vuln@v5.1.4
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-secret@v5.1.3
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-secret@v5.1.4
     inputs:
       stage: lint
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-license@v5.1.3
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/trivy-license@v5.1.4
     inputs:
       stage: lint
       # Ce projet est publie sous MIT et distribue publiquement (GitHub, GHCR,
@@ -73,7 +73,7 @@ include:
   # Chaine image v3 : build d'un candidat, scan Trivy par digest, puis promotion de
   # ce seul digest. Rien de non scanne ne recoit :<sha>, latest ni la version.
   # Les gates attendus par la v2 avant le build attendent desormais la promotion.
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/container-image@v5.1.3
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/container-image@v5.1.4
     inputs:
       stage: docker
       rules: *image-rules
@@ -110,7 +110,7 @@ include:
   # pipeline vert exige, pipeline ignore refuse. Tag signe a la main, chaque
   # mainteneur selon ses outils : OpenPGP (YubiKey) contre release-signers.asc, SSH
   # contre allowed_signers, a cote de la cle du bot.
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/auto-release@v5.1.3
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/auto-release@v5.1.4
     inputs:
       version_files: package.json
       gpg_public_keys: release-signers.asc
@@ -123,7 +123,7 @@ include:
         - { job: 'catalog:trivy-vuln', artifacts: false }
         - { job: 'catalog:trivy-secret', artifacts: false }
         - { job: 'catalog:trivy-license', artifacts: false }
-  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/gitlab-release@v5.1.3
+  - component: $CI_SERVER_FQDN/youkyi-hq/platform/ci/ci-catalog/gitlab-release@v5.1.4
     inputs:
       stage: release
       release_name: 'pki-toolbox $CI_COMMIT_TAG'
