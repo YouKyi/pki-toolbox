@@ -191,7 +191,7 @@ test:
 # before_script works: the Node-20 -jammy image fails the pnpm engine check.
 e2e:
   stage: e2e
-  image: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d
+  image: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:9beb546099e11f52d62e505537914870e01a67e0e6b00ae41da4775324e73dbe
   needs: []
   script:
     - pnpm exec playwright test
