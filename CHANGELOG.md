@@ -10,6 +10,25 @@ dependency at its latest version.
 
 ## [Unreleased]
 
+## [2.4.4] - 2026-11-08
+
+### Dependencies
+
+- [@sveltejs/kit to v3.2.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/2f9d6fcc) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/383))
+- [aquasec/trivy docker tag to v0.76.2](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/28fb962e) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/372))
+- [eslint-plugin-svelte to v3.24.1](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/9b38100f) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/376))
+- [lock file maintenance](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/57d196ee) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/368))
+- [mcr.microsoft.com/playwright:v1.65.0-noble docker digest to 9beb546](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/1a01d567) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/377))
+- [nginx:1.31-alpine-slim docker digest to 4c734d3](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/dc541ec7) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/373))
+- [node.js to 6bd9ab4](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/a9dd2989) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/379))
+- [playwright to v1.65.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/c4b0f433) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/346))
+- [pnpm to v12.19.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/fad74ef2) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/384))
+- [prettier to v3.10.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/5d511078) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/386))
+- [tailwindcss monorepo to v4.3.5](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/c1a1f69f) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/375))
+- [typescript-eslint to v8.72.2](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/d25326ea) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/381))
+- [vite to v8.3.8](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/7d109ce5) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/385))
+- [youkyi-hq/platform/ci/ci-catalog to v5.1.4](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/6738eca7) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/374))
+
 ## [2.4.3] - 2026-11-07
 
 ### Dependencies
@@ -421,7 +440,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.3...main
+[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.4...main
+[2.4.4]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.3...v2.4.4
 [2.4.3]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.2...v2.4.3
 [2.4.2]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.1...v2.4.2
 [2.4.1]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.0...v2.4.1
