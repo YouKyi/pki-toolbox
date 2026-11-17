@@ -10,6 +10,15 @@ dependency at its latest version.
 
 ## [Unreleased]
 
+## [2.4.5] - 2026-11-15
+
+### Dependencies
+
+- [lock file maintenance](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/878975f4) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/387))
+- [pnpm to v12.20.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/7a58da5e) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/389))
+- [prettier to v3.10.1](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/567e62de) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/390))
+- [youkyi-hq/platform/ci/ci-catalog to v5.2.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/11bee688) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/391))
+
 ## [2.4.4] - 2026-11-08
 
 ### Dependencies
@@ -440,7 +449,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.4...main
+[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.5...main
+[2.4.5]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.4...v2.4.5
 [2.4.4]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.3...v2.4.4
 [2.4.3]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.2...v2.4.3
 [2.4.2]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.1...v2.4.2
