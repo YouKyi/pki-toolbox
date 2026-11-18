@@ -10,6 +10,14 @@ dependency at its latest version.
 
 ## [Unreleased]
 
+## [2.4.6] - 2026-11-17
+
+### Dependencies
+
+- [eslint to v10.15.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/5b840849) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/392))
+- [playwright to v1.65.1](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/a3358862) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/382))
+- [pnpm to v12.21.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/329b2d9e) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/393))
+
 ## [2.4.5] - 2026-11-15
 
 ### Dependencies
@@ -449,7 +457,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.5...main
+[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.6...main
+[2.4.6]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.5...v2.4.6
 [2.4.5]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.4...v2.4.5
 [2.4.4]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.3...v2.4.4
 [2.4.3]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.2...v2.4.3
