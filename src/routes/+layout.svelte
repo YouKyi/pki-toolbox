@@ -1,8 +1,16 @@
 <script lang="ts">
 	import '../app.css';
+	import { onMount } from 'svelte';
 	import Navbar from '#lib/components/Navbar.svelte';
 
 	let { children } = $props();
+
+	// The layout mounts after the page it wraps, so this marks the whole page
+	// live. Until then a click on a prerendered button is silently lost; the
+	// end-to-end suites wait on this instead of retrying their clicks.
+	onMount(() => {
+		document.documentElement.dataset.hydrated = '';
+	});
 
 	/**
 	 * `/` puts the caret in the input, the way every tool a system administrator

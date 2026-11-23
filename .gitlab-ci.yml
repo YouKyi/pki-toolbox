@@ -181,7 +181,15 @@ test:
   stage: test
   needs: []
   script:
-    - pnpm test
+    - pnpm test:coverage
+  # The 100% threshold in vite.config.ts fails the job; the summary feeds the MR.
+  coverage: '/^Lines\s*:\s*([\d.]+)%/'
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
 
 # End-to-end tests: build the static app and run Playwright against the exact
 # prerendered output (playwright.config.ts webServer = `pnpm build && pnpm

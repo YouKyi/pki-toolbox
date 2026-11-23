@@ -13,6 +13,8 @@
  * more than ~10_000 total nodes is rejected before `walk()` is ever invoked.
  * The tests below therefore verify the observable end-to-end behaviour:
  * over-large structures throw; structures within the limit parse correctly.
+ * The fragments of constructed strings are parsed separately, which is how a
+ * tree can still reach MAX_NODES; tests/pki/encoding-edges.test.ts covers it.
  */
 import { describe, it, expect } from 'vitest';
 import { parseAsn1 } from '#lib/pki/asn1.js';
