@@ -54,7 +54,12 @@ export default defineConfig({
 		expect: { requireAssertions: true },
 		// `pnpm test:coverage`: the PKI layer and the lib helpers; components and
 		// routes are exercised by the Playwright suite instead.
-		coverage: { provider: 'v8', include: ['src/lib/**/*.ts'], thresholds: { 100: true } },
+		coverage: {
+			provider: 'v8',
+			include: ['src/lib/**/*.ts'],
+			reporter: ['text', 'text-summary', 'html', 'cobertura'],
+			thresholds: { 100: true }
+		},
 		projects: [
 			{
 				extends: './vite.config.ts',
