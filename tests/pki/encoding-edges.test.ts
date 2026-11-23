@@ -46,9 +46,15 @@ describe('parseAsn1 values', () => {
 		expect(top('0d 02 2a 03')).toMatchObject({ tag: 'RELATIVE-OID', value: '42.3' });
 	});
 
-	it('reads an empty INTEGER as zero and a long ENUMERATED as hex', () => {
-		expect(top('02 00').value).toBe('0');
+	it('reads zero from its valid encoding and a long ENUMERATED as hex', () => {
+		expect(top('02 01 00').value).toBe('0');
 		expect(top('0a 09 01 02 03 04 05 06 07 08 09').value).toBe('01 02 03 04 05 06 07 08 09');
+	});
+
+	it('flags an INTEGER without content octets instead of inventing zero', () => {
+		// X.690 §8.3.1 requires at least one content octet.
+		expect(top('02 00').value).toBe('(invalid: no content octets)');
+		expect(top('0a 00').value).toBe('(invalid: no content octets)');
 	});
 
 	it('shows an empty OCTET STRING as nothing', () => {
@@ -75,8 +81,26 @@ describe('parseAsn1 values', () => {
 		);
 	});
 
-	it('marks a constructed (BER) string as constructed, without throwing', () => {
-		expect(top('33 03 13 01 41')).toMatchObject({ tag: 'PrintableString', constructed: true });
+	it('shows an overflowing GeneralizedTime as encoded, flagged as not a date', () => {
+		// asn1js accepts the fraction `.5e999`, which overflows into an invalid date.
+		const text = '2020010100.5e999Z';
+		const hex = Buffer.from(text).toString('hex');
+		expect(top(`18 ${text.length.toString(16)} ${hex}`).value).toBe(`${text} (not a valid date)`);
+	});
+
+	it('splits a constructed (BER) string into its fragments', () => {
+		const node = parseAsn1(der('33 06 13 01 41 13 01 42'));
+		expect(node).toMatchObject({ tag: 'PrintableString', constructed: true, value: null });
+		expect(
+			node.children.map(({ tag, value, offset, length }) => ({ tag, value, offset, length }))
+		).toEqual([
+			{ tag: 'PrintableString', value: 'A', offset: 2, length: 1 },
+			{ tag: 'PrintableString', value: 'B', offset: 5, length: 1 }
+		]);
+	});
+
+	it('shows constructed content that is not a run of BER elements as hex', () => {
+		expect(top('33 02 13 05')).toMatchObject({ constructed: true, value: '13 05', children: 0 });
 	});
 });
 

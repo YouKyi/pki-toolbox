@@ -101,7 +101,9 @@ function readValue(block: AnyBlock, tagClass: number, tagNumber: number): string
 		case 10: {
 			// ENUMERATED
 			const bytes = contentBytes(block);
-			if (bytes.length === 0) return '0';
+			// X.690 §8.3.1: an INTEGER has at least one content octet. Showing an
+			// empty one as 0 would invent a value the encoding does not carry.
+			if (bytes.length === 0) return '(invalid: no content octets)';
 			if (bytes.length <= 8) {
 				let n = 0n;
 				for (const b of bytes) n = (n << 8n) | BigInt(b);
@@ -113,12 +115,10 @@ function readValue(block: AnyBlock, tagClass: number, tagNumber: number): string
 		case 24: {
 			// GeneralizedTime
 			const date = block.toDate?.();
-			// asn1js 4 never yields an invalid date: UTCTime falls back to 1899-11-30
-			// and a malformed GeneralizedTime already throws in fromBER.
-			/* v8 ignore else -- @preserve */
 			if (date && !Number.isNaN(date.getTime())) return date.toISOString();
-			/* v8 ignore next -- @preserve */
-			return new TextDecoder().decode(contentBytes(block));
+			// asn1js accepts a fraction such as `.5e999`, which overflows into an
+			// invalid date: show what is encoded, and say it is not a date.
+			return `${new TextDecoder().decode(contentBytes(block))} (not a valid date)`;
 		}
 		default:
 			if (STRING_TAGS.has(tagNumber)) {
@@ -166,9 +166,13 @@ function walk(block: AnyBlock, offset: number, depth: number, budget: { count: n
 		children: []
 	};
 
-	const children = block.valueBlock.value;
-	if (isConstructed && Array.isArray(children)) {
-		if (depth >= MAX_DEPTH) {
+	if (isConstructed) {
+		const value = block.valueBlock.value;
+		const children = Array.isArray(value) ? value : fragments(contentBytes(block));
+		if (!children) {
+			// Content that does not split into BER elements is shown, not dropped.
+			node.value = hexPreview(contentBytes(block));
+		} else if (depth >= MAX_DEPTH) {
 			// Honestly mark where parsing stopped instead of silently dropping the
 			// subtree: an empty `children` array would look like a leaf node.
 			node.value = `(maximum nesting depth ${MAX_DEPTH} reached, ${children.length} child node(s) not expanded)`;
@@ -179,11 +183,29 @@ function walk(block: AnyBlock, offset: number, depth: number, budget: { count: n
 				childOffset += child.blockLength;
 			}
 		}
-	} else if (!isConstructed) {
+	} else {
 		node.value = readValue(block, tagClass, tagNumber);
 	}
 
 	return node;
+}
+
+/**
+ * The fragments of a BER constructed string. asn1js 4 does not split one: it
+ * keeps the raw content octets as the string value, so the fragments would
+ * otherwise vanish from the tree. Returns null when the content is not a run
+ * of complete BER elements.
+ */
+function fragments(content: Uint8Array): AnyBlock[] | null {
+	const out: AnyBlock[] = [];
+	let pos = 0;
+	while (pos < content.length) {
+		const parsed = asn1js.fromBER(toArrayBuffer(content.subarray(pos)));
+		if (parsed.offset < 1 || !parsed.result) return null;
+		out.push(parsed.result as unknown as AnyBlock);
+		pos += parsed.offset;
+	}
+	return out;
 }
 
 /**
