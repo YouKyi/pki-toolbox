@@ -36,5 +36,8 @@ vite.config.ts.timestamp-*
 /playwright/.cache/
 junit.xml
 
+# Vitest coverage report
+/coverage/
+
 # Subagent-driven development scratch
 .superpowers/

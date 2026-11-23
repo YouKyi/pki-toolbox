@@ -148,6 +148,8 @@ export function detectArtefact(input: string): Detected | null {
 			const first = blocks.find((block) => BY_LABEL[block.type.toUpperCase()] === 'certificate');
 			try {
 				const bytes = base64ToBytes(
+					// `first` exists: a certificate block is what made `kind` a certificate.
+					/* v8 ignore next -- @preserve */
 					(first?.pem ?? '').replace(/-----[^-]+-----/g, '').replace(/\s+/g, '')
 				);
 				if (isPkcs12(bytes)) return { kind: 'pkcs12', ...BY_KIND.pkcs12 };

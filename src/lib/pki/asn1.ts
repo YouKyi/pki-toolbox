@@ -92,6 +92,8 @@ function readValue(block: AnyBlock, tagClass: number, tagNumber: number): string
 			return '';
 		case 6: // OBJECT IDENTIFIER
 		case 13: {
+			// asn1js 4 gives both OID classes a getValue(): the fallbacks never run.
+			/* v8 ignore next -- @preserve */
 			const oid = block.getValue?.() ?? block.valueBlock.toString?.() ?? '';
 			return oid;
 		}
@@ -111,13 +113,20 @@ function readValue(block: AnyBlock, tagClass: number, tagNumber: number): string
 		case 24: {
 			// GeneralizedTime
 			const date = block.toDate?.();
+			// asn1js 4 never yields an invalid date: UTCTime falls back to 1899-11-30
+			// and a malformed GeneralizedTime already throws in fromBER.
+			/* v8 ignore else -- @preserve */
 			if (date && !Number.isNaN(date.getTime())) return date.toISOString();
+			/* v8 ignore next -- @preserve */
 			return new TextDecoder().decode(contentBytes(block));
 		}
 		default:
 			if (STRING_TAGS.has(tagNumber)) {
 				const raw = block.valueBlock.value;
+				// Every asn1js 4 string class stores a string value: the decode never runs.
+				/* v8 ignore else -- @preserve */
 				if (typeof raw === 'string') return raw;
+				/* v8 ignore next -- @preserve */
 				return new TextDecoder().decode(contentBytes(block));
 			}
 			return hexPreview(contentBytes(block));
@@ -132,6 +141,8 @@ const MAX_DEPTH = 40;
 
 function walk(block: AnyBlock, offset: number, depth: number, budget: { count: number }): Asn1Node {
 	budget.count += 1;
+	// asn1js caps fromBER at 10_000 nodes, so this guard cannot trip today.
+	/* v8 ignore next -- @preserve */
 	if (budget.count > MAX_NODES) {
 		throw new Error('The ASN.1 tree exceeds the maximum displayable size.');
 	}
@@ -145,6 +156,8 @@ function walk(block: AnyBlock, offset: number, depth: number, budget: { count: n
 
 	const node: Asn1Node = {
 		tag,
+		// asn1js derives the class from two bits (1..4): every value is named.
+		/* v8 ignore next -- @preserve */
 		tagClass: TAG_CLASSES[tagClass] ?? 'Unknown',
 		constructed: isConstructed,
 		length,
@@ -189,6 +202,8 @@ export function parseAsn1(input: string): Asn1Node {
 	} catch (e) {
 		throw new Error('The input is neither valid PEM nor base64-encoded DER.', { cause: e });
 	}
+	// base64ToBytes rejects an empty body, so a decoded DER is never empty.
+	/* v8 ignore next -- @preserve */
 	if (der.length === 0) throw new Error('The input is empty.');
 
 	const parsed = asn1js.fromBER(toArrayBuffer(der));

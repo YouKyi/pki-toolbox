@@ -91,6 +91,8 @@ export async function decodePkcs12(input: string, password: string): Promise<Dec
 	}
 
 	const authSafe = pfx.parsedValue?.authenticatedSafe;
+	// pkijs either sets authenticatedSafe or throws in parseInternalValues above.
+	/* v8 ignore next -- @preserve */
 	if (!authSafe) throw new Error('This PKCS#12 file contains no usable content.');
 
 	try {

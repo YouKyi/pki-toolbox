@@ -54,8 +54,11 @@ export async function decodePkcs7(input: string): Promise<DecodedPkcs7> {
 
 	return {
 		kind: 'pkcs7',
+		// pkijs defaults both arrays to [] in the SignedData constructor; the fallbacks never fire.
+		/* v8 ignore start -- @preserve */
 		signerCount: signed.signerInfos?.length ?? 0,
 		digestAlgorithms: (signed.digestAlgorithms ?? []).map(
+			/* v8 ignore stop -- @preserve */
 			(algo) => DIGEST_NAMES[algo.algorithmId] ?? algo.algorithmId
 		),
 		certificateCount: certificates.length,

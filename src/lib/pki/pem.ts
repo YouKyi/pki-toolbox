@@ -167,6 +167,8 @@ export function base64ToBytes(b64: string): Uint8Array {
 	try {
 		bin = atob(clean);
 	} catch {
+		// The regex above only admits input atob accepts: this never runs.
+		/* v8 ignore next -- @preserve */
 		throw new Error('The content is not valid base64.');
 	}
 	if (bin.length > MAX_INPUT_BYTES) {
