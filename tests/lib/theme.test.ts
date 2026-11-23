@@ -83,6 +83,12 @@ describe('theme', () => {
 });
 
 describe('theme on the server', () => {
+	// Restored even when an assertion fails, so no other test inherits the mock.
+	afterEach(() => {
+		vi.doUnmock('$app/env');
+		vi.resetModules();
+	});
+
 	it('keeps its defaults and touches no browser API', async () => {
 		vi.resetModules();
 		vi.doMock('$app/env', () => ({ browser: false }));
@@ -95,6 +101,5 @@ describe('theme on the server', () => {
 		expect(server.theme.mode).toBe('dark');
 		expect(server.theme.value).toBe('light');
 		expect(getItem).not.toHaveBeenCalled();
-		vi.doUnmock('$app/env');
 	});
 });
