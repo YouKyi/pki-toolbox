@@ -10,6 +10,26 @@ dependency at its latest version.
 
 ## [Unreleased]
 
+## [2.4.7] - 2026-11-18
+
+### Fixed
+
+- [stop inventing values for malformed encodings](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/df8e4a9a) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/408))
+- [read extensions one at a time](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/35b191e2) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/408))
+- [refuse unreadable CA constraints, check extension shapes](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/c9113a98) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/408))
+- [bound constructed string fragments](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/db82eb5d) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/408))
+
+### Dependencies
+
+- [@sveltejs/kit to v3.4.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/3f3ed7ea) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/407))
+- [lock file maintenance](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/bc0061da) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/406))
+- [nginx:1.31-alpine-slim docker digest to 5bfced7](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/eaed9cad) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/398))
+- [pnpm to v12.22.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/4cb9b82f) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/409))
+- [svelte to v5.58.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/4b1e948d) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/405))
+- [typescript-eslint to v8.73.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/d279cb37) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/400))
+- [vitest to v5.1.1](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/2e982138) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/404))
+- [youkyi-hq/platform/ci/ci-catalog to v5.2.1](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/bad07ccb) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/399))
+
 ## [2.4.6] - 2026-11-17
 
 ### Dependencies
@@ -457,7 +477,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.6...main
+[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.7...main
+[2.4.7]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.6...v2.4.7
 [2.4.6]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.5...v2.4.6
 [2.4.5]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.4...v2.4.5
 [2.4.4]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.3...v2.4.4
