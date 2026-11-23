@@ -56,7 +56,10 @@ test('S21 format conversion downloads PEM, DER and a PKCS#7 bundle', async ({ pa
 // ---------------------------------------------------------------------------
 // S22: a copy button puts the exact text on the clipboard
 // ---------------------------------------------------------------------------
-test('S22 copy puts the PEM on the clipboard', async ({ page, context }) => {
+test('S22 copy puts the PEM on the clipboard', async ({ page, context, browserName }) => {
+	// Reading the clipboard back needs a granted permission, which Playwright
+	// supports on Chromium only; Firefox and WebKit reject the grant itself.
+	test.skip(browserName !== 'chromium', 'clipboard permissions are Chromium-only in Playwright');
 	await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 	await open(page, '/format-convert');
 	await loadExample(page);
@@ -66,9 +69,10 @@ test('S22 copy puts the PEM on the clipboard', async ({ page, context }) => {
 	// A sentinel first, so a PEM already on the clipboard cannot pass for the copy.
 	await page.evaluate(() => navigator.clipboard.writeText('sentinel'));
 	await region(page).getByRole('button', { name: 'Copy' }).first().click();
-	await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(armour(der));
-	// The visual acknowledgement, checked on its own: it fades after 1.2 s.
+	// The acknowledgement first: it fades after 1.2 s, so it is checked before
+	// anything that could take time, and the clipboard content after it.
 	await expect(region(page).getByRole('button', { name: 'Copied' })).toBeVisible();
+	await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(armour(der));
 });
 
 // ---------------------------------------------------------------------------

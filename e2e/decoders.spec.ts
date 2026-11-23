@@ -96,9 +96,11 @@ test('S17 decrypt PKCS#12 example, wrong password then right', async ({ page }) 
 	// whether it is encrypted.
 	const keys = result.getByRole('heading', { name: 'Private keys' }).locator('..');
 	await expect(keys.getByRole('listitem')).toHaveCount(1);
-	await expect(keys.getByRole('listitem')).toHaveText(
-		/^\s*demo\.pki-toolbox\.test\s*EC\s*encrypted\s*$/
-	);
+	const item = await keys.getByRole('listitem').innerText();
+	expect(
+		/^\s*demo\.pki-toolbox\.test\s*EC\s*encrypted\s*$/.test(item),
+		'the key line carries name, algorithm and encryption only'
+	).toBe(true);
 	await expect(keys.getByText('Private key material is never displayed.')).toBeVisible();
 	// No key bytes anywhere in the answer, armoured or bare. Tested as a boolean
 	// so a failure never prints the bytes it found into the report.
