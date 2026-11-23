@@ -16,6 +16,7 @@ import {
 	BasicConstraintsExtension,
 	KeyUsagesExtension,
 	KeyUsageFlags,
+	ExtendedKeyUsageExtension,
 	Extension
 } from '@peculiar/x509';
 import { importCa, issueCertificate } from '#lib/pki/sign.js';
@@ -81,6 +82,9 @@ function throwStringOnParse(proto: object) {
 	});
 }
 
+/** An extension value that is not the structure its OID announces (a NULL). */
+const MALFORMED = new Uint8Array([0x05, 0x00]);
+
 const caExtension = () => new BasicConstraintsExtension(true, undefined, true);
 
 describe('importCa', () => {
@@ -129,6 +133,15 @@ describe('importCa', () => {
 		await expect(importCa(ca.certPem, ca.keyPem)).rejects.toThrowError(
 			'The private key does not match the CA certificate.'
 		);
+	});
+
+	it('accepts a real CA whose SAN is malformed', async () => {
+		const ca = await makeCert('P-256', [
+			caExtension(),
+			new KeyUsagesExtension(KeyUsageFlags.keyCertSign, true),
+			new Extension('2.5.29.17', false, MALFORMED)
+		]);
+		await expect(importCa(ca.certPem, ca.keyPem)).resolves.toMatchObject({ warnings: [] });
 	});
 
 	it('refuses a CA whose Key Usage lacks keyCertSign', async () => {
@@ -190,45 +203,97 @@ describe('decodeCertificate edge cases', () => {
 		expect((await decodeCertificate(certPem)).validity).toBe('not-yet-valid');
 	});
 
-	it('shrugs off SAN, Basic Constraints and EKU extensions that do not parse', async () => {
-		const garbage = new Uint8Array([0x05, 0x00]);
+	it('keeps every valid extension when one beside it is malformed', async () => {
+		// peculiar alone dropped them all: isCA came out false for a real CA.
 		const { certPem } = await makeCert('P-256', [
-			new Extension('2.5.29.17', false, garbage),
-			new Extension('2.5.29.19', false, garbage),
-			new Extension('2.5.29.37', false, garbage)
+			caExtension(),
+			new KeyUsagesExtension(KeyUsageFlags.keyCertSign | KeyUsageFlags.cRLSign, true),
+			new Extension('2.5.29.17', false, MALFORMED),
+			new ExtendedKeyUsageExtension(['1.3.6.1.5.5.7.3.1'])
+		]);
+		const cert = await decodeCertificate(certPem);
+		expect(cert.isCA).toBe(true);
+		expect(cert.basicConstraints).toEqual({ ca: true, pathLength: undefined });
+		expect(cert.keyUsage).toEqual(['keyCertSign', 'cRLSign']);
+		expect(cert.extendedKeyUsage).toEqual(['serverAuth']);
+		expect(cert.subjectAltNames).toEqual([]);
+		expect(cert.extensions).toEqual([
+			{ oid: '2.5.29.19', name: 'Basic Constraints', critical: true },
+			{ oid: '2.5.29.15', name: 'Key Usage', critical: true },
+			{ oid: '2.5.29.17', name: 'Subject Alternative Name (malformed)', critical: false },
+			{ oid: '2.5.29.37', name: 'Extended Key Usage', critical: false }
+		]);
+	});
+
+	it('reads nothing from extensions that are all malformed', async () => {
+		const { certPem } = await makeCert('P-256', [
+			new Extension('2.5.29.17', false, MALFORMED),
+			new Extension('2.5.29.19', true, MALFORMED),
+			new Extension('2.5.29.37', false, MALFORMED)
 		]);
 		const cert = await decodeCertificate(certPem);
 		expect(cert.subjectAltNames).toEqual([]);
 		expect(cert.basicConstraints).toBeNull();
 		expect(cert.isCA).toBe(false);
 		expect(cert.extendedKeyUsage).toEqual([]);
+		expect(cert.extensions.map((e) => e.name)).toEqual([
+			'Subject Alternative Name (malformed)',
+			'Basic Constraints (malformed)',
+			'Extended Key Usage (malformed)'
+		]);
 	});
 
-	it('keeps decoding when every extension lookup by OID throws', async () => {
-		// A malformed extension makes peculiar throw once, then cache an empty
-		// list, so only the first reader ever sees the throw: force it for all.
-		vi.spyOn(X509Certificate.prototype, 'getExtension').mockImplementation(((type: unknown) => {
-			if (typeof type === 'string') throw new Error('bad extension');
-			return null;
-		}) as X509Certificate['getExtension']);
-		const cert = await decodeCertificate(ISRG_ROOT_X2);
-		expect(cert.subjectAltNames).toEqual([]);
-		expect(cert.extendedKeyUsage).toEqual([]);
-		expect(cert.basicConstraints).toBeNull();
+	it('decodes a certificate without any extension', async () => {
+		const { certPem } = await makeCert('P-256', []);
+		const cert = await decodeCertificate(certPem);
+		expect(cert.extensions).toEqual([]);
+		expect(cert.keyUsage).toEqual([]);
 	});
 
-	it('decodes a CSR whose requested SAN does not parse', async () => {
+	it('decodes a CSR whose requested SAN does not parse, keeping its other requests', async () => {
 		const alg = { name: 'ECDSA', namedCurve: 'P-256', hash: 'SHA-256' };
 		const keys = await crypto.subtle.generateKey(alg, true, ['sign', 'verify']);
 		const csr = await Pkcs10CertificateRequestGenerator.create({
 			name: 'CN=bad-san.test',
 			keys,
 			signingAlgorithm: alg,
-			extensions: [new Extension('2.5.29.17', false, new Uint8Array([0x05, 0x00]))]
+			extensions: [
+				new Extension('2.5.29.17', false, MALFORMED),
+				new ExtendedKeyUsageExtension(['1.3.6.1.5.5.7.3.2'])
+			]
 		});
 		const decoded = await decodeCsr(csr.toString('pem'));
 		expect(decoded.subject).toBe('CN=bad-san.test');
 		expect(decoded.subjectAltNames).toEqual([]);
+		// The valid request beside the malformed one is still read.
+		expect(decoded.extendedKeyUsage).toEqual(['clientAuth']);
+	});
+
+	it('decodes a CSR that requests no extension at all', async () => {
+		const alg = { name: 'ECDSA', namedCurve: 'P-256', hash: 'SHA-256' };
+		const keys = await crypto.subtle.generateKey(alg, true, ['sign', 'verify']);
+		const csr = await Pkcs10CertificateRequestGenerator.create({
+			name: 'CN=bare.test',
+			keys,
+			signingAlgorithm: alg
+		});
+		const decoded = await decodeCsr(csr.toString('pem'));
+		expect(decoded.subjectAltNames).toEqual([]);
+		expect(decoded.extendedKeyUsage).toEqual([]);
+		expect(decoded.basicConstraints).toBeNull();
+	});
+
+	it('decodes a v1 certificate, which has no extensions field', async () => {
+		const { certPem } = await makeCert('P-256', []);
+		const v3 = new pkijs.Certificate({
+			schema: asn1js.fromBER(toArrayBuffer(pemToDer(certPem))).result
+		});
+		v3.version = 0;
+		v3.extensions = undefined;
+		const v1 = derToPem(new Uint8Array(v3.toSchema(true).toBER()));
+		const cert = await decodeCertificate(v1);
+		expect(cert.extensions).toEqual([]);
+		expect(cert.isCA).toBe(false);
 	});
 
 	it('reports a parser failure even when it is not an Error', async () => {
@@ -432,17 +497,23 @@ describe('PKCS#12 edge cases', () => {
 			new Error('no')
 		);
 		const store = await decodePkcs12(TEST_PKCS12, TEST_PKCS12_PASSWORD);
-		expect(store.keys).toEqual([expect.objectContaining({ algorithm: null, encrypted: true })]);
+		// Exactly these three metadata fields: nothing else, key bytes least of all.
+		expect(store.keys.map((key) => Object.keys(key).sort())).toEqual([
+			['algorithm', 'encrypted', 'friendlyName']
+		]);
+		expect(store.keys).toStrictEqual([
+			{ friendlyName: 'demo.pki-toolbox.test', algorithm: null, encrypted: true }
+		]);
 	});
 
-	it('rejects content it cannot decrypt', async () => {
+	it('rejects encrypted content that is malformed', async () => {
+		// The declared EncryptedData is an INTEGER: the schema fails before any
+		// decryption, so only the rejection is asserted, not a password diagnosis.
 		const broken = new pkijs.ContentInfo({
 			contentType: '1.2.840.113549.1.7.6',
 			content: new asn1js.Integer({ value: 1 })
 		});
-		await expect(decodePkcs12(p12([], [broken]), '')).rejects.toThrowError(
-			'Could not decrypt the content, incorrect password.'
-		);
+		await expect(decodePkcs12(p12([], [broken]), '')).rejects.toBeInstanceOf(Error);
 	});
 
 	it('rejects DER that is not a PKCS#12 file', async () => {

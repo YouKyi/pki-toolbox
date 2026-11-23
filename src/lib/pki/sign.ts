@@ -20,6 +20,7 @@ import {
 	type PublicKeyType
 } from '@peculiar/x509';
 import { pemToDer, derToPem } from './pem';
+import { certificateExtensions, extensionByOid } from './parse';
 import {
 	ALGORITHMS,
 	KEY_ALGORITHM_LABELS,
@@ -128,13 +129,15 @@ export async function importCa(certPem: string, keyPem: string): Promise<CaConte
 
 	// Review F28: issuing from a non-CA used to be a warning, yet every
 	// conforming verifier rejects the resulting chain. Refuse instead.
-	const bc = cert.getExtension(BasicConstraintsExtension);
+	// Read one extension at a time: a malformed neighbour must not hide them.
+	const extensions = certificateExtensions(cert);
+	const bc = extensionByOid<BasicConstraintsExtension>(extensions, '2.5.29.19');
 	if (!bc?.ca) {
 		throw new Error(
 			'This certificate is not a CA (Basic Constraints cA is not set): it cannot issue certificates. Import a CA certificate and its key.'
 		);
 	}
-	const ku = cert.getExtension(KeyUsagesExtension);
+	const ku = extensionByOid<KeyUsagesExtension>(extensions, '2.5.29.15');
 	if (ku && !(ku.usages & KeyUsageFlags.keyCertSign)) {
 		throw new Error(
 			'This CA certificate does not allow certificate signing (Key Usage lacks keyCertSign): it cannot issue certificates.'
