@@ -164,7 +164,8 @@ describe('parseAsn1 values', () => {
 		expect(() => parseAsn1(seq.toString('base64'))).toThrowError(
 			'The ASN.1 tree exceeds the maximum displayable size.'
 		);
-	});
+		// Over 100 000 nodes on purpose: about 7 s on a slow CI runner.
+	}, 30_000);
 });
 
 describe('parseAsn1 input errors', () => {
