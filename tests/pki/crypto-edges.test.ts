@@ -17,6 +17,7 @@ import {
 	KeyUsagesExtension,
 	KeyUsageFlags,
 	ExtendedKeyUsageExtension,
+	SubjectAlternativeNameExtension,
 	Extension
 } from '@peculiar/x509';
 import { importCa, issueCertificate } from '#lib/pki/sign.js';
@@ -82,6 +83,38 @@ function throwStringOnParse(proto: object) {
 	});
 }
 
+const OID_EXTENSION_REQUEST = '1.2.840.113549.1.9.14';
+
+/** An extension as an asn1js block, ready to place in a hand-built structure. */
+function der(ext: Extension): asn1js.AsnType {
+	return asn1js.fromBER(ext.rawData).result;
+}
+
+function attribute(oid: string, values: asn1js.AsnType): asn1js.Sequence {
+	return new asn1js.Sequence({ value: [new asn1js.ObjectIdentifier({ value: oid }), values] });
+}
+
+/**
+ * A CSR whose attributes are replaced by hand, to reach shapes no generator
+ * writes. The signature no longer matches, which decoding does not check.
+ */
+async function csrWithAttributes(attributes: asn1js.AsnType[]): Promise<string> {
+	const alg = { name: 'ECDSA', namedCurve: 'P-256', hash: 'SHA-256' };
+	const keys = await crypto.subtle.generateKey(alg, true, ['sign', 'verify']);
+	const csr = await Pkcs10CertificateRequestGenerator.create({
+		name: 'CN=shape.test',
+		keys,
+		signingAlgorithm: alg
+	});
+	const root = asn1js.fromBER(csr.rawData).result as asn1js.Sequence;
+	const info = root.valueBlock.value[0] as asn1js.Sequence;
+	info.valueBlock.value[3] = new asn1js.Constructed({
+		idBlock: { tagClass: 3, tagNumber: 0 },
+		value: attributes
+	});
+	return derToPem(new Uint8Array(root.toBER()), 'CERTIFICATE REQUEST');
+}
+
 /** An extension value that is not the structure its OID announces (a NULL). */
 const MALFORMED = new Uint8Array([0x05, 0x00]);
 
@@ -132,6 +165,24 @@ describe('importCa', () => {
 		vi.spyOn(crypto.subtle, 'sign').mockRejectedValueOnce(new Error('no'));
 		await expect(importCa(ca.certPem, ca.keyPem)).rejects.toThrowError(
 			'The private key does not match the CA certificate.'
+		);
+	});
+
+	it('refuses a CA whose Key Usage is present but unreadable', async () => {
+		// Absent allows signing; unreadable might be the constraint forbidding it.
+		const ca = await makeCert('P-256', [
+			caExtension(),
+			new Extension('2.5.29.15', true, MALFORMED)
+		]);
+		await expect(importCa(ca.certPem, ca.keyPem)).rejects.toThrowError(
+			'This CA certificate carries a Key Usage extension that cannot be read: it cannot issue certificates.'
+		);
+	});
+
+	it('refuses a CA whose Basic Constraints is present but unreadable', async () => {
+		const ca = await makeCert('P-256', [new Extension('2.5.29.19', true, MALFORMED)]);
+		await expect(importCa(ca.certPem, ca.keyPem)).rejects.toThrowError(
+			'This CA certificate carries a Basic Constraints extension that cannot be read: it cannot issue certificates.'
 		);
 	});
 
@@ -267,6 +318,57 @@ describe('decodeCertificate edge cases', () => {
 		expect(decoded.subjectAltNames).toEqual([]);
 		// The valid request beside the malformed one is still read.
 		expect(decoded.extendedKeyUsage).toEqual(['clientAuth']);
+	});
+
+	it('skips a requested extension entry that is not an extension, keeping its neighbours', async () => {
+		const pem = await csrWithAttributes([
+			attribute(
+				OID_EXTENSION_REQUEST,
+				new asn1js.Set({
+					value: [
+						new asn1js.Sequence({
+							value: [new asn1js.Null(), der(new ExtendedKeyUsageExtension(['1.3.6.1.5.5.7.3.2']))]
+						})
+					]
+				})
+			)
+		]);
+		const decoded = await decodeCsr(pem);
+		expect(decoded.extendedKeyUsage).toEqual(['clientAuth']);
+	});
+
+	it('requests nothing when the extensionRequest SET holds a SET instead of a SEQUENCE', async () => {
+		const san = der(new SubjectAlternativeNameExtension([{ type: 'dns', value: 'x.test' }]));
+		const pem = await csrWithAttributes([
+			// An unrelated attribute first: the search must walk past it.
+			attribute(
+				'1.2.840.113549.1.9.7',
+				new asn1js.Set({ value: [new asn1js.Utf8String({ value: 'pw' })] })
+			),
+			attribute(
+				OID_EXTENSION_REQUEST,
+				new asn1js.Set({ value: [new asn1js.Set({ value: [san] })] })
+			)
+		]);
+		expect((await decodeCsr(pem)).subjectAltNames).toEqual([]);
+	});
+
+	it('rejects attributes that are not SEQUENCE { OID, SET } as a malformed request', async () => {
+		const san = der(new SubjectAlternativeNameExtension([{ type: 'dns', value: 'x.test' }]));
+		const shapes = [
+			[
+				attribute(
+					OID_EXTENSION_REQUEST,
+					new asn1js.Sequence({ value: [new asn1js.Sequence({ value: [san] })] })
+				)
+			],
+			[new asn1js.Sequence({ value: [new asn1js.Null()] })]
+		];
+		for (const attributes of shapes) {
+			await expect(decodeCsr(await csrWithAttributes(attributes))).rejects.toThrowError(
+				/^This does not look like a PKCS#10 request/
+			);
+		}
 	});
 
 	it('decodes a CSR that requests no extension at all', async () => {

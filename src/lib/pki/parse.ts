@@ -139,8 +139,13 @@ function children(block: asn1js.AsnType | undefined): asn1js.AsnType[] {
 	return Array.isArray(value) ? value : [];
 }
 
+/** The elements of a SEQUENCE, and nothing for any other shape. */
+function sequence(block: asn1js.AsnType | undefined): asn1js.AsnType[] {
+	return block instanceof asn1js.Sequence ? block.valueBlock.value : [];
+}
+
 /** The context-tagged child `[n]` of a constructed block. */
-function tagged(block: asn1js.AsnType, n: number): asn1js.AsnType | undefined {
+function tagged(block: asn1js.AsnType | undefined, n: number): asn1js.AsnType | undefined {
 	return children(block).find((c) => c.idBlock.tagClass === 3 && c.idBlock.tagNumber === n);
 }
 
@@ -148,38 +153,47 @@ function tagged(block: asn1js.AsnType, n: number): asn1js.AsnType | undefined {
  * Decodes each extension on its own. peculiar builds its list in a single
  * `map`, so one malformed extension threw, the list it cached stayed empty,
  * and the valid Basic Constraints or Key Usage beside it vanished too: a real
- * CA read as "not a CA". Here a bad extension costs only itself.
+ * CA read as "not a CA". Here a bad extension costs only itself. An entry
+ * that is not even `SEQUENCE { OID, ... }` cannot be named, so it is skipped.
  */
 function entries(extensions: asn1js.AsnType[]): ExtensionEntry[] {
-	return extensions.map((block) => {
-		const [id, second] = children(block);
+	return extensions.flatMap((block) => {
+		const [id, second] = sequence(block);
+		if (!(id instanceof asn1js.ObjectIdentifier)) return [];
 		let parsed: Extension | null = null;
 		try {
 			parsed = ExtensionFactory.create(block.valueBeforeDecodeView as BufferSource);
 		} catch {
 			// Malformed: still listed, never read.
 		}
-		return {
-			oid: (id as asn1js.ObjectIdentifier).getValue(),
-			critical: second instanceof asn1js.Boolean && second.getValue(),
-			parsed
-		};
+		return [
+			{
+				oid: id.getValue(),
+				critical: second instanceof asn1js.Boolean && second.getValue(),
+				parsed
+			}
+		];
 	});
 }
 
-/** Every extension of a certificate, from `tbsCertificate [3]`. */
+/** Every extension of a certificate, from `tbsCertificate [3] Extensions`. */
 export function certificateExtensions(cert: X509Certificate): ExtensionEntry[] {
-	const tbs = children(asn1js.fromBER(cert.rawData).result)[0];
-	return entries(children(children(tagged(tbs, 3))[0]));
+	const tbs = sequence(asn1js.fromBER(cert.rawData).result)[0];
+	return entries(sequence(children(tagged(tbs, 3))[0]));
 }
 
-/** Every requested extension of a CSR, from its extensionRequest attribute. */
+/**
+ * Every requested extension of a CSR: the extensionRequest attribute, whose
+ * value SET holds one `Extensions` SEQUENCE (RFC 2985 §5.4.2); any other value
+ * requests nothing. peculiar has already refused attributes that are not
+ * `SEQUENCE { OID, SET }`, so only the value needs checking here.
+ */
 function csrExtensions(csr: Pkcs10CertificateRequest): ExtensionEntry[] {
-	const info = children(asn1js.fromBER(csr.rawData).result)[0];
+	const info = sequence(asn1js.fromBER(csr.rawData).result)[0];
 	const request = children(tagged(info, 0)).find(
-		(attr) => (children(attr)[0] as asn1js.ObjectIdentifier).getValue() === OID_EXTENSION_REQUEST
+		(attr) => (sequence(attr)[0] as asn1js.ObjectIdentifier).getValue() === OID_EXTENSION_REQUEST
 	);
-	return entries(children(children(children(request)[1])[0]));
+	return entries(sequence(children(sequence(request)[1])[0]));
 }
 
 /** The decoded extension with this OID, if present and well formed. */

@@ -131,6 +131,18 @@ export async function importCa(certPem: string, keyPem: string): Promise<CaConte
 	// conforming verifier rejects the resulting chain. Refuse instead.
 	// Read one extension at a time: a malformed neighbour must not hide them.
 	const extensions = certificateExtensions(cert);
+	// Present but unreadable is not absent: an absent Key Usage allows signing,
+	// an unreadable one might be the constraint that forbids it. Refuse.
+	for (const [oid, name] of [
+		['2.5.29.19', 'Basic Constraints'],
+		['2.5.29.15', 'Key Usage']
+	]) {
+		if (extensions.some((e) => e.oid === oid && !e.parsed)) {
+			throw new Error(
+				`This CA certificate carries a ${name} extension that cannot be read: it cannot issue certificates.`
+			);
+		}
+	}
 	const bc = extensionByOid<BasicConstraintsExtension>(extensions, '2.5.29.19');
 	if (!bc?.ca) {
 		throw new Error(
