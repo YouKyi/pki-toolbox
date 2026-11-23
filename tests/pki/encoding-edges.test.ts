@@ -88,19 +88,82 @@ describe('parseAsn1 values', () => {
 		expect(top(`18 ${text.length.toString(16)} ${hex}`).value).toBe(`${text} (not a valid date)`);
 	});
 
-	it('splits a constructed (BER) string into its fragments', () => {
-		const node = parseAsn1(der('33 06 13 01 41 13 01 42'));
+	it('splits a constructed (BER) string into its OCTET STRING fragments', () => {
+		const node = parseAsn1(der('33 06 04 01 41 04 01 42'));
 		expect(node).toMatchObject({ tag: 'PrintableString', constructed: true, value: null });
 		expect(
 			node.children.map(({ tag, value, offset, length }) => ({ tag, value, offset, length }))
 		).toEqual([
-			{ tag: 'PrintableString', value: 'A', offset: 2, length: 1 },
-			{ tag: 'PrintableString', value: 'B', offset: 5, length: 1 }
+			{ tag: 'OCTET STRING', value: '41', offset: 2, length: 1 },
+			{ tag: 'OCTET STRING', value: '42', offset: 5, length: 1 }
 		]);
 	});
 
-	it('shows constructed content that is not a run of BER elements as hex', () => {
-		expect(top('33 02 13 05')).toMatchObject({ constructed: true, value: '13 05', children: 0 });
+	it('keeps the sibling after a constructed string in its parent', () => {
+		const node = parseAsn1(der('30 0a 33 06 04 01 41 04 01 42 05 00'));
+		expect(node.children.map((c) => [c.tag, c.offset])).toEqual([
+			['PrintableString', 2],
+			['NULL', 10]
+		]);
+	});
+
+	it('flags fragments that are not primitive OCTET STRINGs, or not elements at all', () => {
+		const invalid = '(invalid: not a run of primitive OCTET STRING fragments)';
+		// X.690 §8.7.3: PrintableString fragments are not allowed.
+		expect(top('33 06 13 01 41 13 01 42')).toMatchObject({
+			value: `13 01 41 13 01 42 ${invalid}`,
+			children: 0
+		});
+		expect(top('33 02 13 05')).toMatchObject({ value: `13 05 ${invalid}`, children: 0 });
+	});
+
+	it('refuses an indefinite-length constructed string, which hides its siblings', () => {
+		const refused =
+			'The input holds an indefinite-length constructed string, which cannot be read reliably.';
+		expect(() => parseAsn1(der('33 80 04 01 41 04 01 42 00 00'))).toThrowError(refused);
+		expect(() => parseAsn1(der('30 0c 33 80 04 01 41 04 01 42 00 00 05 00'))).toThrowError(refused);
+	});
+
+	it('places children of indefinite-length blocks at their real offsets', () => {
+		const seq = parseAsn1(der('30 80 02 01 01 05 00 00 00'));
+		expect(seq.children.map((c) => [c.tag, c.offset])).toEqual([
+			['INTEGER', 2],
+			['NULL', 5]
+		]);
+		const octets = parseAsn1(der('24 80 04 01 41 00 00'));
+		expect(octets.children.map((c) => [c.tag, c.offset, c.value])).toEqual([
+			['OCTET STRING', 2, '41']
+		]);
+	});
+
+	it('does not expand fragments past the maximum depth', () => {
+		let hex = '33 03 04 01 41';
+		for (let i = 0; i < 40; i++) {
+			const bytes = hex.split(' ').length;
+			hex = `30 ${bytes.toString(16).padStart(2, '0')} ${hex}`;
+		}
+		let node = parseAsn1(der(hex));
+		while (node.children.length) node = node.children[0];
+		expect(node).toMatchObject({
+			tag: 'PrintableString',
+			value: '(maximum nesting depth 40 reached, fragments not expanded)'
+		});
+	});
+
+	it('bounds the whole tree when many constructed strings each hold many fragments', () => {
+		// Twelve strings of 9 000 empty fragments: each parse stays under asn1js's
+		// own 10 000-node cap, the tree as a whole exceeds 100 000 nodes.
+		const string = Buffer.concat([Buffer.from([0x33, 0x82, 0x46, 0x50]), Buffer.alloc(18_000)]);
+		for (let i = 4; i < string.length; i += 2) string[i] = 0x04;
+		const body = Buffer.concat(Array.from({ length: 12 }, () => string));
+		const size = body.length;
+		const seq = Buffer.concat([
+			Buffer.from([0x30, 0x83, size >> 16, (size >> 8) & 0xff, size & 0xff]),
+			body
+		]);
+		expect(() => parseAsn1(seq.toString('base64'))).toThrowError(
+			'The ASN.1 tree exceeds the maximum displayable size.'
+		);
 	});
 });
 

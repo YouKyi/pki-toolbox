@@ -57,8 +57,8 @@ const TAG_CLASSES: Record<number, string> = {
 const STRING_TAGS = new Set([12, 18, 19, 20, 22, 26, 27, 28, 30]);
 
 type AnyBlock = {
-	idBlock: { tagClass: number; tagNumber: number; isConstructed: boolean };
-	lenBlock: { length: number };
+	idBlock: { tagClass: number; tagNumber: number; isConstructed: boolean; blockLength: number };
+	lenBlock: { length: number; blockLength: number; isIndefiniteForm: boolean };
 	blockLength: number;
 	valueBlock: {
 		value?: AnyBlock[];
@@ -141,15 +141,18 @@ const MAX_DEPTH = 40;
 
 function walk(block: AnyBlock, offset: number, depth: number, budget: { count: number }): Asn1Node {
 	budget.count += 1;
-	// asn1js caps fromBER at 10_000 nodes, so this guard cannot trip today.
-	/* v8 ignore next -- @preserve */
+	// asn1js caps each fromBER at 10_000 nodes, but the fragments of every
+	// constructed string are a parse of their own: the tree as a whole is
+	// bounded here.
 	if (budget.count > MAX_NODES) {
 		throw new Error('The ASN.1 tree exceeds the maximum displayable size.');
 	}
 
 	const { tagClass, tagNumber, isConstructed } = block.idBlock;
 	const length = block.lenBlock.length;
-	const headerLength = block.blockLength - length;
+	// From the encoded sizes, not blockLength - length: in the indefinite form
+	// the length is 0 and blockLength spans the whole content.
+	const headerLength = block.idBlock.blockLength + block.lenBlock.blockLength;
 
 	const tag =
 		tagClass === 1 ? (UNIVERSAL_TAGS[tagNumber] ?? `UNIVERSAL ${tagNumber}`) : `[${tagNumber}]`;
@@ -166,46 +169,71 @@ function walk(block: AnyBlock, offset: number, depth: number, budget: { count: n
 		children: []
 	};
 
-	if (isConstructed) {
-		const value = block.valueBlock.value;
-		const children = Array.isArray(value) ? value : fragments(contentBytes(block));
-		if (!children) {
-			// Content that does not split into BER elements is shown, not dropped.
-			node.value = hexPreview(contentBytes(block));
-		} else if (depth >= MAX_DEPTH) {
-			// Honestly mark where parsing stopped instead of silently dropping the
-			// subtree: an empty `children` array would look like a leaf node.
-			node.value = `(maximum nesting depth ${MAX_DEPTH} reached, ${children.length} child node(s) not expanded)`;
-		} else {
-			let childOffset = offset + headerLength;
-			for (const child of children) {
-				node.children.push(walk(child, childOffset, depth + 1, budget));
-				childOffset += child.blockLength;
-			}
-		}
-	} else {
+	if (!isConstructed) {
 		node.value = readValue(block, tagClass, tagNumber);
+		return node;
 	}
 
+	const value = block.valueBlock.value;
+	let children: AnyBlock[];
+	if (Array.isArray(value)) {
+		children = value;
+	} else {
+		// A constructed character string: asn1js 4 keeps its content as one raw
+		// string. In the indefinite form it also swallows every sibling that
+		// follows, so the tree around it would be wrong: refuse rather than show it.
+		if (block.lenBlock.isIndefiniteForm) {
+			throw new Error(
+				'The input holds an indefinite-length constructed string, which cannot be read reliably.'
+			);
+		}
+		if (depth >= MAX_DEPTH) {
+			node.value = `(maximum nesting depth ${MAX_DEPTH} reached, fragments not expanded)`;
+			return node;
+		}
+		const parts = fragments(contentBytes(block));
+		if (!parts) {
+			node.value = `${hexPreview(contentBytes(block))} (invalid: not a run of primitive OCTET STRING fragments)`;
+			return node;
+		}
+		children = parts;
+	}
+
+	if (depth >= MAX_DEPTH) {
+		// Honestly mark where parsing stopped instead of silently dropping the
+		// subtree: an empty `children` array would look like a leaf node.
+		node.value = `(maximum nesting depth ${MAX_DEPTH} reached, ${children.length} child node(s) not expanded)`;
+	} else {
+		let childOffset = offset + headerLength;
+		for (const child of children) {
+			node.children.push(walk(child, childOffset, depth + 1, budget));
+			childOffset += child.blockLength;
+		}
+	}
 	return node;
 }
 
 /**
- * The fragments of a BER constructed string. asn1js 4 does not split one: it
- * keeps the raw content octets as the string value, so the fragments would
- * otherwise vanish from the tree. Returns null when the content is not a run
- * of complete BER elements.
+ * The fragments of a constructed character string, which X.690 §8.23.6 encodes
+ * like an OCTET STRING: every fragment is a primitive OCTET STRING (§8.7.3).
+ * The content is parsed once, wrapped in a SEQUENCE header, so the cost stays
+ * linear in its size. Returns null for any other content.
  */
 function fragments(content: Uint8Array): AnyBlock[] | null {
-	const out: AnyBlock[] = [];
-	let pos = 0;
-	while (pos < content.length) {
-		const parsed = asn1js.fromBER(toArrayBuffer(content.subarray(pos)));
-		if (parsed.offset < 1 || !parsed.result) return null;
-		out.push(parsed.result as unknown as AnyBlock);
-		pos += parsed.offset;
-	}
-	return out;
+	const size: number[] = [];
+	for (let n = content.length; n > 0; n = Math.floor(n / 256)) size.unshift(n % 256);
+	const header =
+		content.length < 0x80 ? [0x30, content.length] : [0x30, 0x80 | size.length, ...size];
+	const wrapped = new Uint8Array(header.length + content.length);
+	wrapped.set(header);
+	wrapped.set(content, header.length);
+
+	const parsed = asn1js.fromBER(wrapped.buffer);
+	if (parsed.offset !== wrapped.length) return null;
+	const parts = (parsed.result as unknown as AnyBlock).valueBlock.value as AnyBlock[];
+	const primitiveOctets = (p: AnyBlock) =>
+		p.idBlock.tagClass === 1 && p.idBlock.tagNumber === 4 && !p.idBlock.isConstructed;
+	return parts.every(primitiveOctets) ? parts : null;
 }
 
 /**
