@@ -55,8 +55,10 @@
 				<span
 					class="min-w-0 leading-5 [overflow-wrap:anywhere] {row.mono
 						? 'font-mono text-[13px]'
-						: ''}">{row.value}</span
+						: ''}"
 				>
+					{row.value}
+				</span>
 				{#if row.copy && row.value}
 					<!-- The 44px hit box is bled into the row's own padding with a negative
 					     margin: without it the button is a 44px flex item next to a 20px
