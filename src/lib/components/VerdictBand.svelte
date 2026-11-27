@@ -70,8 +70,10 @@
 				<p class="mt-2 text-[15px] text-ink">
 					{#if lead}{lead}{/if}
 					{#if datetime}<time {datetime} class="font-mono">{value}</time>{:else}<span
-							class="font-mono">{value}</span
-						>{/if}
+							class="font-mono"
+						>
+							{value}
+						</span>{/if}
 					{#if note}<span class="text-ink-3">({note})</span>{/if}
 				</p>
 			{/if}

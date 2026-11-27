@@ -105,8 +105,9 @@
 					target="_blank"
 					rel="noopener noreferrer"
 					class="yk-wordmark inline-flex min-h-11 items-center text-slate-900 hover:text-teal-700 dark:text-slate-100 dark:hover:text-teal-300"
-					>youkyi<u>_</u></a
 				>
+					youkyi<u>_</u>
+				</a>
 				<p class="mt-2 text-xs">
 					PKI-Toolbox, a self-hosted PKI decoder. 100% client-side, no data ever leaves your
 					browser.
@@ -119,15 +120,17 @@
 						target="_blank"
 						rel="noopener noreferrer"
 						class="inline-flex min-h-11 items-center text-teal-700 hover:underline dark:text-teal-300"
-						>youkyi.fr</a
 					>
+						youkyi.fr
+					</a>
 					<a
 						href="https://github.com/youkyi/pki-toolbox"
 						target="_blank"
 						rel="noopener noreferrer"
 						class="inline-flex min-h-11 items-center text-teal-700 hover:underline dark:text-teal-300"
-						>github</a
 					>
+						github
+					</a>
 				</span>
 				<span>© 2026 · Agasseau Alexandre</span>
 			</div>

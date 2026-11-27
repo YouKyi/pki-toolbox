@@ -209,8 +209,9 @@
 												/>
 												<span class="flex-1 truncate">{tool.name}</span>
 												{#if tool.status === 'beta'}<Badge tone="beta">Beta</Badge>{/if}
-												{#if tool.status === 'planned'}<Badge tone="planned">Coming soon</Badge
-													>{/if}
+												{#if tool.status === 'planned'}<Badge tone="planned">
+														Coming soon
+													</Badge>{/if}
 											</a>
 										{/each}
 									</div>
