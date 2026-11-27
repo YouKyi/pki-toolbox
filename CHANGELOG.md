@@ -10,6 +10,17 @@ dependency at its latest version.
 
 ## [Unreleased]
 
+## [2.4.8] - 2026-11-24
+
+### Dependencies
+
+- [asn1js to v4.1.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/b0d16bbb) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/414))
+- [docker/dockerfile:1 docker digest to 572cebb](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/4103e53d) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/412))
+- [nginx:1.31-alpine-slim docker digest to c293b28](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/5bfdb683) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/410))
+- [pnpm to v12.23.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/92eb7416) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/415))
+- [prettier-plugin-svelte to v4.2.0](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/dc822c88) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/403))
+- [svelte to v5.59.1](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/commit/d993a70c) ([merge request](https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/merge_requests/413))
+
 ## [2.4.7] - 2026-11-18
 
 ### Fixed
@@ -477,7 +488,8 @@ leaves the browser.
   under 25 MB.
 - Vitest unit tests and a GitLab CI pipeline (lint, test, build, docker).
 
-[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.7...main
+[Unreleased]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.8...main
+[2.4.8]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.7...v2.4.8
 [2.4.7]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.6...v2.4.7
 [2.4.6]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.5...v2.4.6
 [2.4.5]: https://gitlab.int.youkyi.net/youkyi-hq/oss/pki-toolbox/-/compare/v2.4.4...v2.4.5
